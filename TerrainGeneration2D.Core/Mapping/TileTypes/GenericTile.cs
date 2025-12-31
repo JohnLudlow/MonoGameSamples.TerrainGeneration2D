@@ -9,6 +9,6 @@ public sealed class GenericTileType : TileType
 
   public override bool EvaluateRules(TileRuleContext context)
   {
-    return true;
+    return false;
   }
 }
