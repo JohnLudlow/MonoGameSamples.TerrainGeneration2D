@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="TerrainGeneration2D.Tests/TerrainGeneration2D.Tests.csproj" />
+  <Project Path="TerrainGeneration2D/TerrainGeneration2D.csproj" />
+  <Project Path="TerrainGeneration2D.Core/TerrainGeneration2D.Core.csproj" />
+  <Project Path="TerrainGeneration2D.Content/TerrainGeneration2D.Content.csproj" />
+  <Project Path="TerrainGeneration2D.Benchmarks/TerrainGeneration2D.Benchmarks.csproj" />
+</Solution>

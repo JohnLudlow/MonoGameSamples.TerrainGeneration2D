@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Tilemap>
+    <Tileset region="0 0 20 160" tileWidth="20" tileHeight="20">images/terrain-atlas</Tileset>
+</Tilemap>

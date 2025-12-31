@@ -1,0 +1,21 @@
+{
+    "activeFile": "atlas.tsx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "atlas.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 8
+        }
+    },
+    "last.imagePath": "C:/src/JohnLudlow/MonoGameSamples.TerrainGeneration2D/TerrainGeneration2D.Content/Assets/images",
+    "openFiles": [
+        "atlas.tsx"
+    ],
+    "project": "tileset.tiled-project",
+    "recentFiles": [
+        "atlas.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx"
+}

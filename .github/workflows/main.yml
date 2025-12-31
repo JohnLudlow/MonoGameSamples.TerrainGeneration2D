@@ -1,0 +1,114 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Build and Test
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{matrix.os}}
+    env:
+      CONFIGURATION: Release
+      REV_PREFIX: 1.0
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true        
+        
+    - name: Generate Workfloew revsion
+      shell: pwsh
+      id: get_buildrev
+      run: |
+        # Count the runs for the current workflow that were queued today
+        $date = get-date 
+        
+        $rev_suffix=$(gh run list --limit 100 --workflow '${{ github.workflow }}' --json createdAt |  jq -r --arg DATE "$($date.ToString('yyyy-MM-d'))" '[.[] | select(.createdAt | startswith($DATE))] | length ')
+        $rev = "$env:REV_PREFIX.$($date.ToString('yyyyMMdd')).$rev_suffix"
+
+        write-host "Revision: $rev"
+        "AssemblyVersion=$env:REV_PREFIX" >> $env:GITHUB_ENV
+        "AssemblyFileVersion=$rev"        >> $env:GITHUB_ENV
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      shell: pwsh
+      run: |
+        $dotnetParams = @(
+          "--no-restore",
+          "/m:1",
+          "--configuration", "$env:CONFIGURATION"
+        )
+
+        dotnet build @dotnetParams
+
+    - name: Test
+      shell: pwsh
+      run: |
+        $dotnetParams = @(
+          "--no-build",
+          "--configuration", "$env:CONFIGURATION",
+          "--verbosity", "normal",
+          "--collect:XPlat Code Coverage",
+          "--logger", "trx",
+          "--results-directory", "TestResults"
+        )
+
+        dotnet test @dotnetParams
+
+    - name: Test Report
+      uses: dorny/test-reporter@v2
+      if: ${{ !cancelled() }}       # run this step even if previous step failed
+      with:
+        name: Unit Tests            # Name of the check run which will be created
+        path: TestResults/**/*.trx        
+        reporter: dotnet-trx        # Format of test results
+
+    - name: ReportGenerator
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.5.1
+      with:        
+        reports: '**/coverage.cobertura.xml'
+        targetdir: 'coverage'
+        reporttypes: 'MarkdownSummaryGithub;MarkdownDeltaSummary'
+
+    - name: Upload coverage report artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: CoverageReport # Artifact name        
+        path: coverage 
+
+    - name: Add comment to PR
+      if: github.event_name == 'pull_request'
+      run: gh pr comment $PR_NUMBER --edit-last --create-if-none --body-file coverage/SummaryGithub.md # Adjust path and filename if necessary
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PR_NUMBER: ${{ github.event.number }}        
+
+    - name: Publish coverage in build summary
+      run: cat coverage/SummaryGithub.md >> $env:GITHUB_STEP_SUMMARY # Adjust path and filename if necessary
+
+    - name: Benchmark
+      if: github.event_name == 'pull_request'
+      shell: pwsh
+      run: |
+        $dotnetParams = @(
+          "--no-build",
+          "--configuration", "$env:CONFIGURATION",
+          "--project", "TerrainGeneration2D.Benchmarks/TerrainGeneration2D.Benchmarks.csproj",
+          "--filter", "*",
+          "--verbosity", "normal"
+        )
+        dotnet run @dotnetParams
