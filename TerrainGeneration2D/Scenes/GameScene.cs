@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Gum.DataTypes;
 using Gum.Forms.Controls;
@@ -30,6 +31,9 @@ public class GameScene : Scene
     private TooltipManager? _tooltipManager;
     private Vector2? _lastMouseDragPosition;
     private Label? _testLabel;
+    private Texture2D? _debugPixel;
+    private bool _showDebugOverlay;
+    private IReadOnlyCollection<ChunkedTilemap.ActiveChunkInfo> _activeChunkSnapshot = Array.Empty<ChunkedTilemap.ActiveChunkInfo>();
 
     private GameSceneUI _ui;
     
@@ -72,6 +76,13 @@ public class GameScene : Scene
         {
             _tooltipManager = new TooltipManager(_camera, _chunkedTilemap);
             _tooltipManager.Initialize();
+        }
+
+        var graphicsDevice = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.GraphicsDevice;
+        if (graphicsDevice != null)
+        {
+            _debugPixel = new Texture2D(graphicsDevice, 1, 1);
+            _debugPixel.SetData(new[] { Color.White });
         }
 
         // Test label to verify Gum is working
@@ -142,6 +153,16 @@ public class GameScene : Scene
         // Update active chunks based on camera viewport
         _chunkedTilemap.UpdateActiveChunks(_camera.ViewportWorldBounds);
         
+        if (GameController.ToggleDebugOverlay())
+        {
+            _showDebugOverlay = !_showDebugOverlay;
+        }
+
+        if (_showDebugOverlay)
+        {
+            _activeChunkSnapshot = _chunkedTilemap.GetActiveChunkInfos();
+        }
+
         // Update tooltip
         _tooltipManager?.Update(GameController.GetMousePosition());
     }
@@ -174,17 +195,99 @@ public class GameScene : Scene
         _chunkedTilemap.Draw(spriteBatch, _camera.ViewportWorldBounds);
         
         spriteBatch.End();
+
+        if (_showDebugOverlay)
+        {
+            spriteBatch.Begin(blendState: BlendState.NonPremultiplied);
+            DrawDebugOverlay(spriteBatch);
+            spriteBatch.End();
+        }
         
         // Draw Gum UI
         GumService.Default.Draw();
 
         base.Draw(gameTime);
     }
+
+    private void DrawDebugOverlay(SpriteBatch spriteBatch)
+    {
+        if (_camera == null || _chunkedTilemap == null || _debugPixel == null)
+        {
+            return;
+        }
+
+        foreach (var chunkInfo in _activeChunkSnapshot)
+        {
+            DrawChunkBoundary(spriteBatch, chunkInfo);
+        }
+
+        DrawViewportBoundary(spriteBatch);
+    }
+
+    private void DrawChunkBoundary(SpriteBatch spriteBatch, ChunkedTilemap.ActiveChunkInfo info)
+    {
+        if (_camera == null || _chunkedTilemap == null)
+        {
+            return;
+        }
+
+        var tileSize = _chunkedTilemap.TileSize;
+        var chunkWorldSize = new Vector2(Chunk.ChunkSize * tileSize, Chunk.ChunkSize * tileSize);
+        var worldTopLeft = new Vector2(info.WorldTilePosition.X * tileSize, info.WorldTilePosition.Y * tileSize);
+
+        var topLeftScreen = _camera.WorldToScreen(worldTopLeft);
+        var bottomRightScreen = _camera.WorldToScreen(worldTopLeft + chunkWorldSize);
+        var rect = ConvertToScreenRect(topLeftScreen, bottomRightScreen);
+
+        var color = info.IsDirty ? Color.OrangeRed : Color.LimeGreen;
+        DrawRectangle(spriteBatch, rect, color, thickness: 2);
+    }
+
+    private void DrawViewportBoundary(SpriteBatch spriteBatch)
+    {
+        if (_camera == null)
+        {
+            return;
+        }
+
+        var viewport = _camera.ViewportWorldBounds;
+        var topLeftScreen = _camera.WorldToScreen(new Vector2(viewport.Left, viewport.Top));
+        var bottomRightScreen = _camera.WorldToScreen(new Vector2(viewport.Right, viewport.Bottom));
+        var rect = ConvertToScreenRect(topLeftScreen, bottomRightScreen);
+
+        DrawRectangle(spriteBatch, rect, Color.Cyan, thickness: 3);
+    }
+
+    private static Rectangle ConvertToScreenRect(Vector2 topLeft, Vector2 bottomRight)
+    {
+        var x = Math.Min(topLeft.X, bottomRight.X);
+        var y = Math.Min(topLeft.Y, bottomRight.Y);
+        var width = Math.Max(1f, Math.Abs(bottomRight.X - topLeft.X));
+        var height = Math.Max(1f, Math.Abs(bottomRight.Y - topLeft.Y));
+
+        return new Rectangle((int)x, (int)y, (int)width, (int)height);
+    }
+
+    private void DrawRectangle(SpriteBatch spriteBatch, Rectangle rect, Color color, int thickness = 1)
+    {
+        if (_debugPixel == null)
+        {
+            return;
+        }
+
+        spriteBatch.Draw(_debugPixel, new Rectangle(rect.X, rect.Y, rect.Width, thickness), color);
+        spriteBatch.Draw(_debugPixel, new Rectangle(rect.X, rect.Y, thickness, rect.Height), color);
+        spriteBatch.Draw(_debugPixel, new Rectangle(rect.Right - thickness, rect.Y, thickness, rect.Height), color);
+        spriteBatch.Draw(_debugPixel, new Rectangle(rect.X, rect.Bottom - thickness, rect.Width, thickness), color);
+    }
     
     public override void UnloadContent()
     {
         // Save all chunks before exiting
         _chunkedTilemap?.SaveAll();
+
+        _debugPixel?.Dispose();
+        _debugPixel = null;
         
         base.UnloadContent();
     }

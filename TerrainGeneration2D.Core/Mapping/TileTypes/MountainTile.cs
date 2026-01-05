@@ -12,6 +12,12 @@ public sealed class MountainTileType : TileType
 
   public override bool EvaluateRules(TileRuleContext context)
   {
+    float altitude = context.CandidateHeight.Altitude;
+    if (altitude < context.Config.MountainHeightMin || context.CandidateHeight.MountainNoise < context.Config.MountainNoiseThreshold)
+    {
+      return false;
+    }
+
     if (!MatchesNeighbor(context, TerrainTileIds.Forest, TerrainTileIds.Snow, TerrainTileIds.Mountain))
     {
       return false;

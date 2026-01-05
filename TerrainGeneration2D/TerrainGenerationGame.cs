@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Gum.Forms;
 using Gum.Forms.Controls;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Scenes;
@@ -17,6 +17,9 @@ internal sealed class TerrainGenerationGame : CoreGame
 
   public TerrainGenerationGame() : base("Dungeon Slime", 1280, 720, false)
   {
+#if DEBUG
+    EnablePerformanceDiagnostics = true;
+#endif
   }
 
   protected override void Initialize()

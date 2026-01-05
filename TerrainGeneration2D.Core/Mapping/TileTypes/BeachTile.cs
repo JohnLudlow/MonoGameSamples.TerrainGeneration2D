@@ -12,6 +12,12 @@ public sealed class BeachTileType : TileType
 
   public override bool EvaluateRules(TileRuleContext context)
   {
+    float altitude = context.CandidateHeight.Altitude;
+    if (altitude < context.Config.BeachHeightMin || altitude > context.Config.BeachHeightMax)
+    {
+      return false;
+    }
+
     if (context.NeighborTileId == TerrainTileIds.Ocean)
     {
       var metrics = context.GetNeighborGroupMetrics();

@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
+using Microsoft.Xna.Framework;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
 
@@ -18,15 +21,22 @@ public class WaveFunctionCollapse
   private readonly HashSet<int>?[,] _possibilities;
   private readonly int[,] _output;
   private readonly MappingInformationService _mappingService;
+  private readonly TerrainRuleConfiguration _config;
+  private readonly IHeightProvider _heightProvider;
+  private readonly Point _chunkOrigin;
   private bool _collapsed;
 
-  public WaveFunctionCollapse(int width, int height, TileTypeRegistry tileRegistry, Random random)
+  public WaveFunctionCollapse(int width, int height, TileTypeRegistry tileRegistry, Random random, TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin)
   {
     _width = width;
     _height = height;
     _tileRegistry = tileRegistry ?? throw new ArgumentNullException(nameof(tileRegistry));
     _random = random ?? throw new ArgumentNullException(nameof(random));
+    _config = config ?? throw new ArgumentNullException(nameof(config));
+    _heightProvider = heightProvider ?? throw new ArgumentNullException(nameof(heightProvider));
+    _chunkOrigin = chunkOrigin;
 
+    var validTileIds = _tileRegistry.ValidTileIds;
     _possibilities = new HashSet<int>?[width, height];
     _output = new int[width, height];
     _collapsed = false;
@@ -34,7 +44,7 @@ public class WaveFunctionCollapse
     {
       for (int x = 0; x < width; x++)
       {
-        _possibilities[x, y] = Enumerable.Range(0, _tileRegistry.TileCount).ToHashSet();
+        _possibilities[x, y] = new HashSet<int>(validTileIds);
         _output[x, y] = -1;
       }
     }
@@ -47,35 +57,49 @@ public class WaveFunctionCollapse
   /// </summary>
   public bool Generate(int maxIterations = 10000)
   {
-    int iterations = 0;
+    TerrainPerformanceEventSource.Log.WaveFunctionCollapseBegin(_chunkOrigin.X, _chunkOrigin.Y);
+    bool success = false;
 
-    while (!_collapsed && iterations < maxIterations)
+    try
     {
-      var (x, y) = FindLowestEntropy();
+      int iterations = 0;
 
-      if (x == -1 || y == -1)
+      while (!_collapsed && iterations < maxIterations)
       {
-        // All cells collapsed
-        _collapsed = true;
-        return true;
+        var (x, y) = FindLowestEntropy();
+
+        if (x == -1 || y == -1)
+        {
+          // All cells collapsed
+          _collapsed = true;
+          success = true;
+          return true;
+        }
+
+        if (!CollapseCell(x, y))
+        {
+          // Contradiction - generation failed
+          success = false;
+          return false;
+        }
+
+        if (!Propagate(x, y))
+        {
+          // Propagation caused contradiction
+          success = false;
+          return false;
+        }
+
+        iterations++;
       }
 
-      if (!CollapseCell(x, y))
-      {
-        // Contradiction - generation failed
-        return false;
-      }
-
-      if (!Propagate(x, y))
-      {
-        // Propagation caused contradiction
-        return false;
-      }
-
-      iterations++;
+      success = _collapsed;
+      return success;
     }
-
-    return _collapsed;
+    finally
+    {
+      TerrainPerformanceEventSource.Log.WaveFunctionCollapseEnd(_chunkOrigin.X, _chunkOrigin.Y, success);
+    }
   }
 
   /// <summary>
@@ -220,12 +244,21 @@ public class WaveFunctionCollapse
     foreach (var tileId in possibilities.ToList())
     {
       var tileType = _tileRegistry.GetTileType(tileId);
+      var candidateWorldX = _chunkOrigin.X + candidatePoint.X;
+      var candidateWorldY = _chunkOrigin.Y + candidatePoint.Y;
+      var neighborWorldX = _chunkOrigin.X + neighborPosition.X;
+      var neighborWorldY = _chunkOrigin.Y + neighborPosition.Y;
+      var candidateSample = _heightProvider.GetSample(candidateWorldX, candidateWorldY);
+      var neighborSample = _heightProvider.GetSample(neighborWorldX, neighborWorldY);
       var context = new TileRuleContext(
           candidatePoint,
           tileId,
           neighborPosition,
           neighborTileId,
           directionToNeighbor,
+          _config,
+          candidateSample,
+          neighborSample,
           _mappingService);
 
       if (tileType.EvaluateRules(context))

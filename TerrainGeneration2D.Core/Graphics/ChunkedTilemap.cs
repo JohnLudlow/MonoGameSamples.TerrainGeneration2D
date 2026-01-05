@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.IO.Compression;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -24,13 +27,15 @@ public class ChunkedTilemap
     private readonly Random _random;
     private readonly TileTypeRegistry _tileTypeRegistry;
     private readonly TerrainRuleConfiguration _terrainRuleConfig;
+    private readonly HeightMapConfiguration _heightMapConfiguration;
+    private readonly IHeightProvider _heightProvider;
     private readonly bool _useWaveFunctionCollapse;
     
     public int TileSize => _tileSize;
     public int MapSizeInTiles => _mapSizeInTiles;
     public Tileset Tileset => _tileset;
     
-    public ChunkedTilemap(Tileset tileset, int mapSizeInTiles, int masterSeed, string saveDirectory, bool useWaveFunctionCollapse = true, TerrainRuleConfiguration? terrainRuleConfiguration = null)
+    public ChunkedTilemap(Tileset tileset, int mapSizeInTiles, int masterSeed, string saveDirectory, bool useWaveFunctionCollapse = true, TerrainRuleConfiguration? terrainRuleConfiguration = null, HeightMapConfiguration? heightMapConfiguration = null)
     {
         _tileset = tileset ?? throw new ArgumentNullException(nameof(tileset));
         _tileSize = tileset.TileWidth;
@@ -42,6 +47,8 @@ public class ChunkedTilemap
         _random = new Random();
         _useWaveFunctionCollapse = useWaveFunctionCollapse;
         _terrainRuleConfig = terrainRuleConfiguration ?? new TerrainRuleConfiguration();
+        _heightMapConfiguration = heightMapConfiguration ?? new HeightMapConfiguration();
+        _heightProvider = new HeightMapGenerator(masterSeed, _heightMapConfiguration);
         _tileTypeRegistry = TileTypeRegistry.CreateDefault(tileset.Count, _terrainRuleConfig);
         
         // Ensure save directory exists
@@ -99,7 +106,8 @@ public class ChunkedTilemap
         if (_useWaveFunctionCollapse)
         {
             // Use Wave Function Collapse for coherent terrain
-            var wfc = new WaveFunctionCollapse(Chunk.ChunkSize, Chunk.ChunkSize, _tileTypeRegistry, random);
+            var chunkOrigin = new Point(chunkCoords.X * Chunk.ChunkSize, chunkCoords.Y * Chunk.ChunkSize);
+            var wfc = new WaveFunctionCollapse(Chunk.ChunkSize, Chunk.ChunkSize, _tileTypeRegistry, random, _terrainRuleConfig, _heightProvider, chunkOrigin);
             
             if (wfc.Generate())
             {
@@ -133,13 +141,57 @@ public class ChunkedTilemap
     /// </summary>
     private void GenerateRandomChunk(Chunk chunk, Random random)
     {
+        var baseWorld = chunk.WorldTilePosition;
         for (int localY = 0; localY < Chunk.ChunkSize; localY++)
         {
             for (int localX = 0; localX < Chunk.ChunkSize; localX++)
             {
-                chunk[localX, localY] = random.Next(0, _tileset.Count);
+                int worldX = baseWorld.X + localX;
+                int worldY = baseWorld.Y + localY;
+                var sample = _heightProvider.GetSample(worldX, worldY);
+                chunk[localX, localY] = PickTileByHeight(sample, random);
             }
         }
+    }
+
+    private int PickTileByHeight(HeightSample sample, Random random)
+    {
+        var config = _terrainRuleConfig;
+
+        if (sample.Altitude <= config.OceanHeightMax)
+        {
+            return TerrainTileIds.Ocean;
+        }
+
+        if (sample.Altitude >= config.MountainHeightMin && sample.MountainNoise >= config.MountainNoiseThreshold)
+        {
+            return TerrainTileIds.Mountain;
+        }
+
+        if (sample.Altitude >= config.SnowHeightMin)
+        {
+            return TerrainTileIds.Snow;
+        }
+
+        if (sample.Altitude >= config.BeachHeightMin && sample.Altitude <= config.BeachHeightMax)
+        {
+            if (sample.DetailNoise > random.NextSingle())
+            {
+                return TerrainTileIds.Beach;
+            }
+        }
+
+        if (sample.Altitude >= config.ForestHeightMin && sample.Altitude <= config.ForestHeightMax)
+        {
+            return sample.DetailNoise > 0.5f ? TerrainTileIds.Forest : TerrainTileIds.Plains;
+        }
+
+        if (sample.Altitude >= config.PlainsHeightMin)
+        {
+            return TerrainTileIds.Plains;
+        }
+
+        return TerrainTileIds.Plains;
     }
     
     /// <summary>
@@ -147,20 +199,22 @@ public class ChunkedTilemap
     /// </summary>
     private Chunk? LoadChunk(Point chunkCoords)
     {
-        string filePath = GetChunkFilePath(chunkCoords);
-        
-        if (!File.Exists(filePath))
-        {
-            return null;
-        }
-        
+        TerrainPerformanceEventSource.Log.ChunkLoadBegin(chunkCoords.X, chunkCoords.Y);
+        bool loaded = false;
+
         try
         {
+            string filePath = GetChunkFilePath(chunkCoords);
+            
+            if (!File.Exists(filePath))
+            {
+                return null;
+            }
+            
             using var fileStream = File.OpenRead(filePath);
             using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
             using var reader = new BinaryReader(gzipStream);
             
-            // Read and validate header
             byte[] magic = reader.ReadBytes(4);
             if (magic[0] != 'C' || magic[1] != 'H' || magic[2] != 'N' || magic[3] != 'K')
             {
@@ -181,7 +235,6 @@ public class ChunkedTilemap
                 return null;
             }
             
-            // Read tile data
             var chunk = new Chunk(chunkCoords);
             for (int y = 0; y < Chunk.ChunkSize; y++)
             {
@@ -192,12 +245,16 @@ public class ChunkedTilemap
             }
             
             chunk.IsDirty = false;
+            loaded = true;
             return chunk;
         }
         catch (Exception)
         {
-            // Failed to load chunk, will regenerate
             return null;
+        }
+        finally
+        {
+            TerrainPerformanceEventSource.Log.ChunkLoadEnd(chunkCoords.X, chunkCoords.Y, loaded);
         }
     }
     
@@ -211,21 +268,23 @@ public class ChunkedTilemap
             return;
         }
         
-        string filePath = GetChunkFilePath(chunk.ChunkPosition);
-        
+        var chunkPos = chunk.ChunkPosition;
+        TerrainPerformanceEventSource.Log.ChunkSaveBegin(chunkPos.X, chunkPos.Y);
+        bool success = false;
+
         try
         {
+            string filePath = GetChunkFilePath(chunkPos);
+            
             using var fileStream = File.Create(filePath);
             using var gzipStream = new GZipStream(fileStream, CompressionLevel.Optimal);
             using var writer = new BinaryWriter(gzipStream);
             
-            // Write header
             writer.Write(new[] { (byte)'C', (byte)'H', (byte)'N', (byte)'K' });
             writer.Write(1); // Version
-            writer.Write(chunk.ChunkPosition.X);
-            writer.Write(chunk.ChunkPosition.Y);
+            writer.Write(chunkPos.X);
+            writer.Write(chunkPos.Y);
             
-            // Write tile data
             for (int y = 0; y < Chunk.ChunkSize; y++)
             {
                 for (int x = 0; x < Chunk.ChunkSize; x++)
@@ -235,10 +294,16 @@ public class ChunkedTilemap
             }
             
             chunk.IsDirty = false;
+            success = true;
+            TerrainPerformanceEventSource.Log.ChunkSaved();
         }
         catch (Exception)
         {
-            // Ignore save errors for now
+            success = false;
+        }
+        finally
+        {
+            TerrainPerformanceEventSource.Log.ChunkSaveEnd(chunkPos.X, chunkPos.Y, success);
         }
     }
     
@@ -272,6 +337,8 @@ public class ChunkedTilemap
         maxChunk.X = Math.Min(_mapSizeInChunks - 1, maxChunk.X + 1);
         maxChunk.Y = Math.Min(_mapSizeInChunks - 1, maxChunk.Y + 1);
         
+        TerrainPerformanceEventSource.Log.UpdateActiveChunksBegin(minChunk.X, minChunk.Y, maxChunk.X, maxChunk.Y);
+        
         // Load visible chunks
         for (int cy = minChunk.Y; cy <= maxChunk.Y; cy++)
         {
@@ -298,6 +365,9 @@ public class ChunkedTilemap
             SaveChunk(_activeChunks[chunkPos]);
             _activeChunks.Remove(chunkPos);
         }
+        
+        TerrainPerformanceEventSource.Log.ReportActiveChunkCount(_activeChunks.Count);
+        TerrainPerformanceEventSource.Log.UpdateActiveChunksEnd(minChunk.X, minChunk.Y, maxChunk.X, maxChunk.Y, _activeChunks.Count);
     }
     
     /// <summary>
@@ -365,4 +435,13 @@ public class ChunkedTilemap
             SaveChunk(chunk);
         }
     }
+
+    public IReadOnlyCollection<ActiveChunkInfo> GetActiveChunkInfos()
+    {
+        return _activeChunks.Values
+            .Select(chunk => new ActiveChunkInfo(chunk.ChunkPosition, chunk.WorldTilePosition, chunk.IsDirty))
+            .ToList();
+    }
+
+    public readonly record struct ActiveChunkInfo(Point ChunkPosition, Point WorldTilePosition, bool IsDirty);
 }

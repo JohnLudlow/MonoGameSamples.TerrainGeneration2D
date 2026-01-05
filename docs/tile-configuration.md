@@ -20,6 +20,27 @@ _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDi
 
 Every change to `config` immediately alters the Wave Function Collapse constraints that produce your map.
 
+## Heightmap configuration
+- FastNoiseLite drives the heightmap implementation in `TerrainGeneration2D.Core/Mapping/HeightMap/HeightMapGenerator.cs`. Pass a `HeightMapConfiguration` alongside `TerrainRuleConfiguration` when constructing `ChunkedTilemap` to tune continent scale, mountain frequency, and contribution weights:
+
+```csharp
+var heightConfig = new HeightMapConfiguration
+{
+   ContinentScale = 0.005f,
+   MountainScale = 0.018f,
+   DetailScale = 0.085f,
+   ContinentWeight = 0.7f,
+   MountainWeight = 0.4f,
+   DetailWeight = 0.2f
+};
+_chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDir,
+   terrainRuleConfiguration: config,
+   heightMapConfiguration: heightConfig);
+```
+- Each tile now receives a `HeightSample` (altitude + noise derivatives). Rule checks include `TileRuleContext.CandidateHeight.Altitude` so oceans, beaches, plains, forests, snow, and mountains only validate when the altitude band matches the thresholds in `TerrainRuleConfiguration`, and mountains also require a mountain-specific noise spike (`MountainNoiseThreshold`).
+- `GenericTileType` exists solely as a placeholder for any sprite index beyond the named biome IDs; it always returns `false`, so Wave Function Collapse never places it unless you subclass the type with your own logic.
+- `NullTileType` (tile ID 0) remains registered as a sentinel but is filtered out of the initial WFC possibilities list, so void tiles no longer appear in the generated world.
+
 ## Scenario recipes
 1. **Large continents (non-ocean landmasses)**
    - Increase `MountainRangeMax`/`MountainWidthMax` (e.g., 512, 200) so mountain seeds do not splice continents apart, and raise `BeachOceanSizeMin`/`BeachOceanSizeMax` (e.g., 400–2000) so beaches only spawn when oceans become very large.

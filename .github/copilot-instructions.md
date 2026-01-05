@@ -1,4 +1,4 @@
-# MonoGame Samples - Copilot Instructions
+﻿# MonoGame Samples - Copilot Instructions
 
 ## Overview
 - This collection rebuilds Dungeon Slime as TerrainGeneration2D with a deterministic 2048×2048 map, Gum-powered UI, and a full-screen camera that centers on the world before user input.
@@ -8,6 +8,13 @@
 - `TerrainGeneration2D/GameController.cs` maps `Core.Input` (keyboard, mouse, gamepad) into the game-level actions that scenes consume: camera motion, zoom, fullscreen toggle, right-click pan detection, and mouse coordinates for tooltips.
 - `TerrainGeneration2D.Core/Core.cs` exposes the singleton `GraphicsDeviceManager`, `SpriteBatch`, `InputManager`, and `AudioController`, controls scene transitions, and forces `GC.Collect()` after every swap; scenes should `Dispose()` their children, `UnloadContent()`, and then rely on `Initialize()` to recreate their UI and assets.
 - `TerrainGeneration2D/TerrainGenerationGame.cs` derives from that core, wires in Gum, audio, and input, and always begins by pushing `TerrainGeneration2D.Scenes.GameScene` so the running game has a single scene focus.
+
+## Performance Diagnostics
+- `TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs` provides .NET EventSource instrumentation for chunk operations and WFC generation
+- Events are only emitted when an `EventListener` is attached - by default they have zero overhead
+- `ConsoleEventListener` automatically enabled in DEBUG builds writes events to console
+- See `TerrainGeneration2D.Core/Diagnostics/README.md` for production monitoring with dotnet-counters, dotnet-trace, or PerfView
+- Event source already instruments `ChunkedTilemap` (load/save/update) and `WaveFunctionCollapse` (generation tracking)
 
 ## Scene & UI patterns
 - Scenes own their own `ContentManager` (see `TerrainGeneration2D.Core/Scenes/Scene.cs`), so avoid sharing content across scenes unless you have a static cache and explicitly dispose it when the scene unloads.
@@ -35,9 +42,10 @@
 - Run `dotnet build TerrainGeneration2D.slnx` to compile every project, refresh the content folder, and regenerate Gum assets.
 - Use `dotnet run --project TerrainGeneration2D/TerrainGeneration2D.csproj` to launch the fullscreen map with camera, Gum UI, chunked tilemap, and tooltip overlays.
 - After changing art, audio, or Gum definitions, rerun the build command above—there is no file watcher, so the builder only runs on explicit builds.
+- Performance events automatically appear in console during DEBUG builds; use `dotnet-counters` or `dotnet-trace` for production monitoring.
 
 ## Testing
-- `dotnet test TerrainGeneration2D.Tests/TerrainGeneration2D.Tests.csproj` exercises `Camera2D`, `Chunk`, `ChunkedTilemap` persistence, serialization, and mapping rules. Follow the patterns in `TerrainGeneration2D.Tests/TestHelpers.cs` and `UNIT_TEST_RECOMMENDATIONS.md` when adding new tests.
+- `dotnet test TerrainGeneration2D.Tests/TerrainGeneration2D.Tests.csproj` exercises `Camera2D`, `Chunk`, `ChunkedTilemap` persistence, serialization, mapping rules, and EventSource diagnostics. Follow the patterns in `TerrainGeneration2D.Tests/TestHelpers.cs` and `UNIT_TEST_RECOMMENDATIONS.md` when adding new tests.
 - Benchmarks live under `TerrainGeneration2D.Benchmarks/`, but CI gates rely solely on the test project.
 
 ## Tips for AI engineers
@@ -45,5 +53,6 @@
 - Chunk data is deterministic but cached under `Content/saves`; deleting those files forces regeneration and lets you verify both `LoadChunk` and `GenerateChunk` as you change tile rules.
 - Gum widgets should only be added to `GumService.Default.Root`; `GameSceneUI` clears the root each time the scene initializes to avoid stale controls, so add GIFs or panels there instead of storing them globally.
 - Tooltip text mirrors the string format `Tile:[x,y] Type:id Chunk:[cx,cy]`; reuse that format when emitting debug logs to make it easier to cross-reference UI feedback.
+- EventSource diagnostics require an active listener to emit - `ConsoleEventListener` is auto-enabled in DEBUG builds, but production requires dotnet-counters/dotnet-trace.
 
 Please flag any missing context or unclear sections so we can iterate on this guidance.
