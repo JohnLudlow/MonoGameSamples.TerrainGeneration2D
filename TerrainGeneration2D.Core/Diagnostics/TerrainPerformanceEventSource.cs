@@ -29,6 +29,7 @@ public sealed class TerrainPerformanceEventSource : EventSource
         base.Dispose(disposing);
     }
 
+    // ID allocation: reserve 10–99 for this EventSource. IDs 1–9 are reserved by EventSource/Counters.
     [Event(10, Level = EventLevel.Informational, Message = "UpdateActiveChunks bounds {0},{1} -> {2},{3}")]
     public void UpdateActiveChunksBegin(int minChunkX, int minChunkY, int maxChunkX, int maxChunkY)
     {
@@ -103,7 +104,7 @@ public sealed class TerrainPerformanceEventSource : EventSource
         _chunksSavedCounter.Increment();
     }
 
-    [Event(16, Level = EventLevel.Informational, Message = "WFC begin chunk {0},{1}")]
+    [Event(16, Level = EventLevel.Verbose, Message = "WFC begin chunk {0},{1}")]
     public void WaveFunctionCollapseBegin(int chunkX, int chunkY)
     {
         if (IsEnabled(EventLevel.Informational, EventKeywords.None))
@@ -115,14 +116,14 @@ public sealed class TerrainPerformanceEventSource : EventSource
     [Event(17, Level = EventLevel.Informational, Message = "WFC end chunk {0},{1} success={2}")]
     public void WaveFunctionCollapseEnd(int chunkX, int chunkY, bool success)
     {
-        if (IsEnabled(EventLevel.Informational, EventKeywords.None))
+        if (IsEnabled(EventLevel.Verbose, EventKeywords.None))
         {
             WriteEvent(17, chunkX, chunkY, success);
         }
     }
 
     // Backtracking & WFC detailed diagnostics (IDs >= 18)
-    [Event(18, Level = EventLevel.Informational, Message = "WFC decision push depth={0} at {1},{2} candidates={3}")]
+    [Event(18, Level = EventLevel.Verbose, Message = "WFC decision push depth={0} at {1},{2} candidates={3}")]
     public void WfcDecisionPush(int depth, int x, int y, int candidateCount)
     {
         if (IsEnabled(EventLevel.Informational, EventKeywords.None))
@@ -131,7 +132,7 @@ public sealed class TerrainPerformanceEventSource : EventSource
         }
     }
 
-    [Event(19, Level = EventLevel.Informational, Message = "WFC apply choice depth={0} at {1},{2} tile={3}")]
+    [Event(19, Level = EventLevel.Verbose, Message = "WFC apply choice depth={0} at {1},{2} tile={3}")]
     public void WfcApplyChoice(int depth, int x, int y, int tileId)
     {
         if (IsEnabled(EventLevel.Informational, EventKeywords.None))
@@ -149,7 +150,7 @@ public sealed class TerrainPerformanceEventSource : EventSource
         }
     }
 
-    [Event(21, Level = EventLevel.Informational, Message = "WFC rollback begin depth={0} mark={1}")]
+    [Event(21, Level = EventLevel.Verbose, Message = "WFC rollback begin depth={0} mark={1}")]
     public void WfcRollbackBegin(int depth, int mark)
     {
         if (IsEnabled(EventLevel.Informational, EventKeywords.None))
@@ -158,7 +159,7 @@ public sealed class TerrainPerformanceEventSource : EventSource
         }
     }
 
-    [Event(22, Level = EventLevel.Informational, Message = "WFC rollback end depth={0}")]
+    [Event(22, Level = EventLevel.Verbose, Message = "WFC rollback end depth={0}")]
     public void WfcRollbackEnd(int depth)
     {
         if (IsEnabled(EventLevel.Informational, EventKeywords.None))
@@ -167,7 +168,7 @@ public sealed class TerrainPerformanceEventSource : EventSource
         }
     }
 
-    [Event(23, Level = EventLevel.Informational, Message = "WFC decision pop depth={0}")]
+    [Event(23, Level = EventLevel.Verbose, Message = "WFC decision pop depth={0}")]
     public void WfcDecisionPop(int depth)
     {
         if (IsEnabled(EventLevel.Informational, EventKeywords.None))
@@ -176,7 +177,7 @@ public sealed class TerrainPerformanceEventSource : EventSource
         }
     }
 
-    [Event(24, Level = EventLevel.Informational, Message = "WFC stats decisions={0} backtracks={1} maxDepth={2}")]
+    [Event(24, Level = EventLevel.Verbose, Message = "WFC stats decisions={0} backtracks={1} maxDepth={2}")]
     public void WfcStats(int decisions, int backtracks, int maxDepth)
     {
         if (IsEnabled(EventLevel.Informational, EventKeywords.None))

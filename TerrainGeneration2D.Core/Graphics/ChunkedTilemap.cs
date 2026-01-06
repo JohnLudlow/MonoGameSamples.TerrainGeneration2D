@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.EntropyProviders;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -29,14 +30,17 @@ public class ChunkedTilemap
     private readonly TileTypeRegistry _tileTypeRegistry;
     private readonly TerrainRuleConfiguration _terrainRuleConfig;
     private readonly HeightMapConfiguration _heightMapConfiguration;
+    private readonly WfcWeightConfiguration _wfcWeightConfig;
+    private readonly HeuristicsConfiguration _heuristicsConfig;
     private readonly IHeightProvider _heightProvider;
     private readonly bool _useWaveFunctionCollapse;
+    private readonly ILogger? _logger;
     
     public int TileSize => _tileSize;
     public int MapSizeInTiles => _mapSizeInTiles;
     public Tileset Tileset => _tileset;
     
-    public ChunkedTilemap(Tileset tileset, int mapSizeInTiles, int masterSeed, string saveDirectory, bool useWaveFunctionCollapse = true, TerrainRuleConfiguration? terrainRuleConfiguration = null, HeightMapConfiguration? heightMapConfiguration = null)
+    public ChunkedTilemap(Tileset tileset, int mapSizeInTiles, int masterSeed, string saveDirectory, bool useWaveFunctionCollapse = true, TerrainRuleConfiguration? terrainRuleConfiguration = null, HeightMapConfiguration? heightMapConfiguration = null, WfcWeightConfiguration? weightConfig = null, HeuristicsConfiguration? heuristicsConfig = null, ILogger? logger = null)
     {
         _tileset = tileset ?? throw new ArgumentNullException(nameof(tileset));
         _tileSize = tileset.TileWidth;
@@ -50,7 +54,10 @@ public class ChunkedTilemap
         _terrainRuleConfig = terrainRuleConfiguration ?? new TerrainRuleConfiguration();
         _heightMapConfiguration = heightMapConfiguration ?? new HeightMapConfiguration();
         _heightProvider = new HeightMapGenerator(masterSeed, _heightMapConfiguration);
+        _wfcWeightConfig = weightConfig ?? new WfcWeightConfiguration();
+        _heuristicsConfig = heuristicsConfig ?? new HeuristicsConfiguration();
         _tileTypeRegistry = TileTypeRegistry.CreateDefault(tileset.Count, _terrainRuleConfig);
+        _logger = logger;
         
         // Ensure save directory exists
         if (!Directory.Exists(_saveDirectory))
@@ -108,10 +115,13 @@ public class ChunkedTilemap
         {
             // Use Wave Function Collapse for coherent terrain
             var chunkOrigin = new Point(chunkCoords.X * Chunk.ChunkSize, chunkCoords.Y * Chunk.ChunkSize);
-            var wfc = new WfcProvider(Chunk.ChunkSize, Chunk.ChunkSize, _tileTypeRegistry, random, _terrainRuleConfig, _heightProvider, chunkOrigin);
+            var randomProvider = new RandomAdapter(random);
+            var wfc = new WfcProvider(Chunk.ChunkSize, Chunk.ChunkSize, _tileTypeRegistry, randomProvider, _terrainRuleConfig, _heightProvider, chunkOrigin, _wfcWeightConfig, _heuristicsConfig);
+            if (_logger != null) GameLoggerMessages.MapGenerateBegin(_logger, Chunk.ChunkSize, Chunk.ChunkSize);
             
             // Enable backtracking to improve robustness on contradictions
-            if (wfc.Generate(enableBacktracking: true, maxIterations: 10000, maxBacktrackSteps: 4096, maxDepth: 256))
+            var wfcSuccess = wfc.Generate(enableBacktracking: true, maxIterations: 10000, maxBacktrackSteps: 4096, maxDepth: 256);
+            if (wfcSuccess)
             {
                 var output = wfc.GetOutput();
                 for (var localY = 0; localY < Chunk.ChunkSize; localY++)
@@ -121,17 +131,20 @@ public class ChunkedTilemap
                         chunk[localX, localY] = output[localX, localY];
                     }
                 }
+                if (_logger != null) GameLoggerMessages.MapGenerateEnd(_logger, true);
             }
             else
             {
                 // WFC failed (contradiction), fall back to random
                 GenerateRandomChunk(chunk, random);
+                if (_logger != null) GameLoggerMessages.MapGenerateEnd(_logger, false);
             }
         }
         else
         {
             // Use simple random generation
             GenerateRandomChunk(chunk, random);
+            if (_logger != null) GameLoggerMessages.MapGenerateEnd(_logger, true);
         }
         
         chunk.IsDirty = true; // Mark as dirty so it gets saved

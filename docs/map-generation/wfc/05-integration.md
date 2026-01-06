@@ -30,6 +30,10 @@ To maintain continuity across chunk borders, seed edge domains based on neighbor
 ### Saves and reproducibility
 Chunk data is compressed to disk after generation; deleting the saves folder forces regeneration. Stable seeds ensure deterministic results for the same world settings.
 
+> See also: Heuristics
+>
+> Integration outcomes and visual consistency are influenced by candidate ordering and weight strategies during solving. For guidance on entropy selection, tie-breaking, and neighbor-match weighting (including deterministic ordering for stable exploration), see [05 — Heuristics](05-heuristics.md).
+
 Code references:
 - Chunk orchestration: [TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs](../../../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs)
 - WFC output handoff: [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)

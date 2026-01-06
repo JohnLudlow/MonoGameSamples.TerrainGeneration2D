@@ -79,6 +79,7 @@ Simple view of data flow:
 9. 09-WFC-Propagation: Implement constraint propagation (arc-consistency) [TDD]
 10. 10-WFC-Backtracking: Handle contradictions with decision stack and backtracking [TDD]
 11. 11-WFC-Integration: Integrate WFC into chunk generation and performance instrumentation [TDD]
+12. 12-Config-WFC-Weights: Runtime configuration for WFC heuristic weights (appsettings)
 
 Each phase is self-contained and includes complete code snapshots and at least one unit test. You can start from any phase by applying that phase’s snapshot.
 
@@ -106,6 +107,13 @@ Expand to WFC stages:
 - [09-wfc-propagation.md](./09-wfc-propagation.md)
 - [10-wfc-backtracking.md](./10-wfc-backtracking.md)
 - [11-wfc-integration.md](./11-wfc-integration.md)
+- [12-config-wfc-weights.md](./12-config-wfc-weights.md)
+
+## Heuristics
+- Cell selection: default is lowest domain size. See Shannon entropy option and trade-offs in [map-generation/wfc/05-heuristics.md](../map-generation/wfc/05-heuristics.md).
+- Tile choice: neighbor-match weighting is configurable via `WfcWeights` in [TerrainGeneration2D/appsettings.json](../../TerrainGeneration2D/appsettings.json).
+- Runtime config: quick tuning guide in [12-config-wfc-weights.md](./12-config-wfc-weights.md).
+- Determinism: inject a test `IRandomProvider` for reproducible tie-breaks; see examples in [WfcProvider.cs](../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs) and tests.
 
 Refer to the tests appendix for project setup and commands:
 - [tests-appendix.md](./tests-appendix.md)

@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 using Microsoft.Xna.Framework;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.EntropyProviders;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 
@@ -17,6 +18,10 @@ public class WfcProvider
 {
   private readonly TileTypeRegistry _tileRegistry;
   private readonly IRandomProvider _random;
+  private readonly WfcWeightConfiguration _weightConfig;
+  private readonly HeuristicsConfiguration _heuristicsConfig;
+  private readonly ICellEntropyProvider _domainEntropy;
+  private readonly ICellEntropyProvider _shannonEntropy;
   private readonly int _width;
   private readonly int _height;
   private readonly HashSet<int>?[,] _possibilities;
@@ -47,6 +52,10 @@ public class WfcProvider
     _config = config ?? throw new ArgumentNullException(nameof(config));
     _heightProvider = heightProvider ?? throw new ArgumentNullException(nameof(heightProvider));
     _chunkOrigin = chunkOrigin;
+    _weightConfig = new WfcWeightConfiguration();
+    _heuristicsConfig = new HeuristicsConfiguration();
+    _domainEntropy = new DomainEntropyProvider();
+    _shannonEntropy = new ShannonEntropyProvider();
 
     var validTileIds = _tileRegistry.ValidTileIds;
     _possibilities = new HashSet<int>?[width, height];
@@ -76,6 +85,109 @@ public class WfcProvider
     _config = config ?? throw new ArgumentNullException(nameof(config));
     _heightProvider = heightProvider ?? throw new ArgumentNullException(nameof(heightProvider));
     _chunkOrigin = chunkOrigin;
+    _weightConfig = new WfcWeightConfiguration();
+    _heuristicsConfig = new HeuristicsConfiguration();
+    _domainEntropy = new DomainEntropyProvider();
+    _shannonEntropy = new ShannonEntropyProvider();
+
+    var validTileIds = _tileRegistry.ValidTileIds;
+    _possibilities = new HashSet<int>?[width, height];
+    _output = new int[width, height];
+    _collapsed = false;
+    for (var y = 0; y < height; y++)
+    {
+      for (var x = 0; x < width; x++)
+      {
+        _possibilities[x, y] = new HashSet<int>(validTileIds);
+        _output[x, y] = -1;
+      }
+    }
+
+    _mappingService = new MappingInformationService(_output);
+  }
+
+  /// <summary>
+  /// Create a WFC solver using a custom random provider and weight configuration.
+  /// </summary>
+  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, IRandomProvider randomProvider, TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin, WfcWeightConfiguration weightConfig)
+  {
+    _width = width;
+    _height = height;
+    _tileRegistry = tileRegistry ?? throw new ArgumentNullException(nameof(tileRegistry));
+    _random = randomProvider ?? throw new ArgumentNullException(nameof(randomProvider));
+    _config = config ?? throw new ArgumentNullException(nameof(config));
+    _heightProvider = heightProvider ?? throw new ArgumentNullException(nameof(heightProvider));
+    _chunkOrigin = chunkOrigin;
+    _weightConfig = weightConfig ?? new WfcWeightConfiguration();
+    _heuristicsConfig = new HeuristicsConfiguration();
+    _domainEntropy = new DomainEntropyProvider();
+    _shannonEntropy = new ShannonEntropyProvider();
+
+    var validTileIds = _tileRegistry.ValidTileIds;
+    _possibilities = new HashSet<int>?[width, height];
+    _output = new int[width, height];
+    _collapsed = false;
+    for (var y = 0; y < height; y++)
+    {
+      for (var x = 0; x < width; x++)
+      {
+        _possibilities[x, y] = new HashSet<int>(validTileIds);
+        _output[x, y] = -1;
+      }
+    }
+
+    _mappingService = new MappingInformationService(_output);
+  }
+
+  /// <summary>
+  /// Create a WFC solver using System.Random and weight configuration.
+  /// </summary>
+  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, Random random, TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin, WfcWeightConfiguration weightConfig)
+  {
+    _width = width;
+    _height = height;
+    _tileRegistry = tileRegistry ?? throw new ArgumentNullException(nameof(tileRegistry));
+    ArgumentNullException.ThrowIfNull(random);
+    _random = new RandomAdapter(random);
+    _config = config ?? throw new ArgumentNullException(nameof(config));
+    _heightProvider = heightProvider ?? throw new ArgumentNullException(nameof(heightProvider));
+    _chunkOrigin = chunkOrigin;
+    _weightConfig = weightConfig ?? new WfcWeightConfiguration();
+    _heuristicsConfig = new HeuristicsConfiguration();
+    _domainEntropy = new DomainEntropyProvider();
+    _shannonEntropy = new ShannonEntropyProvider();
+    
+    var validTileIds = _tileRegistry.ValidTileIds;
+    _possibilities = new HashSet<int>?[width, height];
+    _output = new int[width, height];
+    _collapsed = false;
+    for (var y = 0; y < height; y++)
+    {
+      for (var x = 0; x < width; x++)
+      {
+        _possibilities[x, y] = new HashSet<int>(validTileIds);
+        _output[x, y] = -1;
+      }
+    }
+
+    _mappingService = new MappingInformationService(_output);
+  }
+  /// <summary>
+  /// Create a WFC solver with custom random, weight, and heuristics configuration.
+  /// </summary>
+  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, IRandomProvider randomProvider, TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin, WfcWeightConfiguration weightConfig, HeuristicsConfiguration heuristics)
+  {
+    _width = width;
+    _height = height;
+    _tileRegistry = tileRegistry ?? throw new ArgumentNullException(nameof(tileRegistry));
+    _random = randomProvider ?? throw new ArgumentNullException(nameof(randomProvider));
+    _config = config ?? throw new ArgumentNullException(nameof(config));
+    _heightProvider = heightProvider ?? throw new ArgumentNullException(nameof(heightProvider));
+    _chunkOrigin = chunkOrigin;
+    _weightConfig = weightConfig ?? new WfcWeightConfiguration();
+    _heuristicsConfig = heuristics ?? new HeuristicsConfiguration();
+    _domainEntropy = new DomainEntropyProvider();
+    _shannonEntropy = new ShannonEntropyProvider();
 
     var validTileIds = _tileRegistry.ValidTileIds;
     _possibilities = new HashSet<int>?[width, height];
@@ -200,7 +312,7 @@ public class WfcProvider
         if (x > 0 && _output[x - 1, y] != -1) neighborTiles.Add(_output[x - 1, y]);
         if (x < _width - 1 && _output[x + 1, y] != -1) neighborTiles.Add(_output[x + 1, y]);
 
-        var weighted = poss.Select(tile => new { Tile = tile, Weight = 1 + neighborTiles.Count(n => n == tile) * 3 }).ToList();
+        var weighted = poss.Select(tile => new { Tile = tile, Weight = _weightConfig.Base + neighborTiles.Count(n => n == tile) * _weightConfig.NeighborMatchBoost }).ToList();
         var ordered = weighted
           .OrderByDescending(w => w.Weight)
           .ThenBy(w => w.Tile)
@@ -305,36 +417,69 @@ public class WfcProvider
 
   private (int x, int y) FindLowestEntropy()
   {
-    var minEntropy = int.MaxValue;
-    List<(int x, int y)> candidates = new();
+    // Collect candidate cells and compute both scores when enabled
+    var candidateCells = new List<(int x, int y, double kScore, double hScore, int influence)>();
 
     for (var y = 0; y < _height; y++)
     {
       for (var x = 0; x < _width; x++)
       {
-        var possibilities = _possibilities[x, y];
-        if (possibilities == null || possibilities.Count <= 1)
-          continue;
+        var poss = _possibilities[x, y];
+        if (poss == null || poss.Count <= 1) continue;
 
-        var entropy = possibilities.Count;
+        var k = _heuristicsConfig.UseDomainEntropy ? _domainEntropy.GetScore(x, y, _possibilities, _output, _weightConfig) : double.PositiveInfinity;
+        var h = _heuristicsConfig.UseShannonEntropy ? _shannonEntropy.GetScore(x, y, _possibilities, _output, _weightConfig) : double.PositiveInfinity;
 
-        if (entropy < minEntropy)
-        {
-          minEntropy = entropy;
-          candidates.Clear();
-          candidates.Add((x, y));
-        }
-        else if (entropy == minEntropy)
-        {
-          candidates.Add((x, y));
-        }
+        // Influence: how many undecided neighbors this cell may constrain
+        var influence = 0;
+        if (y > 0 && _possibilities[x, y - 1] != null) influence++;
+        if (y < _height - 1 && _possibilities[x, y + 1] != null) influence++;
+        if (x > 0 && _possibilities[x - 1, y] != null) influence++;
+        if (x < _width - 1 && _possibilities[x + 1, y] != null) influence++;
+
+        candidateCells.Add((x, y, k, h, influence));
       }
     }
 
-    if (candidates.Count == 0)
+    if (candidateCells.Count == 0)
       return (-1, -1);
 
-    return candidates[_random.NextInt(candidates.Count)];
+    if (!_heuristicsConfig.UseDomainEntropy && !_heuristicsConfig.UseShannonEntropy)
+      throw new InvalidOperationException("No entropy heuristic enabled: enable DomainEntropy and/or ShannonEntropy.");
+
+    // Selection
+    List<(int x, int y, double k, double h, int influence)> shortlist;
+    if (_heuristicsConfig.UseDomainEntropy && _heuristicsConfig.UseShannonEntropy)
+    {
+      var minK = candidateCells.Min(c => c.kScore);
+      var minH = candidateCells.Min(c => c.hScore);
+      var setK = candidateCells.Where(c => Math.Abs(c.kScore - minK) < 1e-9).ToList();
+      var setH = candidateCells.Where(c => Math.Abs(c.hScore - minH) < 1e-9).ToList();
+      var intersect = setK.Where(k => setH.Any(h => h.x == k.x && h.y == k.y)).ToList();
+      shortlist = intersect.Count > 0 ? intersect : setK.Concat(setH).ToList();
+    }
+    else if (_heuristicsConfig.UseDomainEntropy)
+    {
+      var minK = candidateCells.Min(c => c.kScore);
+      shortlist = candidateCells.Where(c => Math.Abs(c.kScore - minK) < 1e-9).ToList();
+    }
+    else
+    {
+      var minH = candidateCells.Min(c => c.hScore);
+      shortlist = candidateCells.Where(c => Math.Abs(c.hScore - minH) < 1e-9).ToList();
+    }
+
+    if (shortlist.Count == 0)
+      return (-1, -1);
+
+    if (_heuristicsConfig.UseDomainEntropy && _heuristicsConfig.UseShannonEntropy && _heuristicsConfig.UseMostConstrainingTieBreak)
+    {
+      var maxInf = shortlist.Max(c => c.influence);
+      shortlist = shortlist.Where(c => c.influence == maxInf).ToList();
+    }
+
+    var choice = shortlist[_random.NextInt(shortlist.Count)];
+    return (choice.x, choice.y);
   }
 
   private bool CollapseCell(int x, int y)
@@ -354,7 +499,7 @@ public class WfcProvider
         .Select(tile => new
         {
           Tile = tile,
-          Weight = 1 + neighborTiles.Count(neighbor => neighbor == tile) * 3
+          Weight = _weightConfig.Base + neighborTiles.Count(neighbor => neighbor == tile) * _weightConfig.NeighborMatchBoost
         })
         .OrderBy(o => o.Tile)
         .ToList();

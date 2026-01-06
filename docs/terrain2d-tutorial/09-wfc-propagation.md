@@ -83,6 +83,18 @@ private IEnumerable<(int x,int y, Direction dir)> Neighbors(int x, int y)
 
 Proceed to backtracking in the next phase.
 
+## Heuristics: Entropy and Selection
+- Entropy: pick the cell with the smallest domain (fewest candidates). For advanced tuning, consider Shannon entropy $H = -\sum p_i \log p_i$ with tile priors.
+- Tie-breaking: resolve equal-entropy cells via an injected randomness provider for stability in production, and a deterministic provider in tests.
+- Weights: when choosing a tile for a cell, favor neighbors of the same type with a simple boost (e.g., `1 + k * matches`). Keep candidate ordering stable (sort by tile id) to avoid nondeterminism.
+- Determinism: use `IRandomProvider` to control randomness in unit tests and sort candidates to eliminate HashSet iteration variability.
+- Tuning: start with small multipliers; monitor contradictions/backtracks via diagnostics and adjust. See the deeper discussion in [docs/wfc/wfc-implementation-roadmap.md](docs/wfc/wfc-implementation-roadmap.md) and implementation in [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs).
+
+> Try It
+>
+> - Deterministic tests: implement a test-only `IRandomProvider` that returns fixed values and pass it to `WfcProvider` to make collapse choices predictable. See the example in [TerrainGeneration2D.Tests/MappingTests.cs](TerrainGeneration2D.Tests/MappingTests.cs).
+> - Runtime tuning idea: add a config value (e.g., `WfcWeights.NeighborMatchBoost`) in appsettings and thread it into `WfcProvider` to scale the neighbor-match multiplier. Start small (e.g., 1–3) and observe contradictions/backtracks via diagnostics.
+
 ## See also
 - Previous phase: [08 — WFC Domains & Entropy](docs/terrain2d-tutorial/08-wfc-domains.md)
 - Next phase: [10 — WFC Backtracking](docs/terrain2d-tutorial/10-wfc-backtracking.md)

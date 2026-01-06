@@ -1,11 +1,9 @@
+using System.Reflection;
+using System.Runtime.Serialization;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 using Microsoft.Xna.Framework;
-using System;
-using System.IO;
-using System.Reflection;
-using System.Runtime.Serialization;
 
 BenchmarkRunner.Run<ChunkGenerationBenchmark>();
 

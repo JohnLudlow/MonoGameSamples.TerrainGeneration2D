@@ -1,11 +1,12 @@
 ﻿using System;
 using Gum.Forms;
 using Gum.Forms.Controls;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Scenes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Scenes;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
+using Microsoft.Extensions.Logging;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Media;
 using MonoGameGum;
-using Microsoft.Extensions.Logging;
 using CoreGame = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D;
@@ -26,12 +27,13 @@ internal sealed class TerrainGenerationGame : CoreGame
 
   protected override void Initialize()
   {
+    GameLoggerMessages.MonoGameInitBegin(_log, Environment.ProcessId);
     base.Initialize();
 
-    _log.LogInformation("Game initialize: resolution={width}x{height} fullscreen={fullscreen}",
+    GameLoggerMessages.MonoGameInitWindow(
+      _log,
       GraphicsDevice.PresentationParameters.BackBufferWidth,
-      GraphicsDevice.PresentationParameters.BackBufferHeight,
-      CoreGame.Graphics?.IsFullScreen ?? false);
+      GraphicsDevice.PresentationParameters.BackBufferHeight);
 
     if (Audio is null) throw new InvalidOperationException($"Unable to start game if {nameof(Audio)} is null");
     
@@ -41,15 +43,31 @@ internal sealed class TerrainGenerationGame : CoreGame
     InitializeGum();    
 
     ChangeScene(new GameScene());
+    GameLoggerMessages.MonoGameInitEnd(_log);
   }
 
   protected override void LoadContent()
   {
+    GameLoggerMessages.MonoGameLoadContentBegin(_log);
     base.LoadContent();
     if (Content is null) throw new InvalidOperationException($"Unable to start game if {nameof(Content)} is null");
 
     _themeSong = Content.Load<Song>("audio/theme");
-    _log.LogInformation("Content loaded: theme song and assets ready");
+    GameLoggerMessages.MonoGameLoadContentEnd(_log);
+  }
+
+  protected override void Update(GameTime gameTime)
+  {
+    GameLoggerMessages.MonoGameUpdateBegin(_log);
+    base.Update(gameTime);
+    GameLoggerMessages.MonoGameUpdateEnd(_log);
+  }
+
+  protected override void Draw(GameTime gameTime)
+  {
+    GameLoggerMessages.MonoGameDrawBegin(_log);
+    base.Draw(gameTime);
+    GameLoggerMessages.MonoGameDrawEnd(_log);
   }
 
   protected override void UnloadContent()
@@ -61,6 +79,7 @@ internal sealed class TerrainGenerationGame : CoreGame
 
   protected override void Dispose(bool disposing)
   {
+    GameLoggerMessages.MonoGameExitBegin(_log);
     if (_disposed) return;
 
     if (disposing)
@@ -69,6 +88,7 @@ internal sealed class TerrainGenerationGame : CoreGame
     }
 
     base.Dispose(disposing);
+    GameLoggerMessages.MonoGameExitEnd(_log);
   }
 
   private void InitializeGum()

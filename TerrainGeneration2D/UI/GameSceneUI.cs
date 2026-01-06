@@ -1,7 +1,6 @@
 using System;
 using Gum.DataTypes;
 using Gum.Forms.Controls;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;

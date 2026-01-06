@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="260" viewBox="0 0 560 260">
+  <style>
+    .axis { stroke: #333; stroke-width: 1; }
+    .barA { fill: #2a7ae2; }
+    .barB { fill: #9ad1ff; }
+    .barC { fill: #9ad1ff; }
+    .label { font: 13px sans-serif; fill: #333; }
+    .title { font: 16px sans-serif; fill: #111; font-weight: 600; }
+    .note { font: 12px sans-serif; fill: #444; }
+  </style>
+  <rect width="100%" height="100%" fill="#fff"/>
+  <text x="280" y="22" text-anchor="middle" class="title">Weighted vs Uniform Probabilities</text>
+  <g transform="translate(60,30)">
+    <!-- Axes -->
+    <line x1="0" y1="200" x2="460" y2="200" class="axis"/>
+    <line x1="0" y1="0" x2="0" y2="200" class="axis"/>
+
+    <!-- Bars: A=0.8, B=0.1, C=0.1 -->
+    <g>
+      <rect class="barA" x="40" y="40" width="60" height="160"/>
+      <text class="label" x="70" y="214" text-anchor="middle">A</text>
+      <text class="label" x="70" y="34" text-anchor="middle">0.80</text>
+    </g>
+    <g>
+      <rect class="barB" x="220" y="180" width="60" height="20"/>
+      <text class="label" x="250" y="214" text-anchor="middle">B</text>
+      <text class="label" x="250" y="174" text-anchor="middle">0.10</text>
+    </g>
+    <g>
+      <rect class="barC" x="360" y="180" width="60" height="20"/>
+      <text class="label" x="390" y="214" text-anchor="middle">C</text>
+      <text class="label" x="390" y="174" text-anchor="middle">0.10</text>
+    </g>
+
+    <!-- Notes -->
+    <text class="note" x="0" y="-8">Domain {A,B,C}, weights {8,1,1} ⇒ p={0.8, 0.1, 0.1}</text>
+    <text class="note" x="0" y="8">Entropy (ln): H ≈ 0.639; Uniform (k=3): ln 3 ≈ 1.099</text>
+  </g>
+</svg>

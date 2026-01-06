@@ -7,8 +7,6 @@
 /// For more details regarding the Content Builder, see the MonoGame documentation: <tbc.>
 /// </remarks>
 
-using Microsoft.Xna.Framework.Content.Pipeline;
-using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using MonoGame.Framework.Content.Pipeline.Builder;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Content.Builder;

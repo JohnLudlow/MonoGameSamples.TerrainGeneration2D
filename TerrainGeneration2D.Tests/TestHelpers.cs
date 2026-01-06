@@ -1,7 +1,5 @@
 using System.Reflection;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests;
 

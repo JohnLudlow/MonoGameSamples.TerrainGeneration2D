@@ -63,3 +63,6 @@ _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDi
    - Alternatively, register a new `GenericTileType` subclass before building the registry and use `TileRuleContext` to reject candidate expansions whose group metrics exceed your desired circular radius, keeping forests from sprawling into long corridors.
 
 Adjust these recipes incrementally and iterate with `dotnet run --project TerrainGeneration2D/TerrainGeneration2D.csproj`; delete `Content/saves` between experiments so the new rules are exercised through chunk regeneration rather than cached saves.
+
+## Runtime configuration
+- You can tweak `TerrainRuleConfiguration`, `HeightMapConfiguration`, and WFC heuristic weights at runtime via appsettings. See the tutorial: [12-config-wfc-weights.md](./terrain2d-tutorial/12-config-wfc-weights.md).
