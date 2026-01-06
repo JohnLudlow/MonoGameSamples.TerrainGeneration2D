@@ -116,4 +116,5 @@ jobs:
         dotnet run @dotnetParams
 
     - name: Publish performance report in build summary
+      if: github.event_name == 'pull_request'      
       run: cat BenchmarkDotNet.Artifacts/results >> $env:GITHUB_STEP_SUMMARY # Adjust path and filename if necessary
