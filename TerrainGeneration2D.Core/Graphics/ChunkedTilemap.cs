@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 using Microsoft.Xna.Framework;
@@ -100,21 +101,22 @@ public class ChunkedTilemap
         var chunk = new Chunk(chunkCoords);
         
         // Generate deterministic seed for this chunk
-        int chunkSeed = _masterSeed + chunkCoords.X * 73856093 + chunkCoords.Y * 19349663;
+        var chunkSeed = _masterSeed + chunkCoords.X * 73856093 + chunkCoords.Y * 19349663;
         var random = new Random(chunkSeed);
         
         if (_useWaveFunctionCollapse)
         {
             // Use Wave Function Collapse for coherent terrain
             var chunkOrigin = new Point(chunkCoords.X * Chunk.ChunkSize, chunkCoords.Y * Chunk.ChunkSize);
-            var wfc = new WaveFunctionCollapse(Chunk.ChunkSize, Chunk.ChunkSize, _tileTypeRegistry, random, _terrainRuleConfig, _heightProvider, chunkOrigin);
+            var wfc = new WfcProvider(Chunk.ChunkSize, Chunk.ChunkSize, _tileTypeRegistry, random, _terrainRuleConfig, _heightProvider, chunkOrigin);
             
-            if (wfc.Generate())
+            // Enable backtracking to improve robustness on contradictions
+            if (wfc.Generate(enableBacktracking: true, maxIterations: 10000, maxBacktrackSteps: 4096, maxDepth: 256))
             {
                 var output = wfc.GetOutput();
-                for (int localY = 0; localY < Chunk.ChunkSize; localY++)
+                for (var localY = 0; localY < Chunk.ChunkSize; localY++)
                 {
-                    for (int localX = 0; localX < Chunk.ChunkSize; localX++)
+                    for (var localX = 0; localX < Chunk.ChunkSize; localX++)
                     {
                         chunk[localX, localY] = output[localX, localY];
                     }
@@ -142,12 +144,12 @@ public class ChunkedTilemap
     private void GenerateRandomChunk(Chunk chunk, Random random)
     {
         var baseWorld = chunk.WorldTilePosition;
-        for (int localY = 0; localY < Chunk.ChunkSize; localY++)
+        for (var localY = 0; localY < Chunk.ChunkSize; localY++)
         {
-            for (int localX = 0; localX < Chunk.ChunkSize; localX++)
+            for (var localX = 0; localX < Chunk.ChunkSize; localX++)
             {
-                int worldX = baseWorld.X + localX;
-                int worldY = baseWorld.Y + localY;
+                var worldX = baseWorld.X + localX;
+                var worldY = baseWorld.Y + localY;
                 var sample = _heightProvider.GetSample(worldX, worldY);
                 chunk[localX, localY] = PickTileByHeight(sample, random);
             }
@@ -200,11 +202,11 @@ public class ChunkedTilemap
     private Chunk? LoadChunk(Point chunkCoords)
     {
         TerrainPerformanceEventSource.Log.ChunkLoadBegin(chunkCoords.X, chunkCoords.Y);
-        bool loaded = false;
+        var loaded = false;
 
         try
         {
-            string filePath = GetChunkFilePath(chunkCoords);
+            var filePath = GetChunkFilePath(chunkCoords);
             
             if (!File.Exists(filePath))
             {
@@ -215,20 +217,20 @@ public class ChunkedTilemap
             using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
             using var reader = new BinaryReader(gzipStream);
             
-            byte[] magic = reader.ReadBytes(4);
+            var magic = reader.ReadBytes(4);
             if (magic[0] != 'C' || magic[1] != 'H' || magic[2] != 'N' || magic[3] != 'K')
             {
                 return null;
             }
             
-            int version = reader.ReadInt32();
+            var version = reader.ReadInt32();
             if (version != 1)
             {
                 return null;
             }
             
-            int chunkX = reader.ReadInt32();
-            int chunkY = reader.ReadInt32();
+            var chunkX = reader.ReadInt32();
+            var chunkY = reader.ReadInt32();
             
             if (chunkX != chunkCoords.X || chunkY != chunkCoords.Y)
             {
@@ -236,9 +238,9 @@ public class ChunkedTilemap
             }
             
             var chunk = new Chunk(chunkCoords);
-            for (int y = 0; y < Chunk.ChunkSize; y++)
+            for (var y = 0; y < Chunk.ChunkSize; y++)
             {
-                for (int x = 0; x < Chunk.ChunkSize; x++)
+                for (var x = 0; x < Chunk.ChunkSize; x++)
                 {
                     chunk[x, y] = reader.ReadInt32();
                 }
@@ -270,11 +272,11 @@ public class ChunkedTilemap
         
         var chunkPos = chunk.ChunkPosition;
         TerrainPerformanceEventSource.Log.ChunkSaveBegin(chunkPos.X, chunkPos.Y);
-        bool success = false;
+        var success = false;
 
         try
         {
-            string filePath = GetChunkFilePath(chunkPos);
+            var filePath = GetChunkFilePath(chunkPos);
             
             using var fileStream = File.Create(filePath);
             using var gzipStream = new GZipStream(fileStream, CompressionLevel.Optimal);
@@ -285,9 +287,9 @@ public class ChunkedTilemap
             writer.Write(chunkPos.X);
             writer.Write(chunkPos.Y);
             
-            for (int y = 0; y < Chunk.ChunkSize; y++)
+            for (var y = 0; y < Chunk.ChunkSize; y++)
             {
-                for (int x = 0; x < Chunk.ChunkSize; x++)
+                for (var x = 0; x < Chunk.ChunkSize; x++)
                 {
                     writer.Write(chunk[x, y]);
                 }
@@ -340,9 +342,9 @@ public class ChunkedTilemap
         TerrainPerformanceEventSource.Log.UpdateActiveChunksBegin(minChunk.X, minChunk.Y, maxChunk.X, maxChunk.Y);
         
         // Load visible chunks
-        for (int cy = minChunk.Y; cy <= maxChunk.Y; cy++)
+        for (var cy = minChunk.Y; cy <= maxChunk.Y; cy++)
         {
-            for (int cx = minChunk.X; cx <= maxChunk.X; cx++)
+            for (var cx = minChunk.X; cx <= maxChunk.X; cx++)
             {
                 GetOrCreateChunk(new Point(cx, cy));
             }
@@ -378,8 +380,8 @@ public class ChunkedTilemap
         Point chunkCoords = TileToChunkCoordinates(tileX, tileY);
         Chunk chunk = GetOrCreateChunk(chunkCoords);
         
-        int localX = tileX - chunk.WorldTilePosition.X;
-        int localY = tileY - chunk.WorldTilePosition.Y;
+        var localX = tileX - chunk.WorldTilePosition.X;
+        var localY = tileY - chunk.WorldTilePosition.Y;
         
         return chunk[localX, localY];
     }
@@ -392,8 +394,8 @@ public class ChunkedTilemap
         Point chunkCoords = TileToChunkCoordinates(tileX, tileY);
         Chunk chunk = GetOrCreateChunk(chunkCoords);
         
-        int localX = tileX - chunk.WorldTilePosition.X;
-        int localY = tileY - chunk.WorldTilePosition.Y;
+        var localX = tileX - chunk.WorldTilePosition.X;
+        var localY = tileY - chunk.WorldTilePosition.Y;
         
         chunk[localX, localY] = tileId;
     }
@@ -406,17 +408,17 @@ public class ChunkedTilemap
         ArgumentNullException.ThrowIfNull(spriteBatch);
         
         // Calculate visible tile range
-        int minTileX = Math.Max(0, viewportWorldBounds.Left / _tileSize);
-        int minTileY = Math.Max(0, viewportWorldBounds.Top / _tileSize);
-        int maxTileX = Math.Min(_mapSizeInTiles - 1, viewportWorldBounds.Right / _tileSize);
-        int maxTileY = Math.Min(_mapSizeInTiles - 1, viewportWorldBounds.Bottom / _tileSize);
+        var minTileX = Math.Max(0, viewportWorldBounds.Left / _tileSize);
+        var minTileY = Math.Max(0, viewportWorldBounds.Top / _tileSize);
+        var maxTileX = Math.Min(_mapSizeInTiles - 1, viewportWorldBounds.Right / _tileSize);
+        var maxTileY = Math.Min(_mapSizeInTiles - 1, viewportWorldBounds.Bottom / _tileSize);
         
         // Draw only visible tiles
-        for (int tileY = minTileY; tileY <= maxTileY; tileY++)
+        for (var tileY = minTileY; tileY <= maxTileY; tileY++)
         {
-            for (int tileX = minTileX; tileX <= maxTileX; tileX++)
+            for (var tileX = minTileX; tileX <= maxTileX; tileX++)
             {
-                int tileId = GetTile(tileX, tileY);
+                var tileId = GetTile(tileX, tileY);
                 TextureRegion region = _tileset.GetTile(tileId);
                 
                 var position = new Vector2(tileX * _tileSize, tileY * _tileSize);

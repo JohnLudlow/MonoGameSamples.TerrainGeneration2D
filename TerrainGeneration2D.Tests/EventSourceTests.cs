@@ -32,10 +32,10 @@ public class EventSourceTests : IDisposable
 
         TerrainPerformanceEventSource.Log.ChunkLoadBegin(1, 2);
         TerrainPerformanceEventSource.Log.ChunkLoadEnd(1, 2, true);
-
-        Assert.True(_listener.Events.Count >= 2, $"Expected at least 2 events, got {_listener.Events.Count}");
-        Assert.Contains(_listener.Events, e => e.EventName == "ChunkLoadBegin");
-        Assert.Contains(_listener.Events, e => e.EventName == "ChunkLoadEnd");
+        var events = _listener.Snapshot().Where(e => e != null).ToList();
+        Assert.True(events.Count >= 2, $"Expected at least 2 events, got {events.Count}");
+        Assert.Contains(events, e => e.EventName == "ChunkLoadBegin");
+        Assert.Contains(events, e => e.EventName == "ChunkLoadEnd");
     }
 
     [Fact]
@@ -47,9 +47,10 @@ public class EventSourceTests : IDisposable
         TerrainPerformanceEventSource.Log.ChunkSaveEnd(3, 4, true);
         TerrainPerformanceEventSource.Log.ChunkSaved();
 
-        Assert.True(_listener.Events.Count >= 2, $"Expected at least 2 events, got {_listener.Events.Count}");
-        Assert.Contains(_listener.Events, e => e.EventName == "ChunkSaveBegin");
-        Assert.Contains(_listener.Events, e => e.EventName == "ChunkSaveEnd");
+        var events = _listener.Snapshot().Where(e => e != null).ToList();
+        Assert.True(events.Count >= 2, $"Expected at least 2 events, got {events.Count}");
+        Assert.Contains(events, e => e.EventName == "ChunkSaveBegin");
+        Assert.Contains(events, e => e.EventName == "ChunkSaveEnd");
     }
 
     [Fact]
@@ -61,9 +62,10 @@ public class EventSourceTests : IDisposable
         TerrainPerformanceEventSource.Log.ReportActiveChunkCount(9);
         TerrainPerformanceEventSource.Log.UpdateActiveChunksEnd(0, 0, 2, 2, 9);
 
-        Assert.True(_listener.Events.Count >= 2, $"Expected at least 2 events, got {_listener.Events.Count}");
-        Assert.Contains(_listener.Events, e => e.EventName == "UpdateActiveChunksBegin");
-        Assert.Contains(_listener.Events, e => e.EventName == "UpdateActiveChunksEnd");
+        var events = _listener.Snapshot().Where(e => e != null).ToList();
+        Assert.True(events.Count >= 2, $"Expected at least 2 events, got {events.Count}");
+        Assert.Contains(events, e => e.EventName == "UpdateActiveChunksBegin");
+        Assert.Contains(events, e => e.EventName == "UpdateActiveChunksEnd");
     }
 
     [Fact]
@@ -74,9 +76,10 @@ public class EventSourceTests : IDisposable
         TerrainPerformanceEventSource.Log.WaveFunctionCollapseBegin(5, 6);
         TerrainPerformanceEventSource.Log.WaveFunctionCollapseEnd(5, 6, true);
 
-        Assert.True(_listener.Events.Count >= 2, $"Expected at least 2 events, got {_listener.Events.Count}");
-        Assert.Contains(_listener.Events, e => e.EventName == "WaveFunctionCollapseBegin");
-        Assert.Contains(_listener.Events, e => e.EventName == "WaveFunctionCollapseEnd");
+        var events = _listener.Snapshot().Where(e => e != null).ToList();
+        Assert.True(events.Count >= 2, $"Expected at least 2 events, got {events.Count}");
+        Assert.Contains(events, e => e.EventName == "WaveFunctionCollapseBegin");
+        Assert.Contains(events, e => e.EventName == "WaveFunctionCollapseEnd");
     }
 
     [Fact]
@@ -86,7 +89,8 @@ public class EventSourceTests : IDisposable
 
         TerrainPerformanceEventSource.Log.ChunkLoadBegin(10, 20);
         
-        var evt = _listener.Events.FirstOrDefault(e => e.EventName == "ChunkLoadBegin");
+        var eventsSnapshot = _listener.Snapshot();
+        var evt = eventsSnapshot.FirstOrDefault(e => e != null && e.EventName == "ChunkLoadBegin");
         Assert.NotNull(evt);
         Assert.NotNull(evt.Payload);
         Assert.Equal(2, evt.Payload.Count);
@@ -97,6 +101,7 @@ public class EventSourceTests : IDisposable
     private class TestEventListener : EventListener
     {
         public List<EventWrittenEventArgs> Events { get; } = new();
+        private readonly object _sync = new();
         private bool _enabled;
 
         protected override void OnEventSourceCreated(EventSource eventSource)
@@ -112,13 +117,27 @@ public class EventSourceTests : IDisposable
         {
             if (_enabled && eventData.EventName != "EventCounters")
             {
-                Events.Add(eventData);
+                lock (_sync)
+                {
+                    Events.Add(eventData);
+                }
             }
         }
 
         public void ClearEvents()
         {
-            Events.Clear();
+            lock (_sync)
+            {
+                Events.Clear();
+            }
+        }
+
+        public List<EventWrittenEventArgs> Snapshot()
+        {
+            lock (_sync)
+            {
+                return Events.ToList();
+            }
         }
     }
 }

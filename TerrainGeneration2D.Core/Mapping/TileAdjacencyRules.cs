@@ -20,7 +20,7 @@ public class TileAdjacencyRules
   {
     TileCount = tileCount;
 
-    for (int i = 0; i < tileCount; i++)
+    for (var i = 0; i < tileCount; i++)
     {
       _northRules[i] = new HashSet<int>();
       _southRules[i] = new HashSet<int>();
@@ -92,9 +92,9 @@ public class TileAdjacencyRules
   {
     var rules = new TileAdjacencyRules(tileCount);
 
-    for (int i = 0; i < tileCount; i++)
+    for (var i = 0; i < tileCount; i++)
     {
-      for (int j = 0; j < tileCount; j++)
+      for (var j = 0; j < tileCount; j++)
       {
         rules._northRules[i].Add(j);
         rules._southRules[i].Add(j);

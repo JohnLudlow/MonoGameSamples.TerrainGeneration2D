@@ -25,7 +25,7 @@ public sealed class ConsoleEventListener : EventListener
     {
         if (eventData.EventName == "EventCounters")
         {
-            for (int i = 0; i < eventData.Payload?.Count; i++)
+            for (var i = 0; i < eventData.Payload?.Count; i++)
             {
                 if (eventData.Payload[i] is IDictionary<string, object> eventPayload)
                 {

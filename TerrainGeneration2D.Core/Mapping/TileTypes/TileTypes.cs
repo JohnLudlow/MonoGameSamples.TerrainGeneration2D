@@ -127,7 +127,7 @@ public sealed class TileTypeRegistry
       tileTypes.Add(new MountainTileType(TerrainTileIds.Mountain, config));
     }
 
-    for (int tileId = TerrainTileIds.Mountain + 1; tileId < tileCount; tileId++)
+    for (var tileId = TerrainTileIds.Mountain + 1; tileId < tileCount; tileId++)
     {
       tileTypes.Add(new GenericTileType(tileId));
     }

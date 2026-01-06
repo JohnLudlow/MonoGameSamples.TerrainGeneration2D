@@ -128,7 +128,7 @@ internal static class GameController
     /// </summary>
     public static int GetZoomDelta()
     {
-        int delta = s_mouse.ScrollWheelDelta;
+        var delta = s_mouse.ScrollWheelDelta;
         
         // Gamepad triggers for zoom
         if (s_gamePad.CurrentState.Triggers.Right > 0.5f)

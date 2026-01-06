@@ -68,8 +68,8 @@ internal sealed class TooltipManager
         Vector2 worldPosition = _camera.ScreenToWorld(mouseScreenPosition);
         
         // Convert to tile coordinates
-        int tileX = (int)(worldPosition.X / _tilemap.TileSize);
-        int tileY = (int)(worldPosition.Y / _tilemap.TileSize);
+        var tileX = (int)(worldPosition.X / _tilemap.TileSize);
+        var tileY = (int)(worldPosition.Y / _tilemap.TileSize);
         
         // Check if tile coordinates changed
         if (tileX != _lastTileCoords.X || tileY != _lastTileCoords.Y)
@@ -80,7 +80,7 @@ internal sealed class TooltipManager
             if (tileX >= 0 && tileX < _tilemap.MapSizeInTiles &&
                 tileY >= 0 && tileY < _tilemap.MapSizeInTiles)
             {
-                int tileId = _tilemap.GetTile(tileX, tileY);
+                var tileId = _tilemap.GetTile(tileX, tileY);
                 Point chunkCoords = ChunkedTilemap.TileToChunkCoordinates(tileX, tileY);
                 
                 _tooltipText.Text = $"Tile:[{tileX},{tileY}] Type:{tileId} Chunk:[{chunkCoords.X},{chunkCoords.Y}]";

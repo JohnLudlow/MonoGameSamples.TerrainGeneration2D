@@ -9,7 +9,7 @@ public sealed class PlainsTileType : TileType
 
   public override bool EvaluateRules(TileRuleContext context)
   {
-    float altitude = context.CandidateHeight.Altitude;
+    var altitude = context.CandidateHeight.Altitude;
     if (altitude < context.Config.PlainsHeightMin || altitude > context.Config.PlainsHeightMax)
     {
       return false;

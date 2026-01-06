@@ -244,7 +244,7 @@ public class OptionsSlider : Slider
   private void HandleValueChanged(object sender, EventArgs e)
   {
     // Calculate the ratio of the current value within its range
-    double ratio = (Value - Minimum) / (Maximum - Minimum);
+    var ratio = (Value - Minimum) / (Maximum - Minimum);
 
     // Update the fill rectangle width as a percentage
     // _fillRectangle uses percentage width units, so we multiply by 100

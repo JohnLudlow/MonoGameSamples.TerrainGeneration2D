@@ -14,7 +14,7 @@
 
 Key files:
 - [TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs](TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs)
-- [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse.cs](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse.cs)
+- [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
 - [TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs](TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs)
 - [TerrainGeneration2D/GameController.cs](TerrainGeneration2D/GameController.cs)
 
@@ -45,7 +45,7 @@ Conclusion: This is a partial WFC implementation (observation + propagation) but
 - Add decision stack with `(x,y, candidates, index)`.
 - Snapshot domains or maintain an undo log to revert changes cheaply.
 - On contradiction, pop and try next candidate; terminate when all collapsed or no candidates remain.
-- File: update [WaveFunctionCollapse.cs](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse.cs).
+- File: update [WfcProvider.cs](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs).
 
 2. Entropy & Selection Heuristics
 - Compute Shannon entropy using uniform probabilities or priors.
@@ -61,7 +61,7 @@ Conclusion: This is a partial WFC implementation (observation + propagation) but
 - Seed WFC domains at chunk edges from already-generated neighbor chunks.
 - When generating chunk `(cx,cy)`, import boundary constraints from `(cx-1,cy)`, `(cx,cy-1)`, etc.
 - Ensure persistence maintains seam constraints; handle regeneration coherently.
-- Files: [ChunkedTilemap.cs](TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs) and [WaveFunctionCollapse.cs](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse.cs).
+- Files: [ChunkedTilemap.cs](TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs) and [WfcProvider.cs](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs).
 
 5. Heightmap Integration
 - Cache `IHeightProvider` samples per chunk to avoid repeated calls.

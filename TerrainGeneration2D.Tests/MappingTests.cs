@@ -8,6 +8,29 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests;
 
 public class MappingTests
 {
+    private sealed class DeterministicRandomProvider : JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.IRandomProvider
+    {
+        public int NextInt() => 0;
+        public int NextInt(int maxValue) => 0;
+        public int NextInt(int minValue, int maxValue) => minValue;
+        public double NextDouble() => 0.0;
+    }
+    private sealed class AlwaysInvalidTileType : TileType
+    {
+        public AlwaysInvalidTileType(int tileId) : base(tileId, "Invalid") {}
+        public override bool EvaluateRules(TileRuleContext context) => false;
+    }
+
+    private sealed class AlwaysValidTileType : TileType
+    {
+        public AlwaysValidTileType(int tileId) : base(tileId, "Valid") {}
+        public override bool EvaluateRules(TileRuleContext context)
+        {
+            // Only valid when the neighbor tile is also this valid tile (2)
+            return context.NeighborTileId == 2;
+        }
+    }
+
     [Fact]
     public void MappingInformationService_ReturnsCorrectGroupMetrics()
     {
@@ -60,12 +83,75 @@ public class MappingTests
     {
         var registry = TileTypeRegistry.CreateDefault(5);
         var random = new Random(123);
-        var wfc = new WaveFunctionCollapse(8, 8, registry, random, new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+        var wfc = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
 
-        bool success = wfc.Generate(maxIterations: 1000);
+        var success = wfc.Generate(maxIterations: 1000);
         Assert.True(success);
 
         var output = wfc.GetOutput();
         Assert.All(output.Cast<int>(), tile => Assert.InRange(tile, 0, registry.TileCount - 1));
+    }
+
+    [Fact]
+    public void WaveFunctionCollapse_Backtracking_FullyCollapses()
+    {
+        var registry = TileTypeRegistry.CreateDefault(5);
+        var random = new Random(456);
+        var wfc = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+
+        var success = wfc.Generate(enableBacktracking: true, maxIterations: 1000, maxBacktrackSteps: 2048, maxDepth: 128);
+        Assert.True(success);
+
+        var output = wfc.GetOutput();
+        Assert.All(output.Cast<int>(), tile => Assert.InRange(tile, 0, registry.TileCount - 1));
+    }
+
+    [Fact]
+    public void WaveFunctionCollapse_Backtracking_WithLimits_Completes()
+    {
+        var registry = TileTypeRegistry.CreateDefault(5);
+        var random = new Random(789);
+        var wfc = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+
+        // Exercise the backtracking path with tight limits to ensure parameters are honored
+        var success = wfc.Generate(enableBacktracking: true, maxIterations: 1000, maxBacktrackSteps: 0, maxDepth: 4);
+        // Success is not guaranteed if contradictions occur under tight limits, but the call should not throw
+        var output = wfc.GetOutput();
+        Assert.NotNull(output);
+    }
+
+
+    [Fact]
+    public void WaveFunctionCollapse_NonBacktracking_Fails_WithTinyIterationLimit_But_Backtracking_Succeeds()
+    {
+        var registry = TileTypeRegistry.CreateDefault(5);
+        var random = new Random(321);
+        var wfcNoBacktrack = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+        var wfcBacktrack = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, new Random(654), new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+
+        var successNoBack = wfcNoBacktrack.Generate(maxIterations: 1);
+        var successBack = wfcBacktrack.Generate(enableBacktracking: true, maxIterations: 1000, maxBacktrackSteps: 4096, maxDepth: 128);
+
+        Assert.False(successNoBack);
+        Assert.True(successBack);
+    }
+
+    [Fact]
+    public void WaveFunctionCollapse_Backtracking_Recovers_From_Contradiction()
+    {
+        // Registry with one universally invalid tile (1) and one universally valid tile (2)
+        var registry = new TileTypeRegistry(new TileType[]
+        {
+            new AlwaysInvalidTileType(1),
+            new AlwaysValidTileType(2)
+        });
+        // Deterministic provider yields consistent choices; non-backtracking fails, backtracking recovers
+        var wfcNoBacktrack = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, new DeterministicRandomProvider(), new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+        var successNoBack = wfcNoBacktrack.Generate(maxIterations: 1000);
+        Assert.False(successNoBack);
+
+        var wfcBacktrack = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, new DeterministicRandomProvider(), new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+        var successBack = wfcBacktrack.Generate(enableBacktracking: true, maxIterations: 10000, maxBacktrackSteps: 4096, maxDepth: 256);
+        Assert.True(successBack);
     }
 }

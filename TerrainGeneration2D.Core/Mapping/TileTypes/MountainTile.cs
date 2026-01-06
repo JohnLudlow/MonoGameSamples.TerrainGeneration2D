@@ -12,7 +12,7 @@ public sealed class MountainTileType : TileType
 
   public override bool EvaluateRules(TileRuleContext context)
   {
-    float altitude = context.CandidateHeight.Altitude;
+    var altitude = context.CandidateHeight.Altitude;
     if (altitude < context.Config.MountainHeightMin || context.CandidateHeight.MountainNoise < context.Config.MountainNoiseThreshold)
     {
       return false;
@@ -41,7 +41,7 @@ public sealed class MountainTileType : TileType
       return false;
     }
 
-    int combinedCount = candidateMetrics.Count + neighborMetrics.Count;
+    var combinedCount = candidateMetrics.Count + neighborMetrics.Count;
     if (combinedCount > _config.MountainRangeMax)
     {
       return false;

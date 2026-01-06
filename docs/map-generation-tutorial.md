@@ -15,8 +15,8 @@ This guide reproduces the entire terrain map generation experience and explains 
 
 4. **Follow how each chunk is born, cached, and saved.**
    - Open [TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs](TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs) to see the deterministic seed (`masterSeed + chunkX * 73856093 + chunkY * 19349663`), the gzipped save format (`Content/saves/map_{chunkX}_{chunkY}.dat`), and the `GenerateChunk` path.
-   - When `useWaveFunctionCollapse` is true (default), the chunk calls `WaveFunctionCollapse.Generate`; when WFC succeeds it copies the tile grid into the chunk, otherwise it falls back to `GenerateRandomChunk`, which samples `HeightMapGenerator` and maps heights via `TerrainRuleConfiguration`.
-   - Inspect [`TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse.cs`](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse.cs) to see how candidate tiles are constrained based on nearby decisions, weighted by neighbor matches, and then propagated through the `TileTypeRegistry` rules.
+   - When `useWaveFunctionCollapse` is true (default), the chunk calls `WfcProvider.Generate`; when WFC succeeds it copies the tile grid into the chunk, otherwise it falls back to `GenerateRandomChunk`, which samples `HeightMapGenerator` and maps heights via `TerrainRuleConfiguration`.
+   - Inspect [`TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs`](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs) to see how candidate tiles are constrained based on nearby decisions, weighted by neighbor matches, and then propagated through the `TileTypeRegistry` rules.
    - The WFC constraints depend on the tile types defined in [`TerrainGeneration2D.Core/Mapping/TileTypes/TileTypes.cs`](TerrainGeneration2D.Core/Mapping/TileTypes/TileTypes.cs) and the threshold-driven materials described in [`TerrainGeneration2D.Core/Mapping/TileTypes/TerrainRuleConfiguration.cs`](TerrainGeneration2D.Core/Mapping/TileTypes/TerrainRuleConfiguration.cs).
 
 5. **Use the debug overlay to visualize active and dirty chunks.**

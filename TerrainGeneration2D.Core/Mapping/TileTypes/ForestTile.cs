@@ -9,7 +9,7 @@ public sealed class ForestTileType : TileType
 
   public override bool EvaluateRules(TileRuleContext context)
   {
-    float altitude = context.CandidateHeight.Altitude;
+    var altitude = context.CandidateHeight.Altitude;
     if (altitude < context.Config.ForestHeightMin || altitude > context.Config.ForestHeightMax)
     {
       return false;

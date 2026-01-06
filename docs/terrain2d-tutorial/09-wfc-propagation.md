@@ -35,7 +35,7 @@ public class WfcPropagationTests
 ```
 
 ## 1. Engine propagation methods (Core)
-Update `TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse.cs`:
+Update `TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs`:
 ```csharp
 // ...existing code...
 public void Collapse(int x, int y, int tile)

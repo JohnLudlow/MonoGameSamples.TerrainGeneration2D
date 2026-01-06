@@ -28,7 +28,7 @@ public class WfcBacktrackingTests
 ```
 
 ## 1. Engine: Solve with backtracking
-Update `TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse.cs`:
+Update `TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs`:
 ```csharp
 // ...existing code...
 public bool Solve(Dictionary<(int tile, Direction dir), HashSet<int>> rules, int seed)
