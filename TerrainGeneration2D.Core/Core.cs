@@ -74,6 +74,7 @@ public class Core : Game
     Graphics.ApplyChanges();
 
     Window.Title = windowTitle;
+    Window.AllowUserResizing = true;
 
     Content = base.Content;
     Content.RootDirectory = "Content";

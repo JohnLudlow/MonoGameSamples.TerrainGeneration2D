@@ -5,6 +5,7 @@ using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Scenes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Scenes;
 using Microsoft.Xna.Framework.Media;
 using MonoGameGum;
+using Microsoft.Extensions.Logging;
 using CoreGame = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D;
@@ -12,6 +13,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D;
 internal sealed class TerrainGenerationGame : CoreGame
 {
   private Song? _themeSong;
+  private readonly ILogger _log = Log.Create<TerrainGenerationGame>();
 
   private bool _disposed;
 
@@ -25,6 +27,11 @@ internal sealed class TerrainGenerationGame : CoreGame
   protected override void Initialize()
   {
     base.Initialize();
+
+    _log.LogInformation("Game initialize: resolution={width}x{height} fullscreen={fullscreen}",
+      GraphicsDevice.PresentationParameters.BackBufferWidth,
+      GraphicsDevice.PresentationParameters.BackBufferHeight,
+      CoreGame.Graphics?.IsFullScreen ?? false);
 
     if (Audio is null) throw new InvalidOperationException($"Unable to start game if {nameof(Audio)} is null");
     
@@ -42,6 +49,7 @@ internal sealed class TerrainGenerationGame : CoreGame
     if (Content is null) throw new InvalidOperationException($"Unable to start game if {nameof(Content)} is null");
 
     _themeSong = Content.Load<Song>("audio/theme");
+    _log.LogInformation("Content loaded: theme song and assets ready");
   }
 
   protected override void UnloadContent()
