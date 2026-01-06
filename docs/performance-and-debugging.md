@@ -14,7 +14,39 @@
 + After the trace completes, run `dotnet-trace ps` (or the task manager) to verify the process ID and reopen the trace if needed; you can also replay the timeline with `perfview /trace:terrain-events.nettrace` or `speedscope terrain-events.speedscope.json` if you convert the file.
 
 ## Benchmark extension
-- The new benchmark `GenerateAndScrollChunks` in `TerrainGeneration2D.Benchmarks/Program.cs` seeds a map, fills the 2×2-chunk viewport, then simulates eight scrolling steps by shifting the viewport by one chunk each time before saving everything. This mimics the runtime work done while the camera pans and exercises both chunk generation and the repeated `UpdateActiveChunks`/save logic.
+- The benchmark suite in [TerrainGeneration2D.Benchmarks/Program.cs](TerrainGeneration2D.Benchmarks/Program.cs) now exposes parameterized scenarios:
+	- Map sizes: 512, 1024, 2048 tiles per side
+	- Entropy strategy: Domain, Shannon, Combined (Domain+Shannon with tie-break)
+	- WFC time budget per chunk: 20ms, 50ms, 100ms
+	- Toggle WFC on/off to compare against random fallback
+	These run as a Cartesian matrix for each scenario to compare throughput, allocations, and IO behavior.
+
+- Scenarios:
+	- `GenerateChunkedTerrain`: Generates the full map’s active region then saves, useful for raw generation throughput.
+	- `GenerateAndScrollChunks`: Seeds a 2×2-chunk viewport, then performs eight one-chunk scrolls before saving, approximating camera panning and exercising the active-chunk buffer logic.
+
+- Run benchmarks (Release) locally:
+	- Full suite
+		```bash
+		dotnet run -c Release --project TerrainGeneration2D.Benchmarks -- --job short
+		```
+	- Filter by scenario
+		```bash
+		dotnet run -c Release --project TerrainGeneration2D.Benchmarks -- --filter *GenerateAndScrollChunks*
+		```
+	- Filter by parameter (e.g., only Shannon entropy)
+		```bash
+		dotnet run -c Release --project TerrainGeneration2D.Benchmarks -- --filter "*Shannon*"
+		```
+		Tip: Parameter values appear in the benchmark display names (e.g., `MapSizeInTiles=1024, Strategy=Shannon, TimeBudgetMs=50`), so you can filter by those substrings.
+
+- Counter capture in benchmarks:
+	- Benchmarks attach an EventPipe profiler provider for `JohnLudlow.TerrainGeneration2D.Performance` so custom EventSource counters/events (e.g., `active-chunk-count`, `chunks-saved-per-second`) are recorded during runs.
+	- Artifacts are stored alongside benchmark results; open the trace with PerfView or `speedscope` to correlate generation steps with counter changes.
+
+- Result tips:
+	- Use the allocated bytes/op and Gen0/Gen1 counts to compare Domain vs Shannon when the time budget is tight (20ms) vs more generous (100ms).
+	- Compare `GenerateAndScrollChunks` across map sizes to understand the impact of chunk buffer churn and save frequency.
 
 ## Debugging overlay plan
 - Build a Gum/MonoGame overlay that draws current chunk bounds using `ChunkedTilemap.TileToChunkCoordinates` + `Chunk.ChunkSize`. White lines can highlight the 3×3 buffered area and the currently rendered viewport. Maintain a boolean `ShowDebugBounds` in `GameScene` that toggles when F12 is pressed (listen in `Update()` once per frame). When enabled, draw the overlay after chunk rendering (e.g., using `SpriteBatch.DrawRectangle` helpers or a simple pixel texture). Add tooltips showing chunk coordinates and whether they are loaded or pending save.

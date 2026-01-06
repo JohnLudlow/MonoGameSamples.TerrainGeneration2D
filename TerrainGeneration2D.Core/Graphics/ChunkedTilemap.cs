@@ -35,12 +35,13 @@ public class ChunkedTilemap
     private readonly IHeightProvider _heightProvider;
     private readonly bool _useWaveFunctionCollapse;
     private readonly ILogger? _logger;
+    private readonly int _wfcTimeBudgetMs;
     
     public int TileSize => _tileSize;
     public int MapSizeInTiles => _mapSizeInTiles;
     public Tileset Tileset => _tileset;
     
-    public ChunkedTilemap(Tileset tileset, int mapSizeInTiles, int masterSeed, string saveDirectory, bool useWaveFunctionCollapse = true, TerrainRuleConfiguration? terrainRuleConfiguration = null, HeightMapConfiguration? heightMapConfiguration = null, WfcWeightConfiguration? weightConfig = null, HeuristicsConfiguration? heuristicsConfig = null, ILogger? logger = null)
+    public ChunkedTilemap(Tileset tileset, int mapSizeInTiles, int masterSeed, string saveDirectory, bool useWaveFunctionCollapse = true, TerrainRuleConfiguration? terrainRuleConfiguration = null, HeightMapConfiguration? heightMapConfiguration = null, WfcWeightConfiguration? weightConfig = null, HeuristicsConfiguration? heuristicsConfig = null, ILogger? logger = null, int? wfcTimeBudgetMs = null)
     {
         _tileset = tileset ?? throw new ArgumentNullException(nameof(tileset));
         _tileSize = tileset.TileWidth;
@@ -58,6 +59,7 @@ public class ChunkedTilemap
         _heuristicsConfig = heuristicsConfig ?? new HeuristicsConfiguration();
         _tileTypeRegistry = TileTypeRegistry.CreateDefault(tileset.Count, _terrainRuleConfig);
         _logger = logger;
+        _wfcTimeBudgetMs = wfcTimeBudgetMs ?? 50;
         
         // Ensure save directory exists
         if (!Directory.Exists(_saveDirectory))
@@ -120,7 +122,7 @@ public class ChunkedTilemap
             if (_logger != null) GameLoggerMessages.MapGenerateBegin(_logger, Chunk.ChunkSize, Chunk.ChunkSize);
             
             // Enable backtracking to improve robustness on contradictions
-            var wfcSuccess = wfc.Generate(enableBacktracking: true, maxIterations: 10000, maxBacktrackSteps: 4096, maxDepth: 256);
+            var wfcSuccess = wfc.Generate(enableBacktracking: true, maxIterations: 10000, maxBacktrackSteps: 2048, maxDepth: 128, timeBudget: TimeSpan.FromMilliseconds(_wfcTimeBudgetMs));
             if (wfcSuccess)
             {
                 var output = wfc.GetOutput();

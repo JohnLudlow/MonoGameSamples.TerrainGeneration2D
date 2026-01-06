@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Tracing;
+﻿using System;
+using System.Diagnostics.Tracing;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 
@@ -13,8 +14,17 @@ public sealed class TerrainPerformanceEventSource : EventSource
 
     private TerrainPerformanceEventSource()
     {
-        _activeChunkCounter = new EventCounter("active-chunk-count", this);
-        _chunksSavedCounter = new IncrementingEventCounter("chunks-saved-per-second", this);
+        _activeChunkCounter = new EventCounter("active-chunk-count", this)
+        {
+            DisplayName = "Active Chunks",
+            DisplayUnits = "chunks"
+        };
+        _chunksSavedCounter = new IncrementingEventCounter("chunks-saved-per-second", this)
+        {
+            DisplayName = "Chunks Saved/sec",
+            DisplayUnits = "chunks/s",
+            DisplayRateTimeScale = TimeSpan.FromSeconds(1)
+        };
     }
 
     protected override void Dispose(bool disposing)

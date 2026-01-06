@@ -113,7 +113,10 @@ public class GameScene : Scene
             UseMostConstrainingTieBreak = heurSection.GetValue<bool>("UseMostConstrainingTieBreak", true)
         };
 
-        _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDir, useWaveFunctionCollapse: true, terrainRuleConfiguration: terrainConfig, heightMapConfiguration: heightConfig, weightConfig: weightConfig, heuristicsConfig: heuristics, logger: _log);
+        var runtimeSection = cfg.GetSection("WfcRuntime");
+        var timeBudgetMs = runtimeSection.GetValue<int>("TimeBudgetMs", 50);
+
+        _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDir, useWaveFunctionCollapse: true, terrainRuleConfiguration: terrainConfig, heightMapConfiguration: heightConfig, weightConfig: weightConfig, heuristicsConfig: heuristics, logger: _log, wfcTimeBudgetMs: timeBudgetMs);
         
         // Create camera
         if (JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.GraphicsDevice != null)

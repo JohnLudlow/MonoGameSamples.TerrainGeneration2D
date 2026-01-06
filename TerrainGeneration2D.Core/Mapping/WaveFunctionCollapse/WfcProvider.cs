@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
@@ -210,12 +211,14 @@ public class WfcProvider
   /// </summary>
   /// <param name="maxIterations">Safety cap on iterations.</param>
   /// <returns>True if fully collapsed; false on contradiction.</returns>
-  public bool Generate(int maxIterations = 10000)
+  public bool Generate(int maxIterations = 10000, TimeSpan? timeBudget = null)
   {
     TerrainPerformanceEventSource.Log.WaveFunctionCollapseBegin(_chunkOrigin.X, _chunkOrigin.Y);
     var success = false;
     var decisions = 0;
     const int depth = 0; // no backtracking yet
+    Stopwatch? sw = null;
+    if (timeBudget.HasValue) sw = Stopwatch.StartNew();
 
     try
     {
@@ -223,6 +226,11 @@ public class WfcProvider
 
       while (!_collapsed && iterations < maxIterations)
       {
+        if (sw != null && sw.Elapsed > timeBudget!.Value)
+        {
+          success = false;
+          return false;
+        }
         var (x, y) = FindLowestEntropy();
 
         if (x == -1 || y == -1)
@@ -273,11 +281,11 @@ public class WfcProvider
   /// <param name="maxBacktrackSteps">Maximum number of backtrack steps before failing.</param>
   /// <param name="maxDepth">Optional maximum decision depth; useful to bound search.</param>
   /// <returns>True if fully collapsed; false if limits hit or unsatisfiable.</returns>
-  public bool Generate(bool enableBacktracking, int maxIterations = 10000, int? maxBacktrackSteps = null, int? maxDepth = null)
+  public bool Generate(bool enableBacktracking, int maxIterations = 10000, int? maxBacktrackSteps = null, int? maxDepth = null, TimeSpan? timeBudget = null)
   {
     if (!enableBacktracking)
     {
-      return Generate(maxIterations);
+      return Generate(maxIterations, timeBudget);
     }
 
     TerrainPerformanceEventSource.Log.WaveFunctionCollapseBegin(_chunkOrigin.X, _chunkOrigin.Y);
@@ -288,10 +296,18 @@ public class WfcProvider
     var log = new ChangeLog();
     var stack = new Stack<DecisionFrame>();
 
+    Stopwatch? sw = null;
+    if (timeBudget.HasValue) sw = Stopwatch.StartNew();
+
     try
     {
       while (iterations < maxIterations)
       {
+        if (sw != null && sw.Elapsed > timeBudget!.Value)
+        {
+          success = false;
+          return false;
+        }
         var (x, y) = FindLowestEntropy();
         if (x == -1 || y == -1)
         {
@@ -328,6 +344,11 @@ public class WfcProvider
         var advanced = false;
         while (stack.Count > 0)
         {
+          if (sw != null && sw.Elapsed > timeBudget!.Value)
+          {
+            success = false;
+            return false;
+          }
           var top = stack.Peek();
           if (maxDepth.HasValue && top.Depth > maxDepth.Value)
           {

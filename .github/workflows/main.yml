@@ -109,6 +109,11 @@ jobs:
           "--configuration", "$env:CONFIGURATION",
           "--project", "TerrainGeneration2D.Benchmarks/TerrainGeneration2D.Benchmarks.csproj",
           "--filter", "*",
-          "--verbosity", "normal"
+          "--verbosity", "normal",
+          "--", 
+          "--job", "short"
         )
         dotnet run @dotnetParams
+
+    - name: Publish performance report in build summary
+      run: cat BenchmarkDotNet.Artifacts/results >> $env:GITHUB_STEP_SUMMARY # Adjust path and filename if necessary
