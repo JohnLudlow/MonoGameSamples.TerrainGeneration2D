@@ -493,10 +493,53 @@ public class WfcProvider
     if (shortlist.Count == 0)
       return (-1, -1);
 
-    if (_heuristicsConfig.UseDomainEntropy && _heuristicsConfig.UseShannonEntropy && _heuristicsConfig.UseMostConstrainingTieBreak)
+    TerrainPerformanceEventSource.Log.ReportWfcShortlistSize(shortlist.Count);
+
+    var applyInfluenceTieBreak = _heuristicsConfig.UseMostConstrainingTieBreak &&
+      (
+        (_heuristicsConfig.UseDomainEntropy && _heuristicsConfig.UseShannonEntropy) ||
+        _heuristicsConfig.ApplyInfluenceTieBreakForSingleHeuristic
+      );
+
+    if (applyInfluenceTieBreak)
     {
-      var maxInf = shortlist.Max(c => c.influence);
-      shortlist = shortlist.Where(c => c.influence == maxInf).ToList();
+      if (_heuristicsConfig.MostConstrainingBias > 0)
+      {
+        // Soft bias: weighted random by influence
+        var weights = shortlist.Select(c => 1.0 + _heuristicsConfig.MostConstrainingBias * c.influence).ToArray();
+        var total = weights.Sum();
+        var roll = _random.NextDouble() * total;
+        double acc = 0;
+        for (int i = 0; i < shortlist.Count; i++)
+        {
+          acc += weights[i];
+          if (roll <= acc)
+          {
+            TerrainPerformanceEventSource.Log.WfcTieBreakInfluenceApplied(shortlist.Count);
+            var chosenBiased = shortlist[i];
+            return (chosenBiased.x, chosenBiased.y);
+          }
+        }
+      }
+      else
+      {
+        // Hard filter: prefer maximum influence
+        var maxInf = shortlist.Max(c => c.influence);
+        shortlist = shortlist.Where(c => c.influence == maxInf).ToList();
+        TerrainPerformanceEventSource.Log.WfcTieBreakInfluenceApplied(shortlist.Count);
+      }
+    }
+
+    if (_heuristicsConfig.PreferCentralCellTieBreak && shortlist.Count > 1)
+    {
+      var centerX = _width / 2;
+      var centerY = _height / 2;
+      int Distance((int x, int y, double k, double h, int influence) c)
+        => Math.Abs(c.x - centerX) + Math.Abs(c.y - centerY);
+
+      var minDist = shortlist.Min(Distance);
+      shortlist = shortlist.Where(c => Distance(c) == minDist).ToList();
+      TerrainPerformanceEventSource.Log.WfcTieBreakCentralApplied(shortlist.Count);
     }
 
     var choice = shortlist[_random.NextInt(shortlist.Count)];
@@ -515,6 +558,18 @@ public class WfcProvider
     if (y < _height - 1 && _output[x, y + 1] != -1) neighborTiles.Add(_output[x, y + 1]);
     if (x > 0 && _output[x - 1, y] != -1) neighborTiles.Add(_output[x - 1, y]);
     if (x < _width - 1 && _output[x + 1, y] != -1) neighborTiles.Add(_output[x + 1, y]);
+
+    // Uniform vs weighted selection blend
+    if (_heuristicsConfig.UniformPickFraction > 0 && _random.NextDouble() < _heuristicsConfig.UniformPickFraction)
+    {
+      var uniformOptions = possibilities.OrderBy(t => t).ToList();
+      var idx = _random.NextInt(uniformOptions.Count);
+      var chosenUniform = uniformOptions[idx];
+      TerrainPerformanceEventSource.Log.WfcApplyChoice(0, x, y, chosenUniform);
+      _output[x, y] = chosenUniform;
+      _possibilities[x, y] = null;
+      return true;
+    }
 
     var weightedOptions = possibilities
         .Select(tile => new

@@ -173,4 +173,12 @@ internal static class GameController
     {
         return s_keyboard.WasKeyJustPressed(Keys.F12);
     }
+
+    /// <summary>
+    /// Returns true if the settings panel toggle was just triggered (F10 key).
+    /// </summary>
+    public static bool ToggleSettingsPanel()
+    {
+        return s_keyboard.WasKeyJustPressed(Keys.F10);
+    }
 }

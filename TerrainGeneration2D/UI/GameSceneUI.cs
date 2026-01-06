@@ -33,6 +33,8 @@ public class GameSceneUI : ContainerRuntime
 
   // The text runtime used to display the players score on the game screen.
   private TextRuntime _scoreText;
+    // The on-screen hint for controls.
+    private TextRuntime _hintText;
 
   /// <summary>
   /// Event invoked when the Resume button on the Pause panel is clicked.
@@ -74,6 +76,10 @@ public class GameSceneUI : ContainerRuntime
     // a child to this container.
     _scoreText = CreateScoreText();
     AddChild(_scoreText);
+
+    // Create the on-screen hint text (bottom-left) and add it.
+    _hintText = CreateHintText();
+    AddChild(_hintText);
 
     // Create the Pause panel that is displayed when the game is paused and
     // add it as a child to this container
@@ -329,6 +335,25 @@ private Panel CreateGameOverPanel(TextureAtlas atlas)
     panel.AddChild(quitButton);
 
     return panel;
+}
+
+private TextRuntime CreateHintText()
+{
+    var text = new TextRuntime();
+    // Bottom-left with small padding
+    text.Anchor(Gum.Wireframe.Anchor.BottomLeft);
+    text.X = 10.0f;
+    text.Y = -10.0f;
+    text.UseCustomFont = true;
+    text.CustomFontFile = "fonts/04b_30.fnt";
+    text.FontScale = 0.3f;
+    // Slightly dim color for subtle hint
+    text.Red = 220;
+    text.Green = 220;
+    text.Blue = 220;
+    text.Text = "F10: Settings • F11: Fullscreen • F12: Debug";
+    text.WidthUnits = DimensionUnitType.RelativeToChildren;
+    return text;
 }
 
 

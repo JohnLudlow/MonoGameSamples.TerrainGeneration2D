@@ -35,7 +35,7 @@ public class ChunkedTilemap
     private readonly IHeightProvider _heightProvider;
     private readonly bool _useWaveFunctionCollapse;
     private readonly ILogger? _logger;
-    private readonly int _wfcTimeBudgetMs;
+    private int _wfcTimeBudgetMs;
     
     public int TileSize => _tileSize;
     public int MapSizeInTiles => _mapSizeInTiles;
@@ -461,4 +461,61 @@ public class ChunkedTilemap
     }
 
     public readonly record struct ActiveChunkInfo(Point ChunkPosition, Point WorldTilePosition, bool IsDirty);
+
+    public int WfcTimeBudgetMs
+    {
+        get => _wfcTimeBudgetMs;
+        set => _wfcTimeBudgetMs = Math.Max(1, value);
+    }
+
+    /// <summary>
+    /// Regenerates all chunks currently within the expanded viewport region and optionally overwrites saves.
+    /// Use after changing heuristics or terrain rules to see effects immediately.
+    /// </summary>
+    public void RegenerateChunksInView(Rectangle viewportWorldBounds, bool overwriteSaves = true)
+    {
+        Point minChunk = TileToChunkCoordinates(
+            viewportWorldBounds.Left / _tileSize,
+            viewportWorldBounds.Top / _tileSize
+        );
+
+        Point maxChunk = TileToChunkCoordinates(
+            viewportWorldBounds.Right / _tileSize,
+            viewportWorldBounds.Bottom / _tileSize
+        );
+
+        minChunk.X = Math.Max(0, minChunk.X - 1);
+        minChunk.Y = Math.Max(0, minChunk.Y - 1);
+        maxChunk.X = Math.Min(_mapSizeInChunks - 1, maxChunk.X + 1);
+        maxChunk.Y = Math.Min(_mapSizeInChunks - 1, maxChunk.Y + 1);
+
+        for (var cy = minChunk.Y; cy <= maxChunk.Y; cy++)
+        {
+            for (var cx = minChunk.X; cx <= maxChunk.X; cx++)
+            {
+                var pos = new Point(cx, cy);
+                var regenerated = GenerateChunk(pos);
+                _activeChunks[pos] = regenerated;
+                if (overwriteSaves)
+                {
+                    SaveChunk(regenerated);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Deletes all saved chunks on disk. Next loads will regenerate using current settings.
+    /// </summary>
+    public void ClearAllSavedChunks()
+    {
+        if (!Directory.Exists(_saveDirectory))
+        {
+            return;
+        }
+        foreach (var file in Directory.EnumerateFiles(_saveDirectory, "map_*_*.dat"))
+        {
+            try { File.Delete(file); } catch { /* ignore */ }
+        }
+    }
 }

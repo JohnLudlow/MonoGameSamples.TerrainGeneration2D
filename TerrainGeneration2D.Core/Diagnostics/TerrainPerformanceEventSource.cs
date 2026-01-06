@@ -10,6 +10,7 @@ public sealed class TerrainPerformanceEventSource : EventSource
 
     private readonly EventCounter _activeChunkCounter;
     private readonly IncrementingEventCounter _chunksSavedCounter;
+    private readonly EventCounter _wfcShortlistCounter;
     private bool _disposed;
 
     private TerrainPerformanceEventSource()
@@ -25,6 +26,11 @@ public sealed class TerrainPerformanceEventSource : EventSource
             DisplayUnits = "chunks/s",
             DisplayRateTimeScale = TimeSpan.FromSeconds(1)
         };
+        _wfcShortlistCounter = new EventCounter("wfc-shortlist-size", this)
+        {
+            DisplayName = "WFC Shortlist Size",
+            DisplayUnits = "cells"
+        };
     }
 
     protected override void Dispose(bool disposing)
@@ -33,6 +39,7 @@ public sealed class TerrainPerformanceEventSource : EventSource
         {
             _activeChunkCounter.Dispose();
             _chunksSavedCounter.Dispose();
+            _wfcShortlistCounter.Dispose();
             _disposed = true;
         }
 
@@ -114,6 +121,15 @@ public sealed class TerrainPerformanceEventSource : EventSource
         _chunksSavedCounter.Increment();
     }
 
+    public void ReportWfcShortlistSize(int count)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+        _wfcShortlistCounter.WriteMetric(count);
+    }
+
     [Event(16, Level = EventLevel.Verbose, Message = "WFC begin chunk {0},{1}")]
     public void WaveFunctionCollapseBegin(int chunkX, int chunkY)
     {
@@ -193,6 +209,24 @@ public sealed class TerrainPerformanceEventSource : EventSource
         if (IsEnabled(EventLevel.Informational, EventKeywords.None))
         {
             WriteEvent(24, decisions, backtracks, maxDepth);
+        }
+    }
+
+    [Event(25, Level = EventLevel.Verbose, Message = "WFC influence tie-break applied, remaining={0}")]
+    public void WfcTieBreakInfluenceApplied(int remaining)
+    {
+        if (IsEnabled(EventLevel.Informational, EventKeywords.None))
+        {
+            WriteEvent(25, remaining);
+        }
+    }
+
+    [Event(26, Level = EventLevel.Verbose, Message = "WFC central tie-break applied, remaining={0}")]
+    public void WfcTieBreakCentralApplied(int remaining)
+    {
+        if (IsEnabled(EventLevel.Informational, EventKeywords.None))
+        {
+            WriteEvent(26, remaining);
         }
     }
 }

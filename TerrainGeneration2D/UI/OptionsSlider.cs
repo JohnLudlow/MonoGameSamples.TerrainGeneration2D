@@ -37,7 +37,7 @@ public class OptionsSlider : Slider
   {
     // Create the top-level container for all visual elements
     var topLevelContainer = new ContainerRuntime();
-    topLevelContainer.Height = 55f;
+    topLevelContainer.Height = 40f;
     topLevelContainer.Width = 264f;
 
     var backgroundRegion = atlas.GetRegion("panel-background");
@@ -57,7 +57,7 @@ public class OptionsSlider : Slider
     _textInstance = new TextRuntime();
     _textInstance.CustomFontFile = @"fonts/04b_30.fnt";
     _textInstance.UseCustomFont = true;
-    _textInstance.FontScale = 0.5f;
+    _textInstance.FontScale = 0.3f;
     _textInstance.Text = "Replace Me";
     _textInstance.X = 10f;
     _textInstance.Y = 10f;
@@ -66,10 +66,10 @@ public class OptionsSlider : Slider
 
     // Create the container for the slider track and decorative elements
     var innerContainer = new ContainerRuntime();
-    innerContainer.Height = 13f;
+    innerContainer.Height = 10f;
     innerContainer.Width = 241f;
     innerContainer.X = 10f;
-    innerContainer.Y = 33f;
+    innerContainer.Y = 26f;
     topLevelContainer.AddChild(innerContainer);
 
     var offBackgroundRegion = atlas.GetRegion("slider-off-background");
@@ -83,7 +83,7 @@ public class OptionsSlider : Slider
     offBackground.TextureLeft = offBackgroundRegion.SourceRectangle.Left;
     offBackground.TextureTop = offBackgroundRegion.SourceRectangle.Top;
     offBackground.TextureWidth = offBackgroundRegion.Width;
-    offBackground.Width = 28f;
+    offBackground.Width = 24f;
     offBackground.WidthUnits = DimensionUnitType.Absolute;
     offBackground.Dock(Gum.Wireframe.Dock.Left);
     innerContainer.AddChild(offBackground);
@@ -99,7 +99,7 @@ public class OptionsSlider : Slider
     middleBackground.TextureLeft = middleBackgroundRegion.SourceRectangle.Left;
     middleBackground.TextureTop = middleBackgroundRegion.SourceRectangle.Top;
     middleBackground.TextureWidth = middleBackgroundRegion.Width;
-    middleBackground.Width = 179f;
+    middleBackground.Width = 175f;
     middleBackground.WidthUnits = DimensionUnitType.Absolute;
     middleBackground.Dock(Gum.Wireframe.Dock.Left);
     middleBackground.X = 27f;
@@ -115,7 +115,7 @@ public class OptionsSlider : Slider
     maxBackground.TextureLeft = maxBackgroundRegion.SourceRectangle.Left;
     maxBackground.TextureTop = maxBackgroundRegion.SourceRectangle.Top;
     maxBackground.TextureWidth = maxBackgroundRegion.Width;
-    maxBackground.Width = 36f;
+    maxBackground.Width = 32f;
     maxBackground.WidthUnits = DimensionUnitType.Absolute;
     maxBackground.Dock(Gum.Wireframe.Dock.Right);
     innerContainer.AddChild(maxBackground);
@@ -142,7 +142,7 @@ public class OptionsSlider : Slider
     offText.Green = 86;
     offText.Blue = 130;
     offText.CustomFontFile = @"fonts/04b_30.fnt";
-    offText.FontScale = 0.25f;
+    offText.FontScale = 0.2f;
     offText.UseCustomFont = true;
     offText.Text = "OFF";
     offText.Anchor(Gum.Wireframe.Anchor.Center);
@@ -154,7 +154,7 @@ public class OptionsSlider : Slider
     maxText.Green = 86;
     maxText.Blue = 130;
     maxText.CustomFontFile = @"fonts/04b_30.fnt";
-    maxText.FontScale = 0.25f;
+    maxText.FontScale = 0.2f;
     maxText.UseCustomFont = true;
     maxText.Text = "MAX";
     maxText.Anchor(Gum.Wireframe.Anchor.Center);
@@ -215,6 +215,7 @@ public class OptionsSlider : Slider
     // Enable click-to-point functionality for the slider
     // This allows users to click anywhere on the track to jump to that value
     IsMoveToPointEnabled = true;
+    IsEnabled = true;
 
     // Add event handlers
     Visual.RollOn += HandleRollOn;

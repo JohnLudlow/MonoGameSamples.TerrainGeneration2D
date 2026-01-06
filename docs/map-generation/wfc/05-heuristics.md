@@ -15,6 +15,12 @@ Purpose: describe how the solver chooses the next cell to collapse and which til
 - Tie-breaking:
   - Runtime: break equal-entropy ties via the injected randomness provider; see [WfcProvider.cs](../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs).
   - Deterministic tests: inject a deterministic provider to ensure reproducible tie-breaking.
+  - Current flags (runtime-configurable):
+    - `Heuristics.UseMostConstrainingTieBreak`: prefer cells that influence more undecided neighbors.
+    - `Heuristics.ApplyInfluenceTieBreakForSingleHeuristic`: also apply the influence tie-break when only one heuristic is enabled.
+    - `Heuristics.PreferCentralCellTieBreak`: favor cells closer to the grid center when ties remain.
+    - `Heuristics.UniformPickFraction`: blend uniform vs. weighted tile selection during collapse (non-backtracking).
+    - `Heuristics.MostConstrainingBias`: soft bias strength for influence-based tie-break (weighted pick among tied cells).
 
 ### Shannon Entropy vs. Domain Size
 
@@ -59,12 +65,21 @@ double Entropy(HashSet<int> domain, Func<int,int> weight)
 }
 ```
 
-Configuration suggestion (optional):
+Configuration suggestion:
 
 - Heuristics.UseShannonEntropy: `true|false`
 - Heuristics.UniformPickFraction: `0..1` (blend uniform with weighted)
-- Heuristics.MostConstrainingBias: `0..1` (second-order tie-break)
+- Heuristics.MostConstrainingBias: `0..1` (soft influence bias over tied cells)
 - See runtime config doc: [12-config-wfc-weights.md](../../terrain2d-tutorial/12-config-wfc-weights.md)
+
+## What's Still To Implement (Heuristics)
+
+Optional enhancements:
+
+- Global priors/frequency shaping: maintain global tile usage priors and blend with local weights for Shannon entropy (`p_i`), to discourage overuse and improve variety.
+- Multi-heuristic composition: allow a weighted combination of domain-size and Shannon scores (e.g., `score = a·k + b·H`) instead of the current intersect/union shortlist logic.
+- Positional biases: optional perimeter/interior bias in tie-breaks (beyond `PreferCentralCellTieBreak`) to guide the collapse front spatially.
+- Expanded diagnostics: add counters for per-stage shortlist sizes and heuristic paths if deeper visibility is needed.
 
 ### Visual Aids
 

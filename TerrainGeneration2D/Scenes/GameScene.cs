@@ -37,6 +37,9 @@ public class GameScene : Scene
     private bool _showDebugOverlay;
     private IReadOnlyCollection<ChunkedTilemap.ActiveChunkInfo> _activeChunkSnapshot = Array.Empty<ChunkedTilemap.ActiveChunkInfo>();
     private readonly ILogger _log = Log.Create<GameScene>();
+    private HeuristicsConfiguration? _heuristicsConfig;
+    private RuntimeSettingsPanel? _settingsPanel;
+    private bool _showSettings;
 
     private GameSceneUI _ui;
     
@@ -110,13 +113,33 @@ public class GameScene : Scene
         {
             UseDomainEntropy = heurSection.GetValue<bool>("UseDomainEntropy", true),
             UseShannonEntropy = heurSection.GetValue<bool>("UseShannonEntropy", false),
-            UseMostConstrainingTieBreak = heurSection.GetValue<bool>("UseMostConstrainingTieBreak", true)
+            UseMostConstrainingTieBreak = heurSection.GetValue<bool>("UseMostConstrainingTieBreak", true),
+            ApplyInfluenceTieBreakForSingleHeuristic = heurSection.GetValue<bool>("ApplyInfluenceTieBreakForSingleHeuristic", true),
+            PreferCentralCellTieBreak = heurSection.GetValue<bool>("PreferCentralCellTieBreak", false),
+            UniformPickFraction = heurSection.GetValue<double>("UniformPickFraction", 0.0),
+            MostConstrainingBias = heurSection.GetValue<double>("MostConstrainingBias", 0.0)
         };
+        _heuristicsConfig = heuristics;
 
         var runtimeSection = cfg.GetSection("WfcRuntime");
         var timeBudgetMs = runtimeSection.GetValue<int>("TimeBudgetMs", 50);
 
         _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDir, useWaveFunctionCollapse: true, terrainRuleConfiguration: terrainConfig, heightMapConfiguration: heightConfig, weightConfig: weightConfig, heuristicsConfig: heuristics, logger: _log, wfcTimeBudgetMs: timeBudgetMs);
+
+        // Settings UI
+        var content = GumService.Default.ContentLoader.XnaContentManager;
+        var atlas = TextureAtlas.FromFile(content, "images/atlas-definition.xml");
+        _settingsPanel = new RuntimeSettingsPanel(atlas);
+        _settingsPanel.Bind(
+            heuristics,
+            terrainConfig,
+            getBudget: () => _chunkedTilemap?.WfcTimeBudgetMs ?? timeBudgetMs,
+            setBudget: v => { if (_chunkedTilemap != null) _chunkedTilemap.WfcTimeBudgetMs = v; },
+            regenerateVisible: () => { if (_chunkedTilemap != null && _camera != null) _chunkedTilemap.RegenerateChunksInView(_camera.ViewportWorldBounds, overwriteSaves: true); },
+            clearSaves: () => { _chunkedTilemap?.ClearAllSavedChunks(); }
+        );
+        _settingsPanel.IsVisible = false;
+        _settingsPanel.AddToRoot();
         
         // Create camera
         if (JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.GraphicsDevice != null)
@@ -142,12 +165,7 @@ public class GameScene : Scene
             _debugPixel.SetData(new[] { Color.White });
         }
 
-        // Test label to verify Gum is working
-        _testLabel = new Label();
-        _testLabel.X = 80;
-        _testLabel.Y = 240;
-        _testLabel.Text = "Test Label - Gum Working!";
-        _testLabel.AddToRoot();
+        // Hint text is provided by GameSceneUI; remove temporary test label.
     }
 
     public override void Update(GameTime gameTime)
@@ -214,6 +232,12 @@ public class GameScene : Scene
         if (GameController.ToggleDebugOverlay())
         {
             _showDebugOverlay = !_showDebugOverlay;
+        }
+
+        if (GameController.ToggleSettingsPanel())
+        {
+            _showSettings = !_showSettings;
+            if (_settingsPanel != null) _settingsPanel.IsVisible = _showSettings;
         }
 
         if (_showDebugOverlay)

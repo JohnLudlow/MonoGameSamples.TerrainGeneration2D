@@ -43,6 +43,20 @@ public class ChunkGenerationBenchmark
     [Params(true, false)]
     public bool UseWfc { get; set; }
 
+    // Heuristics tie-break toggles
+    [Params(true, false)]
+    public bool ApplyInfluenceTieBreakForSingleHeuristic { get; set; }
+
+    [Params(false, true)]
+    public bool PreferCentralCellTieBreak { get; set; }
+
+    // Heuristics knobs
+    [Params(0.0, 0.25)]
+    public double UniformPickFraction { get; set; }
+
+    [Params(0.0, 0.5)]
+    public double MostConstrainingBias { get; set; }
+
     [GlobalSetup]
     public void Setup()
     {
@@ -110,19 +124,31 @@ public class ChunkGenerationBenchmark
             {
                 UseDomainEntropy = true,
                 UseShannonEntropy = false,
-                UseMostConstrainingTieBreak = true
+                UseMostConstrainingTieBreak = true,
+                ApplyInfluenceTieBreakForSingleHeuristic = ApplyInfluenceTieBreakForSingleHeuristic,
+                PreferCentralCellTieBreak = PreferCentralCellTieBreak,
+                UniformPickFraction = UniformPickFraction,
+                MostConstrainingBias = MostConstrainingBias
             },
             EntropyStrategy.Shannon => new HeuristicsConfiguration
             {
                 UseDomainEntropy = false,
                 UseShannonEntropy = true,
-                UseMostConstrainingTieBreak = true
+                UseMostConstrainingTieBreak = true,
+                ApplyInfluenceTieBreakForSingleHeuristic = ApplyInfluenceTieBreakForSingleHeuristic,
+                PreferCentralCellTieBreak = PreferCentralCellTieBreak,
+                UniformPickFraction = UniformPickFraction,
+                MostConstrainingBias = MostConstrainingBias
             },
             EntropyStrategy.Combined => new HeuristicsConfiguration
             {
                 UseDomainEntropy = true,
                 UseShannonEntropy = true,
-                UseMostConstrainingTieBreak = true
+                UseMostConstrainingTieBreak = true,
+                ApplyInfluenceTieBreakForSingleHeuristic = ApplyInfluenceTieBreakForSingleHeuristic,
+                PreferCentralCellTieBreak = PreferCentralCellTieBreak,
+                UniformPickFraction = UniformPickFraction,
+                MostConstrainingBias = MostConstrainingBias
             },
             _ => new HeuristicsConfiguration()
         };
@@ -144,7 +170,7 @@ public class ChunkGenerationBenchmark
 
     private string CreateOutputDir()
     {
-        var name = $"{MapSizeInTiles}_{Strategy}_{TimeBudgetMs}ms_{Guid.NewGuid():N}";
+        var name = $"{MapSizeInTiles}_{Strategy}_{TimeBudgetMs}ms_infTie={ApplyInfluenceTieBreakForSingleHeuristic}_center={PreferCentralCellTieBreak}_uniform={UniformPickFraction.ToString(CultureInfo.InvariantCulture)}_bias={MostConstrainingBias.ToString(CultureInfo.InvariantCulture)}_{Guid.NewGuid():N}";
         var dir = Path.Combine(_saveRoot, name);
         Directory.CreateDirectory(dir);
         return dir;
@@ -153,7 +179,7 @@ public class ChunkGenerationBenchmark
     private string CreateLabel(string scenario)
     {
         var wfc = UseWfc ? "WFC" : "Random";
-        return $"{scenario} size={MapSizeInTiles} strategy={Strategy} budget={TimeBudgetMs}ms mode={wfc}";
+        return $"{scenario} size={MapSizeInTiles} strategy={Strategy} budget={TimeBudgetMs}ms mode={wfc} inf-tie={ApplyInfluenceTieBreakForSingleHeuristic} center={PreferCentralCellTieBreak} uniform={UniformPickFraction.ToString(CultureInfo.InvariantCulture)} bias={MostConstrainingBias.ToString(CultureInfo.InvariantCulture)}";
     }
 }
 
