@@ -6,20 +6,29 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Jobs;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 using Microsoft.Xna.Framework;
 
-// Attach EventPipe profiler on Windows to capture runtime profiling data
-var config = DefaultConfig.Instance;
-if (OperatingSystem.IsWindows())
+// Configure a short, fast benchmark run when args contain "short" or "--fast"
+var commandLineArgs = Environment.GetCommandLineArgs();
+var isShort = commandLineArgs.Any(a => a.Contains("short", StringComparison.OrdinalIgnoreCase) || a.Equals("--fast", StringComparison.OrdinalIgnoreCase));
+
+var manualConfig = ManualConfig.Create(DefaultConfig.Instance);
+// Use an extremely short job to keep runtime low
+manualConfig.AddJob(Job.ShortRun
+    .WithWarmupCount(1)
+    .WithIterationCount(1)
+    .WithUnrollFactor(1));
+
+// Attach EventPipe profiler only for full runs on Windows
+if (OperatingSystem.IsWindows() && !isShort)
 {
-    var manual = ManualConfig.Create(config);
-    manual.AddDiagnoser(new EventPipeProfiler(EventPipeProfile.CpuSampling));
-    config = manual;
+    manualConfig.AddDiagnoser(new EventPipeProfiler(EventPipeProfile.CpuSampling));
 }
 
-BenchmarkRunner.Run<ChunkGenerationBenchmark>(config);
+BenchmarkRunner.Run<ChunkGenerationBenchmark>(manualConfig);
 
 [MarkdownExporterAttribute.GitHub]
 [MemoryDiagnoser, ExceptionDiagnoser]
@@ -29,33 +38,41 @@ public class ChunkGenerationBenchmark
     private Tileset _tileset = null!;
     private static TerrainEventCounterListener? _listener;
 
-    [Params(512, 1024, 2048)]
+    [ParamsSource(nameof(MapSizes))]
     public int MapSizeInTiles { get; set; }
+    public IEnumerable<int> MapSizes => BenchmarkSettings.MapSizes;
 
-    [Params(EntropyStrategy.Domain, EntropyStrategy.Shannon, EntropyStrategy.Combined)]
+    [ParamsSource(nameof(Strategies))]
     public EntropyStrategy Strategy { get; set; }
+    public IEnumerable<EntropyStrategy> Strategies => BenchmarkSettings.Strategies;
 
     // Time-box per-chunk WFC to keep scenarios comparable
-    [Params(20, 50, 100)]
+    [ParamsSource(nameof(TimeBudgets))]
     public int TimeBudgetMs { get; set; }
+    public IEnumerable<int> TimeBudgets => BenchmarkSettings.TimeBudgets;
 
     // Toggle WFC vs random fallback to compare approaches
-    [Params(true, false)]
+    [ParamsSource(nameof(WfcModes))]
     public bool UseWfc { get; set; }
+    public IEnumerable<bool> WfcModes => BenchmarkSettings.WfcModes;
 
     // Heuristics tie-break toggles
-    [Params(true, false)]
+    [ParamsSource(nameof(InfluenceModes))]
     public bool ApplyInfluenceTieBreakForSingleHeuristic { get; set; }
+    public IEnumerable<bool> InfluenceModes => BenchmarkSettings.InfluenceModes;
 
-    [Params(false, true)]
+    [ParamsSource(nameof(CenterBiasModes))]
     public bool PreferCentralCellTieBreak { get; set; }
+    public IEnumerable<bool> CenterBiasModes => BenchmarkSettings.CenterBiasModes;
 
     // Heuristics knobs
-    [Params(0.0, 0.25)]
+    [ParamsSource(nameof(UniformFractions))]
     public double UniformPickFraction { get; set; }
+    public IEnumerable<double> UniformFractions => BenchmarkSettings.UniformFractions;
 
-    [Params(0.0, 0.5)]
+    [ParamsSource(nameof(MostConstrainingBiases))]
     public double MostConstrainingBias { get; set; }
+    public IEnumerable<double> MostConstrainingBiases => BenchmarkSettings.MostConstrainingBiases;
 
     [GlobalSetup]
     public void Setup()
@@ -319,4 +336,18 @@ internal sealed class TerrainEventCounterListener : EventListener
           saved.max?.ToString("F2", CultureInfo.InvariantCulture) ?? "-"
         }");
     }
+}
+
+internal static class BenchmarkSettings
+{
+    private static readonly bool _isShort = Environment.GetCommandLineArgs().Any(a => a.Contains("short", StringComparison.OrdinalIgnoreCase) || a.Equals("--fast", StringComparison.OrdinalIgnoreCase));
+
+    public static IEnumerable<int> MapSizes => _isShort ? new[] { 512 } : new[] { 512, 2048 };
+    public static IEnumerable<EntropyStrategy> Strategies => _isShort ? new[] { EntropyStrategy.Domain } : new[] { EntropyStrategy.Domain, EntropyStrategy.Shannon, EntropyStrategy.Combined };
+    public static IEnumerable<int> TimeBudgets => _isShort ? new[] { 50 } : new[] { 50, 100 };
+    public static IEnumerable<bool> WfcModes => _isShort ? new[] { true } : new[] { true, false };
+    public static IEnumerable<bool> InfluenceModes => _isShort ? new[] { false } : new[] { true, false };
+    public static IEnumerable<bool> CenterBiasModes => _isShort ? new[] { false } : new[] { false, true };
+    public static IEnumerable<double> UniformFractions => _isShort ? new[] { 0.0 } : new[] { 0.0, 0.25 };
+    public static IEnumerable<double> MostConstrainingBiases => _isShort ? new[] { 0.0 } : new[] { 0.0, 0.5 };
 }
