@@ -117,4 +117,4 @@ jobs:
 
     - name: Publish performance report in build summary
       if: github.event_name == 'pull_request'      
-      run: cat BenchmarkDotNet.Artifacts/results >> $env:GITHUB_STEP_SUMMARY # Adjust path and filename if necessary
+      run: cat BenchmarkDotNet.Artifacts/results/*.md >> $env:GITHUB_STEP_SUMMARY # Adjust path and filename if necessary
