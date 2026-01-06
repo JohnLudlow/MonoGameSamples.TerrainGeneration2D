@@ -9,6 +9,11 @@ public sealed class OceanTileType : TileType
 
   public override bool EvaluateRules(TileRuleContext context)
   {
+    if (context.CandidateHeight.Altitude > context.Config.OceanHeightMax)
+    {
+      return false;
+    }
+
     return MatchesNeighbor(context, TerrainTileIds.Void, TerrainTileIds.Ocean, TerrainTileIds.Beach);
   }
 }

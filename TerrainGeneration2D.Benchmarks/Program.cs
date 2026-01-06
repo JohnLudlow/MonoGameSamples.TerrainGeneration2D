@@ -45,6 +45,26 @@ public class ChunkGenerationBenchmark
         map.UpdateActiveChunks(new Rectangle(0, 0, MapSizeInTiles * _tileset.TileWidth, MapSizeInTiles * _tileset.TileHeight));
         map.SaveAll();
     }
+
+    [Benchmark]
+    public void GenerateAndScrollChunks()
+    {
+        var outputDir = Path.Combine(_saveRoot, Guid.NewGuid().ToString("N"));
+        var map = new ChunkedTilemap(_tileset, MapSizeInTiles, masterSeed: 42, outputDir);
+        map.UpdateActiveChunks(new Rectangle(0, 0, Chunk.ChunkSize * _tileset.TileWidth * 2,
+            Chunk.ChunkSize * _tileset.TileHeight * 2));
+
+        var scrollDistance = Chunk.ChunkSize * _tileset.TileWidth;
+        for (int step = 1; step <= 8; step++)
+        {
+            var offset = step * scrollDistance;
+            var viewport = new Rectangle(offset, offset, Chunk.ChunkSize * _tileset.TileWidth,
+                Chunk.ChunkSize * _tileset.TileHeight);
+            map.UpdateActiveChunks(viewport);
+        }
+
+        map.SaveAll();
+    }
 }
 
 internal static class TilesetFactory

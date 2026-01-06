@@ -1,36 +1,73 @@
-# MonoGame Samples - Copilot Instructions
+﻿# MonoGame TerrainGeneration2D — AI Agent Guide
 
-## Overview
-- This workspace reworks the legacy Dungeon Slime tutorial into a TerrainGeneration2D prototype with a 2048×2048 deterministic map, full-screen camera, and Gum-driven UI.
-- Three projects share responsibility: TerrainGeneration2D (game), TerrainGeneration2D.Core (framework/services), and TerrainGeneration2D.Content (custom content builder that runs automatically after every build).
+Use this guide to be productive immediately in this repo. It captures the architecture, workflows, and project-specific conventions AI agents should follow.
 
-## Architecture & Services
-- TerrainGeneration2D/TerrainGenerationGame.cs extends TerrainGeneration2D.Core/Core.cs, wires up Gum, audio, input, and kicks off TerrainGeneration2D.Scenes.GameScene. Inspect Core for the singleton GraphicsDevice, SpriteBatch, InputManager, AudioController, and the GC.Collect that runs after each scene swap.
-- Scenes derive from TerrainGeneration2D.Core/Scenes/Scene.cs, each owning its own ContentManager; you must Dispose() scenes explicitly and call UnloadContent to release assets inside the derived class.
-- Directory.Build.props enforces <Nullable>enable</Nullable>, adds analyzers, and sets the global root namespace (JohnLudlow.MonoGameSamples.TerrainGeneration2D), which every project inherits.
+## Big Picture
+- Single fullscreen game launches via [TerrainGeneration2D/TerrainGenerationGame.cs](TerrainGeneration2D/TerrainGenerationGame.cs) and immediately pushes `GameScene`; only one scene runs at a time.
+- Core lifecycle lives in [TerrainGeneration2D.Core/Core.cs](TerrainGeneration2D.Core/Core.cs): wires graphics/content/input/audio and enforces `ChangeScene` disposal + `GC.Collect` before initializing the next scene.
+- Key components and relationships: `Camera2D`, `ChunkedTilemap`, WFC, and `TileTypeRegistry`. See the diagram in [docs/architecture-class-diagram.md](docs/architecture-class-diagram.md).
 
-## Gameplay + UI wiring
-- GameScene (TerrainGeneration2D/Scenes/GameScene.cs) builds the tileset from images/terrain-atlas (20×20 tiles), constructs ChunkedTilemap with master seed 12345, creates Camera2D centered on the map, registers TooltipManager, and saves all chunks when unloading.
-- GameSceneUI (TerrainGeneration2D/UI/GameSceneUI.cs) drives the Gum layout: score text, pause/game-over panels, and buttons that route through AnimatedButton. It assumes audio/ui and images/atlas-definition.xml are already built into Content and uses TextureAtlas.FromFile.
-- TooltipManager (TerrainGeneration2D/UI/TooltipManager.cs) keeps a root Panel/TextRuntime, computes tile/chunk info via Camera2D.ScreenToWorld, caches the last coordinates, and only shows the tooltip when the cursor is over a valid tile, offset by +10,+10 screen pixels.
-- GameController (TerrainGeneration2D/GameController.cs) translates Core.Input (keyboard, mouse, gamepad) into actions: GetCameraMovement (WASD/arrows/stick), GetZoomDelta (mouse wheel + triggers), ToggleFullscreen (F11), right-click pan detection, and exposes mouse position for tooltip updates.
+## Map + Saves
+- Deterministic 2048x2048 terrain, chunked into 64x64 tiles. Buffer updates a 3x3 area based on `Camera2D.ViewportWorldBounds`.
+- Chunks persist as gzipped data under [TerrainGeneration2D.Core/Content/saves](TerrainGeneration2D.Core/Content/saves) using `map_{chunkX}_{chunkY}.dat`.
+- Delete the saves folder to force regeneration and exercise load vs WFC paths. `GameScene.UnloadContent` invokes `ChunkedTilemap.SaveAll`.
 
-## Chunked map & camera
-- ChunkedTilemap (TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs) manages 64×64 chunks (see TerrainGeneration2D.Core/Graphics/Chunk.cs), deterministic generation (seed = masterSeed + chunkX * 73856093 + chunkY * 19349663), optional WaveFunctionCollapse/TileTypeRegistry constraints, gzip serialization to Content/saves/map_{chunkX}_{chunkY}.dat, and UpdateActiveChunks keeps a 3×3 buffer while unloading and saving distant chunks.
-- Camera2D (TerrainGeneration2D.Core/Graphics/Camera2D.cs) stores Position, clamps Zoom between 0.25 and 4.0 with increment 0.1, exposes ViewportWorldBounds for chunk culling, and offers ScreenToWorld/WorldToScreen to drive tooltips and chunk range calculations.
-- Tile rules (TerrainGeneration2D.Core/Mapping/TileTypes/TileTypes.cs) define TerrainRuleConfiguration and TileTypeRegistry used by WaveFunctionCollapse; the registry is sized to Tileset.Count so new tile IDs default to GenericTileType.
+## Input + Camera
+- Centralized input via [TerrainGeneration2D/GameController.cs](TerrainGeneration2D/GameController.cs). Scenes should only call:
+	- `GetCameraMovement()`, `GetZoomDelta()`, `IsCameraPanActive()`, `GetMousePosition()`
+	- Toggles: F11 fullscreen, F12 debug overlay
+- Movement: WASD/arrows + left-thumbstick; zoom: mouse wheel + shoulder triggers; right-click drag pans (scaled by current `Camera2D.Zoom`).
 
-## Content pipeline
-- TerrainGeneration2D.Content/Builder/TerrainGeneration2DContentBuilder.cs enumerates assets (textures, fonts, audio) and runs via the BuildContent target in the main csproj; the builder copies output into bin/Debug/net10.0/Content/ (no MGCB Editor involved).
-- When assets change, rerun `dotnet build TerrainGeneration2D.slnx` so the builder refreshes the Content folder; the running game expects TerrainGeneration2D/Scenes/GameScene.cs to load "terrain-atlas" and the Gum atlas files.
+## UI Flow
+- UI uses Gum: `GameScene.Initialize()` clears and repopulates `GumService.Default.Root`; re-add all nodes each scene.
+- See [TerrainGeneration2D/UI/GameSceneUI.cs](TerrainGeneration2D/UI/GameSceneUI.cs) and [TerrainGeneration2D/UI/TooltipManager.cs](TerrainGeneration2D/UI/TooltipManager.cs).
+- Tooltip format: `Tile:[x,y] Type:id Chunk:[cx,cy]` and updates only when tile coordinates change.
 
-## Workflows
-- `dotnet build TerrainGeneration2D.slnx` builds everything and automatically triggers the content pipeline.
-- `dotnet run --project TerrainGeneration2D/TerrainGeneration2D.csproj` launches the fullscreen map with camera, Gum UI, chunked tilemap, and tooltip overlays.
-- ChunkedTilemap.SaveAll is invoked during GameScene.UnloadContent to flush dirty chunks; the saved files persist under Content/saves so repeating navigations hit the same data.
+## Debug Overlay
+- F12 paints dirty chunk borders and viewport bounds using `ChunkedTilemap.ActiveChunkInfo` snapshots; helps validate culling and buffer logic.
 
-## Testing
-- `dotnet test TerrainGeneration2D.Tests/TerrainGeneration2D.Tests.csproj` already covers Camera2D, Chunk behavior, ChunkedTilemap persistence, serialization, and mapping rules. Mirror the examples in TerrainGeneration2D.Tests/UNIT_TEST_RECOMMENDATIONS.md and reuse TestHelpers.cs for shared fixtures.
-- Benchmarks for chunk generation live in TerrainGeneration2D.Benchmarks/, but the CI gate relies on the tests above.
+## Content Pipeline + Assets
+- Build refreshes Content and runs the builder in [TerrainGeneration2D.Content/Builder](TerrainGeneration2D.Content/Builder).
+- Load assets by relative names: `images/terrain-atlas`, `audio/theme`, `audio/ui`, `fonts/04b_30.fnt`.
+- Always re-run a full build after editing assets.
 
-Flag any missing details or questions so this doc can stay accurate and useful for the next AI pass.
+## Diagnostics
+- `EnablePerformanceDiagnostics` is on in DEBUG (see `TerrainGenerationGame`).
+- Use `ConsoleEventListener` or external tools (dotnet-counters, dotnet-trace, PerfView) per [TerrainGeneration2D.Core/Diagnostics/README.md](TerrainGeneration2D.Core/Diagnostics/README.md).
+- Keep custom Event IDs ≥ 10; existing `TerrainPerformanceEventSource` uses 10–17 to avoid conflicts.
+
+## Developer Workflows
+- Build: `dotnet build TerrainGeneration2D.slnx`
+- Run: `dotnet run --project TerrainGeneration2D/TerrainGeneration2D.csproj`
+- Test: `dotnet test TerrainGeneration2D.Tests/TerrainGeneration2D.Tests.csproj`
+
+## Tutorial Content
+- Purpose: The tutorial documents are designed so someone can implement the same functionality independently, without further reference to this repository. Treat them as standalone, step-by-step guides.
+
+## Coding Standards
+- Keep coding standards consistent across tutorial snippets and code.
+- Respect local formatting and analyzer settings in [.editorconfig](../.editorconfig) and any repo-specific conventions.
+- Prefer `var` for local variable declarations where the type is evident from the right-hand side.
+- MonoGame lifecycle methods should appear in pipeline order where present: `Initialize`, `LoadContent`, `Update`, `Draw`, then unload/cleanup.
+- Class member order: private fields, properties, constructors, public methods, private methods.
+- Field naming: class fields (const or otherwise) use `_camelCase` with a leading underscore.
+- Naming: classes and public members use `PascalCase`.
+- Never use public settable member fields.
+- Prefer get-only properties where possible; use settable properties only when required.
+- Where possible, include meaningful XML documentation comments for public APIs and non-trivial members.
+
+## Code Snippets
+- Always lead with a short explanation plus the project and filename for context.
+- When adding to the middle of a long class/method, note that earlier code is omitted for brevity so readers understand it’s a partial listing.
+
+## Project Conventions
+- Scenes must not touch `InputManager` directly; use `GameController` helpers.
+- Use `Camera2D.ScreenToWorld` + `ChunkedTilemap.TileToChunkCoordinates` for tooltips and tile picking; cache coordinates to avoid flicker.
+- `GameScene` loads `images/terrain-atlas`, creates `ChunkedTilemap` with master seed 12345, centers the camera, registers tooltips, manages debug overlay.
+
+## Examples (do this)
+- Pan/zoom handling: read movement/zoom from `GameController` and apply to `Camera2D`; scale pan by `Camera2D.Zoom`.
+- Chunk persistence: call `ChunkedTilemap.SaveAll` when chunks leave the buffer or during scene unload.
+- Overlay validation: toggle F12 and inspect borders + bounds to confirm culling.
+
+For deeper learning and staged code snapshots, see the tutorial index at [docs/terrain2d-tutorial/README.md](docs/terrain2d-tutorial/README.md).

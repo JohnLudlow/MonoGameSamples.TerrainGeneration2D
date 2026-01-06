@@ -1,6 +1,8 @@
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
+using Microsoft.Xna.Framework;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests;
 
@@ -44,6 +46,9 @@ public class MappingTests
             new TilePoint(1, 0),
             TerrainTileIds.Mountain,
             Direction.East,
+            config,
+            new HeightSample(0.4f, 0f, 0f),
+            new HeightSample(0.8f, 0f, 0f),
             mapping);
 
         var beach = registry.GetTileType(TerrainTileIds.Beach);
@@ -55,7 +60,7 @@ public class MappingTests
     {
         var registry = TileTypeRegistry.CreateDefault(5);
         var random = new Random(123);
-        var wfc = new WaveFunctionCollapse(8, 8, registry, random);
+        var wfc = new WaveFunctionCollapse(8, 8, registry, random, new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
 
         bool success = wfc.Generate(maxIterations: 1000);
         Assert.True(success);

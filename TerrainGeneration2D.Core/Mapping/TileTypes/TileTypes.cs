@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 
@@ -30,22 +31,13 @@ public readonly record struct TileRuleContext(
     TilePoint NeighborPosition,
     int NeighborTileId,
     Direction DirectionToNeighbor,
+    TerrainRuleConfiguration Config,
+    HeightSample CandidateHeight,
+    HeightSample NeighborHeight,
     MappingInformationService MappingService)
 {
   public GroupMetrics GetCandidateGroupMetrics() => MappingService.GetGroupMetrics(CandidatePosition, CandidateTileId);
   public GroupMetrics GetNeighborGroupMetrics() => MappingService.GetGroupMetrics(NeighborPosition);
-}
-
-public sealed class TerrainRuleConfiguration
-{
-  public int MountainRangeMin { get; init; } = 8;
-  public int MountainRangeMax { get; init; } = 48;
-  public int MountainWidthMax { get; init; } = 12;
-  public int MountainWidthMin { get; init; } = 3;
-  public int BeachOceanSizeMin { get; init; } = 12;
-  public int BeachOceanSizeMax { get; init; } = 180;
-  public int BeachPlainsSizeMin { get; init; } = 20;
-  public int BeachPlainsSizeMax { get; init; } = 400;
 }
 
 public abstract class TileType
@@ -70,10 +62,14 @@ public abstract class TileType
 public sealed class TileTypeRegistry
 {
   private readonly Dictionary<int, TileType> _tileTypes;
+  private readonly List<int> _tileOrder;
+  private readonly List<int> _validTileIds;
 
   public TileTypeRegistry(IEnumerable<TileType> tileTypes)
   {
     _tileTypes = tileTypes.ToDictionary(t => t.TileId);
+    _tileOrder = tileTypes.Select(t => t.TileId).ToList();
+    _validTileIds = _tileOrder.Where(id => id != TerrainTileIds.Void).ToList();
   }
 
   public TileType GetTileType(int tileId)
@@ -86,7 +82,10 @@ public sealed class TileTypeRegistry
     return tileType;
   }
 
-  public int TileCount => _tileTypes.Count;
+  public int TileCount => _tileOrder.Count;
+
+  public IReadOnlyList<int> TileIds => _tileOrder;
+  public IReadOnlyList<int> ValidTileIds => _validTileIds;
 
   public static TileTypeRegistry CreateDefault(int tileCount, TerrainRuleConfiguration? config = null)
   {

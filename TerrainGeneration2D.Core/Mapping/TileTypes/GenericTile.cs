@@ -9,6 +9,7 @@ public sealed class GenericTileType : TileType
 
   public override bool EvaluateRules(TileRuleContext context)
   {
-    return true;
+    // Placeholder tiles never pass by default; subclass or override to reuse the sprite.
+    return false;
   }
 }

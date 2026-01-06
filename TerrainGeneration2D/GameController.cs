@@ -166,4 +166,12 @@ internal static class GameController
     {
         return s_keyboard.WasKeyJustPressed(Keys.F11);
     }
+
+    /// <summary>
+    /// Returns true if the debug overlay toggle was just triggered (F12 key).
+    /// </summary>
+    public static bool ToggleDebugOverlay()
+    {
+        return s_keyboard.WasKeyJustPressed(Keys.F12);
+    }
 }

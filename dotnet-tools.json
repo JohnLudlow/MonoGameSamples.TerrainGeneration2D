@@ -1,5 +1,13 @@
 {
   "version": 1,
   "isRoot": true,
-  "tools": {}
+  "tools": {
+    "dotnet-counters": {
+      "version": "9.0.652701",
+      "commands": [
+        "dotnet-counters"
+      ],
+      "rollForward": false
+    }
+  }
 }

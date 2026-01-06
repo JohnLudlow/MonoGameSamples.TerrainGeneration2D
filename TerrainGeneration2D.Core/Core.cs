@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Audio;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Input;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Scenes;
 using Microsoft.Xna.Framework;
@@ -11,6 +12,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core;
 public class Core : Game
 {
   private static Core? _instance;
+  private ConsoleEventListener? _eventListener;
 
   /// <summary>
   /// Gets a reference to the Core instance.
@@ -50,6 +52,8 @@ public class Core : Game
 
   public static AudioController Audio {get; private set;}
 
+  public bool EnablePerformanceDiagnostics { get; set; }
+
   /// <summary>
   /// Creates a new Core instance.
   /// </summary>
@@ -70,6 +74,7 @@ public class Core : Game
     Graphics.ApplyChanges();
 
     Window.Title = windowTitle;
+    Window.AllowUserResizing = true;
 
     Content = base.Content;
     Content.RootDirectory = "Content";
@@ -84,6 +89,11 @@ public class Core : Game
     SpriteBatch = new SpriteBatch(GraphicsDevice);
     Input = new InputManager();
     Audio = new AudioController();
+
+    if (EnablePerformanceDiagnostics)
+    {
+      _eventListener = new ConsoleEventListener();
+    }
   }
 
   protected override void Update(GameTime gameTime)
@@ -106,6 +116,14 @@ public class Core : Game
     base.UnloadContent();
   }
 
+  protected override void Dispose(bool disposing)
+  {
+    if (disposing)
+    {
+      _eventListener?.Dispose();
+    }
+    base.Dispose(disposing);
+  }
 
     protected override void Draw(GameTime gameTime)
     {
