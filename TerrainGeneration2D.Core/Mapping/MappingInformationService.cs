@@ -30,7 +30,7 @@ public sealed class MappingInformationService
       return GroupMetrics.Empty;
     }
 
-    int tileId = assumeTileId ?? _output[point.X, point.Y];
+    var tileId = assumeTileId ?? _output[point.X, point.Y];
     if (tileId == -1)
     {
       return GroupMetrics.Empty;
@@ -41,16 +41,16 @@ public sealed class MappingInformationService
     queue.Enqueue(point);
     visited[point.X, point.Y] = true;
 
-    int minX = point.X;
-    int maxX = point.X;
-    int minY = point.Y;
-    int maxY = point.Y;
-    int count = 0;
+    var minX = point.X;
+    var maxX = point.X;
+    var minY = point.Y;
+    var maxY = point.Y;
+    var count = 0;
 
     while (queue.Count > 0)
     {
       var current = queue.Dequeue();
-      int currentTileId = GetTileId(current, point, assumeTileId);
+      var currentTileId = GetTileId(current, point, assumeTileId);
       if (currentTileId != tileId)
       {
         continue;
@@ -69,7 +69,7 @@ public sealed class MappingInformationService
           continue;
         }
 
-        int neighborTileId = GetTileId(neighbor, point, assumeTileId);
+        var neighborTileId = GetTileId(neighbor, point, assumeTileId);
         if (neighborTileId == tileId)
         {
           visited[neighbor.X, neighbor.Y] = true;

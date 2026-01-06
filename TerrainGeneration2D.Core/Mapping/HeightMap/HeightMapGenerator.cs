@@ -29,11 +29,11 @@ public sealed class HeightMapGenerator : IHeightProvider
 
   public HeightSample GetSample(int worldX, int worldY)
   {
-    float continent = (_continentNoise.GetNoise(worldX, worldY) + 1f) / 2f;
-    float mountain = (_mountainNoise.GetNoise(worldX, worldY) + 1f) / 2f;
-    float detail = (_detailNoise.GetNoise(worldX, worldY) + 1f) / 2f;
+    var continent = (_continentNoise.GetNoise(worldX, worldY) + 1f) / 2f;
+    var mountain = (_mountainNoise.GetNoise(worldX, worldY) + 1f) / 2f;
+    var detail = (_detailNoise.GetNoise(worldX, worldY) + 1f) / 2f;
 
-    float altitude = continent * _config.ContinentWeight + mountain * _config.MountainWeight + detail * _config.DetailWeight;
+    var altitude = continent * _config.ContinentWeight + mountain * _config.MountainWeight + detail * _config.DetailWeight;
     altitude = Math.Clamp(altitude, 0f, 1f);
 
     return new HeightSample(altitude, mountain, detail);

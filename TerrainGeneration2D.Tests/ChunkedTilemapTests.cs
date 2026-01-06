@@ -46,8 +46,8 @@ public class ChunkedTilemapTests : IDisposable
         var map2 = new ChunkedTilemap(tileset, 2048, 12345, _testSaveDir + "2", useWaveFunctionCollapse: false);
 
         // Act - Access same chunk in both maps
-        int tile1 = map1.GetTile(100, 100);
-        int tile2 = map2.GetTile(100, 100);
+        var tile1 = map1.GetTile(100, 100);
+        var tile2 = map2.GetTile(100, 100);
 
         // Assert
         Assert.Equal(tile1, tile2);
@@ -62,11 +62,11 @@ public class ChunkedTilemapTests : IDisposable
         var map2 = new ChunkedTilemap(tileset, 2048, 54321, _testSaveDir + "2", useWaveFunctionCollapse: false);
 
         // Act - Sample multiple tiles to ensure different generation
-        bool foundDifference = false;
-        for (int i = 0; i < 100; i++)
+        var foundDifference = false;
+        for (var i = 0; i < 100; i++)
         {
-            int tile1 = map1.GetTile(i, i);
-            int tile2 = map2.GetTile(i, i);
+            var tile1 = map1.GetTile(i, i);
+            var tile2 = map2.GetTile(i, i);
             if (tile1 != tile2)
             {
                 foundDifference = true;
@@ -86,12 +86,12 @@ public class ChunkedTilemapTests : IDisposable
         var map = new ChunkedTilemap(tileset, 2048, 12345, _testSaveDir);
 
         // Act - Generate and save
-        int originalValue = map.GetTile(100, 100);
+        var originalValue = map.GetTile(100, 100);
         map.SaveAll();
 
         // Create new map instance with different seed and load
         var newMap = new ChunkedTilemap(tileset, 2048, 99999, _testSaveDir);
-        int loadedValue = newMap.GetTile(100, 100);
+        var loadedValue = newMap.GetTile(100, 100);
 
         // Assert
         Assert.Equal(originalValue, loadedValue);
@@ -124,7 +124,7 @@ public class ChunkedTilemapTests : IDisposable
         var map = new ChunkedTilemap(tileset, 2048, 12345, _testSaveDir);
 
         // Act
-        int tileId = map.GetTile(0, 0);
+        var tileId = map.GetTile(0, 0);
 
         // Assert - Tile ID should be within tileset range
         Assert.InRange(tileId, 0, 15);

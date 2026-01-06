@@ -56,7 +56,7 @@ public class GameScene : Scene
         var tileset = new Tileset(tilesetRegion, 20, 20); // 20x20 tile size, 8 tiles vertically (0-7)
         
         // Create save directory in Content folder
-        string saveDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content", "saves");
+        var saveDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content", "saves");
         
         // Create chunked tilemap
         _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDir);
@@ -67,7 +67,7 @@ public class GameScene : Scene
             _camera = new Camera2D(JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.GraphicsDevice.Viewport);
             
             // Start at center of map
-            int centerTile = MapSizeInTiles / 2;
+            var centerTile = MapSizeInTiles / 2;
             _camera.Position = new Vector2(centerTile * tileset.TileWidth, centerTile * tileset.TileWidth);
         }
         
@@ -104,7 +104,7 @@ public class GameScene : Scene
             return;
         }
         
-        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         
         // Handle fullscreen toggle
         if (GameController.ToggleFullscreen())
@@ -125,10 +125,10 @@ public class GameScene : Scene
         }
         
         // Handle zoom
-        int scrollDelta = GameController.GetZoomDelta();
+        var scrollDelta = GameController.GetZoomDelta();
         if (scrollDelta != 0)
         {
-            float zoomDelta = Math.Sign(scrollDelta) * Camera2D.ZoomIncrement;
+            var zoomDelta = Math.Sign(scrollDelta) * Camera2D.ZoomIncrement;
             _camera.AdjustZoom(zoomDelta);
         }
         

@@ -55,7 +55,7 @@ public class ChunkGenerationBenchmark
             Chunk.ChunkSize * _tileset.TileHeight * 2));
 
         var scrollDistance = Chunk.ChunkSize * _tileset.TileWidth;
-        for (int step = 1; step <= 8; step++)
+        for (var step = 1; step <= 8; step++)
         {
             var offset = step * scrollDistance;
             var viewport = new Rectangle(offset, offset, Chunk.ChunkSize * _tileset.TileWidth,

@@ -120,4 +120,68 @@ public sealed class TerrainPerformanceEventSource : EventSource
             WriteEvent(17, chunkX, chunkY, success);
         }
     }
+
+    // Backtracking & WFC detailed diagnostics (IDs >= 18)
+    [Event(18, Level = EventLevel.Informational, Message = "WFC decision push depth={0} at {1},{2} candidates={3}")]
+    public void WfcDecisionPush(int depth, int x, int y, int candidateCount)
+    {
+        if (IsEnabled(EventLevel.Informational, EventKeywords.None))
+        {
+            WriteEvent(18, depth, x, y, candidateCount);
+        }
+    }
+
+    [Event(19, Level = EventLevel.Informational, Message = "WFC apply choice depth={0} at {1},{2} tile={3}")]
+    public void WfcApplyChoice(int depth, int x, int y, int tileId)
+    {
+        if (IsEnabled(EventLevel.Informational, EventKeywords.None))
+        {
+            WriteEvent(19, depth, x, y, tileId);
+        }
+    }
+
+    [Event(20, Level = EventLevel.Warning, Message = "WFC contradiction depth={0} at {1},{2}")]
+    public void WfcContradiction(int depth, int x, int y)
+    {
+        if (IsEnabled(EventLevel.Warning, EventKeywords.None))
+        {
+            WriteEvent(20, depth, x, y);
+        }
+    }
+
+    [Event(21, Level = EventLevel.Informational, Message = "WFC rollback begin depth={0} mark={1}")]
+    public void WfcRollbackBegin(int depth, int mark)
+    {
+        if (IsEnabled(EventLevel.Informational, EventKeywords.None))
+        {
+            WriteEvent(21, depth, mark);
+        }
+    }
+
+    [Event(22, Level = EventLevel.Informational, Message = "WFC rollback end depth={0}")]
+    public void WfcRollbackEnd(int depth)
+    {
+        if (IsEnabled(EventLevel.Informational, EventKeywords.None))
+        {
+            WriteEvent(22, depth);
+        }
+    }
+
+    [Event(23, Level = EventLevel.Informational, Message = "WFC decision pop depth={0}")]
+    public void WfcDecisionPop(int depth)
+    {
+        if (IsEnabled(EventLevel.Informational, EventKeywords.None))
+        {
+            WriteEvent(23, depth);
+        }
+    }
+
+    [Event(24, Level = EventLevel.Informational, Message = "WFC stats decisions={0} backtracks={1} maxDepth={2}")]
+    public void WfcStats(int decisions, int backtracks, int maxDepth)
+    {
+        if (IsEnabled(EventLevel.Informational, EventKeywords.None))
+        {
+            WriteEvent(24, decisions, backtracks, maxDepth);
+        }
+    }
 }

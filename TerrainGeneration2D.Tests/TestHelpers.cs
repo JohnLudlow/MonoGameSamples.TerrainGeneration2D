@@ -13,8 +13,8 @@ public static class TestHelpers
         // We use reflection to bypass the normal constructor requirements
         
         // Calculate rows and columns for the tile count
-        int columns = (int)Math.Ceiling(Math.Sqrt(tileCount));
-        int rows = (int)Math.Ceiling((double)tileCount / columns);
+        var columns = (int)Math.Ceiling(Math.Sqrt(tileCount));
+        var rows = (int)Math.Ceiling((double)tileCount / columns);
         
         // Create the tileset using FormatterServices to bypass constructor
         #pragma warning disable SYSLIB0050 // FormatterServices is obsolete but needed for mocking

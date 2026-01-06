@@ -39,6 +39,7 @@ dotnet_diagnostic.CA2213.severity = warning
 dotnet_diagnostic.CA1303.severity = silent
 dotnet_diagnostic.CA1805.severity = silent
 dotnet_diagnostic.CA5394.severity = none
+dotnet_diagnostic.CA1707.severity = none
 
 # ReSharper properties
 resharper_autodetect_indent_settings = true
