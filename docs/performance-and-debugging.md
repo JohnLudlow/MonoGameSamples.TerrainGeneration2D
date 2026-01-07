@@ -56,3 +56,20 @@
 - Extend `GameSceneUI` (or create a dedicated Gum panel) with sliders/dropdowns for `TerrainRuleConfiguration` and `HeightMapConfiguration` values: ocean/plains/mountain height thresholds, `MountainNoiseThreshold`, and the `HeightMapConfiguration` scales/weights. Each slider change writes back to a live `TerrainRuleConfiguration` instance that the current `ChunkedTilemap` references (or triggers a scene reload). Because the tilemap regenerates from saved chunk files, offer a "Regenerate" button that deletes `Content/saves` and rebuilds the visible chunks at the current camera position.
 - For instant feedback during play, allow the UI to create a new `ChunkedTilemap` with the updated config upon button press, and swap it into `GameScene` (dispose the old tilemap, `SaveAll`, then instantiate a fresh one). Keep the UI out of the critical render path by executing the rebuild on a background task or frame queue, showing a busy indicator until the new chunks are ready.
 - Document the UI controls (slider ranges, units) near the debugging overlay so testers know how to dial up ocean vs. mountain coverage without touching code.
+
+## Benchmark CLI Overrides
+- Use flags to override parameter sources during runs:
+	- `--size`: map size in tiles per side (e.g., 512, 1024, 2048)
+	- `--strategy`: entropy selection (`domain`, `shannon`, `combined`)
+	- `--budget`: WFC time budget per chunk in ms (e.g., 25, 50, 100)
+	- `--wfc`: enable WFC (`true`/`false`)
+	- `--influenceSingle`: enable single-tile influence (`true`/`false`)
+	- `--centerBias`: enable center bias (`true`/`false`)
+	- `--uniform`: fraction [0.0–1.0] for uniform vs weighted selection
+	- `--bias`: MostConstrainingBias weight (e.g., 0.0, 0.5)
+
+- Examples:
+	- Fast, targeted Shannon run
+		- `dotnet run -c Release --project TerrainGeneration2D.Benchmarks -- --fast --size 1024 --strategy shannon --budget 25 --wfc true --centerBias true --uniform 0.25 --bias 0.5`
+	- Full-size domain run
+		- `dotnet run -c Release --project TerrainGeneration2D.Benchmarks -- --size 2048 --strategy domain --budget 50 --wfc true`

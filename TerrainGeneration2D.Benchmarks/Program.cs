@@ -340,14 +340,46 @@ internal sealed class TerrainEventCounterListener : EventListener
 
 internal static class BenchmarkSettings
 {
-    private static readonly bool _isShort = Environment.GetCommandLineArgs().Any(a => a.Contains("short", StringComparison.OrdinalIgnoreCase) || a.Equals("--fast", StringComparison.OrdinalIgnoreCase));
+    private static readonly string[] _args = Environment.GetCommandLineArgs();
+    private static readonly bool _isShort = _args.Any(a => a.Contains("short", StringComparison.OrdinalIgnoreCase) || a.Equals("--fast", StringComparison.OrdinalIgnoreCase));
 
-    public static IEnumerable<int> MapSizes => _isShort ? new[] { 512 } : new[] { 512, 2048 };
-    public static IEnumerable<EntropyStrategy> Strategies => _isShort ? new[] { EntropyStrategy.Domain } : new[] { EntropyStrategy.Domain, EntropyStrategy.Shannon, EntropyStrategy.Combined };
-    public static IEnumerable<int> TimeBudgets => _isShort ? new[] { 50 } : new[] { 50, 100 };
-    public static IEnumerable<bool> WfcModes => _isShort ? new[] { true } : new[] { true, false };
-    public static IEnumerable<bool> InfluenceModes => _isShort ? new[] { false } : new[] { true, false };
-    public static IEnumerable<bool> CenterBiasModes => _isShort ? new[] { false } : new[] { false, true };
-    public static IEnumerable<double> UniformFractions => _isShort ? new[] { 0.0 } : new[] { 0.0, 0.25 };
-    public static IEnumerable<double> MostConstrainingBiases => _isShort ? new[] { 0.0 } : new[] { 0.0, 0.5 };
+    private static int? ParseInt(string key)
+        => TryGetOverride(key, out var v) && int.TryParse(v, NumberStyles.Integer, CultureInfo.InvariantCulture, out var i) ? i : (int?)null;
+    private static bool? ParseBool(string key)
+        => TryGetOverride(key, out var v) && bool.TryParse(v, out var b) ? b : (bool?)null;
+    private static double? ParseDouble(string key)
+        => TryGetOverride(key, out var v) && double.TryParse(v, NumberStyles.Float, CultureInfo.InvariantCulture, out var d) ? d : (double?)null;
+    private static EntropyStrategy? ParseStrategy(string key)
+        => TryGetOverride(key, out var v) && Enum.TryParse<EntropyStrategy>(v, true, out var s) ? s : (EntropyStrategy?)null;
+
+    private static bool TryGetOverride(string key, out string value)
+    {
+        value = string.Empty;
+        for (int i = 0; i < _args.Length - 1; i++)
+        {
+            if (_args[i].Equals("--" + key, StringComparison.OrdinalIgnoreCase))
+            {
+                value = _args[i + 1];
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static IEnumerable<int> MapSizes
+        => ParseInt("size") is int s ? new[] { s } : (_isShort ? new[] { 512 } : new[] { 512, 2048 });
+    public static IEnumerable<EntropyStrategy> Strategies
+        => ParseStrategy("strategy") is EntropyStrategy st ? new[] { st } : (_isShort ? new[] { EntropyStrategy.Domain } : new[] { EntropyStrategy.Domain, EntropyStrategy.Shannon, EntropyStrategy.Combined });
+    public static IEnumerable<int> TimeBudgets
+        => ParseInt("budget") is int b ? new[] { b } : (_isShort ? new[] { 50 } : new[] { 50, 100 });
+    public static IEnumerable<bool> WfcModes
+        => ParseBool("wfc") is bool w ? new[] { w } : (_isShort ? new[] { true } : new[] { true, false });
+    public static IEnumerable<bool> InfluenceModes
+        => ParseBool("influenceSingle") is bool inf ? new[] { inf } : (_isShort ? new[] { false } : new[] { true, false });
+    public static IEnumerable<bool> CenterBiasModes
+        => ParseBool("centerBias") is bool c ? new[] { c } : (_isShort ? new[] { false } : new[] { false, true });
+    public static IEnumerable<double> UniformFractions
+        => ParseDouble("uniform") is double u ? new[] { u } : (_isShort ? new[] { 0.0 } : new[] { 0.0, 0.25 });
+    public static IEnumerable<double> MostConstrainingBiases
+        => ParseDouble("bias") is double m ? new[] { m } : (_isShort ? new[] { 0.0 } : new[] { 0.0, 0.5 });
 }
