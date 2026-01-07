@@ -1,5 +1,4 @@
 using System.Linq;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -173,5 +172,13 @@ internal static class GameController
     public static bool ToggleDebugOverlay()
     {
         return s_keyboard.WasKeyJustPressed(Keys.F12);
+    }
+
+    /// <summary>
+    /// Returns true if the settings panel toggle was just triggered (F10 key).
+    /// </summary>
+    public static bool ToggleSettingsPanel()
+    {
+        return s_keyboard.WasKeyJustPressed(Keys.F10);
     }
 }

@@ -4,16 +4,18 @@ using System.Collections.Generic;
 using System.IO;
 using Gum.DataTypes;
 using Gum.Forms.Controls;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Input;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Scenes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.UI;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using MonoGameGum;
-using MonoGameGum.GueDeriving;
+using Microsoft.Extensions.Logging;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Scenes;
 
@@ -34,6 +36,10 @@ public class GameScene : Scene
     private Texture2D? _debugPixel;
     private bool _showDebugOverlay;
     private IReadOnlyCollection<ChunkedTilemap.ActiveChunkInfo> _activeChunkSnapshot = Array.Empty<ChunkedTilemap.ActiveChunkInfo>();
+    private readonly ILogger _log = Log.Create<GameScene>();
+    private HeuristicsConfiguration? _heuristicsConfig;
+    private RuntimeSettingsPanel? _settingsPanel;
+    private bool _showSettings;
 
     private GameSceneUI _ui;
     
@@ -59,7 +65,81 @@ public class GameScene : Scene
         var saveDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content", "saves");
         
         // Create chunked tilemap
-        _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDir);
+        // Read configurations from appsettings
+        var cfg = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Log.Config;
+        var weightsSection = cfg.GetSection("WfcWeights");
+        var weightConfig = new WfcWeightConfiguration
+        {
+            Base = weightsSection.GetValue<int>("Base", 1),
+            NeighborMatchBoost = weightsSection.GetValue<int>("NeighborMatchBoost", 3)
+        };
+
+        var rulesSection = cfg.GetSection("TerrainRules");
+        var terrainConfig = new TerrainRuleConfiguration
+        {
+            MountainRangeMin = rulesSection.GetValue<int>("MountainRangeMin", 8),
+            MountainRangeMax = rulesSection.GetValue<int>("MountainRangeMax", 48),
+            MountainWidthMax = rulesSection.GetValue<int>("MountainWidthMax", 12),
+            MountainWidthMin = rulesSection.GetValue<int>("MountainWidthMin", 3),
+            BeachOceanSizeMin = rulesSection.GetValue<int>("BeachOceanSizeMin", 12),
+            BeachOceanSizeMax = rulesSection.GetValue<int>("BeachOceanSizeMax", 180),
+            BeachPlainsSizeMin = rulesSection.GetValue<int>("BeachPlainsSizeMin", 20),
+            BeachPlainsSizeMax = rulesSection.GetValue<int>("BeachPlainsSizeMax", 400),
+            OceanHeightMax = rulesSection.GetValue<float>("OceanHeightMax", 0.34f),
+            BeachHeightMin = rulesSection.GetValue<float>("BeachHeightMin", 0.33f),
+            BeachHeightMax = rulesSection.GetValue<float>("BeachHeightMax", 0.48f),
+            PlainsHeightMin = rulesSection.GetValue<float>("PlainsHeightMin", 0.35f),
+            PlainsHeightMax = rulesSection.GetValue<float>("PlainsHeightMax", 0.78f),
+            ForestHeightMin = rulesSection.GetValue<float>("ForestHeightMin", 0.42f),
+            ForestHeightMax = rulesSection.GetValue<float>("ForestHeightMax", 0.88f),
+            SnowHeightMin = rulesSection.GetValue<float>("SnowHeightMin", 0.82f),
+            MountainHeightMin = rulesSection.GetValue<float>("MountainHeightMin", 0.76f),
+            MountainNoiseThreshold = rulesSection.GetValue<float>("MountainNoiseThreshold", 0.55f)
+        };
+
+        var hmSection = cfg.GetSection("HeightMap");
+        var heightConfig = new HeightMapConfiguration
+        {
+            ContinentScale = hmSection.GetValue<float>("ContinentScale", 0.0045f),
+            MountainScale = hmSection.GetValue<float>("MountainScale", 0.02f),
+            DetailScale = hmSection.GetValue<float>("DetailScale", 0.1f),
+            ContinentWeight = hmSection.GetValue<float>("ContinentWeight", 0.75f),
+            MountainWeight = hmSection.GetValue<float>("MountainWeight", 0.35f),
+            DetailWeight = hmSection.GetValue<float>("DetailWeight", 0.25f)
+        };
+
+        var heurSection = cfg.GetSection("Heuristics");
+        var heuristics = new HeuristicsConfiguration
+        {
+            UseDomainEntropy = heurSection.GetValue<bool>("UseDomainEntropy", true),
+            UseShannonEntropy = heurSection.GetValue<bool>("UseShannonEntropy", false),
+            UseMostConstrainingTieBreak = heurSection.GetValue<bool>("UseMostConstrainingTieBreak", true),
+            ApplyInfluenceTieBreakForSingleHeuristic = heurSection.GetValue<bool>("ApplyInfluenceTieBreakForSingleHeuristic", true),
+            PreferCentralCellTieBreak = heurSection.GetValue<bool>("PreferCentralCellTieBreak", false),
+            UniformPickFraction = heurSection.GetValue<double>("UniformPickFraction", 0.0),
+            MostConstrainingBias = heurSection.GetValue<double>("MostConstrainingBias", 0.0)
+        };
+        _heuristicsConfig = heuristics;
+
+        var runtimeSection = cfg.GetSection("WfcRuntime");
+        var timeBudgetMs = runtimeSection.GetValue<int>("TimeBudgetMs", 50);
+
+        _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDir, useWaveFunctionCollapse: true, terrainRuleConfiguration: terrainConfig, heightMapConfiguration: heightConfig, weightConfig: weightConfig, heuristicsConfig: heuristics, logger: _log, wfcTimeBudgetMs: timeBudgetMs);
+
+        // Settings UI
+        var content = GumService.Default.ContentLoader.XnaContentManager;
+        var atlas = TextureAtlas.FromFile(content, "images/atlas-definition.xml");
+        _settingsPanel = new RuntimeSettingsPanel(atlas);
+        _settingsPanel.Bind(
+            heuristics,
+            terrainConfig,
+            getBudget: () => _chunkedTilemap?.WfcTimeBudgetMs ?? timeBudgetMs,
+            setBudget: v => { if (_chunkedTilemap != null) _chunkedTilemap.WfcTimeBudgetMs = v; },
+            regenerateVisible: () => { if (_chunkedTilemap != null && _camera != null) _chunkedTilemap.RegenerateChunksInView(_camera.ViewportWorldBounds, overwriteSaves: true); },
+            clearSaves: () => { _chunkedTilemap?.ClearAllSavedChunks(); }
+        );
+        _settingsPanel.IsVisible = false;
+        _settingsPanel.AddToRoot();
         
         // Create camera
         if (JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.GraphicsDevice != null)
@@ -85,16 +165,12 @@ public class GameScene : Scene
             _debugPixel.SetData(new[] { Color.White });
         }
 
-        // Test label to verify Gum is working
-        _testLabel = new Label();
-        _testLabel.X = 80;
-        _testLabel.Y = 240;
-        _testLabel.Text = "Test Label - Gum Working!";
-        _testLabel.AddToRoot();
+        // Hint text is provided by GameSceneUI; remove temporary test label.
     }
 
     public override void Update(GameTime gameTime)
     {
+        GameLoggerMessages.SceneUpdateBegin(_log);
         base.Update(gameTime);
 
         _ui.Update(gameTime);
@@ -158,6 +234,12 @@ public class GameScene : Scene
             _showDebugOverlay = !_showDebugOverlay;
         }
 
+        if (GameController.ToggleSettingsPanel())
+        {
+            _showSettings = !_showSettings;
+            if (_settingsPanel != null) _settingsPanel.IsVisible = _showSettings;
+        }
+
         if (_showDebugOverlay)
         {
             _activeChunkSnapshot = _chunkedTilemap.GetActiveChunkInfos();
@@ -165,10 +247,12 @@ public class GameScene : Scene
 
         // Update tooltip
         _tooltipManager?.Update(GameController.GetMousePosition());
+        GameLoggerMessages.SceneUpdateEnd(_log);
     }
 
     public override void Draw(GameTime gameTime)
     {
+        GameLoggerMessages.SceneDrawBegin(_log);
         // Clear the back buffer
         JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.GraphicsDevice?.Clear(Color.Black);
         
@@ -205,6 +289,7 @@ public class GameScene : Scene
         
         // Draw Gum UI
         GumService.Default.Draw();
+        GameLoggerMessages.SceneDrawEnd(_log);
 
         base.Draw(gameTime);
     }

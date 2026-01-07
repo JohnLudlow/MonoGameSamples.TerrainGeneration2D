@@ -21,5 +21,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D
         });
 
         public static ILogger Create<T>() => Factory.CreateLogger<T>();
+
+        public static IConfiguration Config => _config;
     }
 }

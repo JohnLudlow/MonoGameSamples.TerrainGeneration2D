@@ -7,7 +7,8 @@
     <RootNamespace>JohnLudlow.MonoGameSamples.TerrainGeneration2D.Benchmarks</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.8" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.15.8" />
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.5-develop.*" />
   </ItemGroup>
   <ItemGroup>

@@ -15,6 +15,8 @@ A `DecisionFrame` captures a single branching point in the search. When the solv
 - which candidate index we’ll attempt next (`NextIndex`), and
 - a bookmark into the change log (`ChangesMark`) so we can undo all mutations caused by trying a candidate and its propagation.
 
+In practice, candidates are ordered by weight descending (e.g., neighbor-match boost) and then by tile ID ascending. This ordering keeps backtracking exploration deterministic across runs and aligns with the implementation in `WfcProvider`.
+
 The solver pushes a `DecisionFrame` onto a stack before attempting any candidate. If trying a candidate leads to a contradiction, we call `RollbackTo(frame.ChangesMark)` and advance `frame.NextIndex` to try the next candidate. If we exhaust all candidates, we pop the frame and backtrack to the previous decision.
 
 ### Change and ChangeLog — capturing reversible mutations
@@ -204,6 +206,10 @@ public void WfcStats(int decisions, int backtracks, int maxDepth) { WriteEvent(W
 
 From `ChunkedTilemap`, prefer calling `Generate(enableBacktracking: true, ...)` and pass optional limits; maintain fallback to random fill if `Generate(...)` returns `false`.
 
+> See also: Heuristics
+>
+> Backtracking behavior is heavily influenced by candidate ordering and weight strategies. For guidance on entropy selection, tie-breaking, and neighbor-match weighting (including deterministic ordering for stable exploration), see [05 — Heuristics](05-heuristics.md).
+
 ### Game Integration Example
 
 Where it lives: TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs, class `ChunkedTilemap`, method `GenerateChunk(Point chunkCoords)`.
@@ -250,3 +256,4 @@ Navigation
 - Up: [WFC README](README.md)
 - Previous: [03 — Propagation](03-propagation.md)
 - Next: [05 — Integration](05-integration.md)
+ - Next (alternate): [05 — Heuristics](05-heuristics.md)

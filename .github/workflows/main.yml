@@ -3,7 +3,7 @@
 
 name: Build and Test
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -89,14 +89,7 @@ jobs:
       with:
         name: CoverageReport # Artifact name        
         path: coverage 
-
-    - name: Add comment to PR
-      if: github.event_name == 'pull_request'
-      run: gh pr comment $PR_NUMBER --edit-last --create-if-none --body-file coverage/SummaryGithub.md # Adjust path and filename if necessary
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        PR_NUMBER: ${{ github.event.number }}        
-
+        
     - name: Publish coverage in build summary
       run: cat coverage/SummaryGithub.md >> $env:GITHUB_STEP_SUMMARY # Adjust path and filename if necessary
 
@@ -109,6 +102,12 @@ jobs:
           "--configuration", "$env:CONFIGURATION",
           "--project", "TerrainGeneration2D.Benchmarks/TerrainGeneration2D.Benchmarks.csproj",
           "--filter", "*",
-          "--verbosity", "normal"
+          "--verbosity", "normal",
+          "--", 
+          "--fast"
         )
         dotnet run @dotnetParams
+
+    - name: Publish performance report in build summary
+      if: github.event_name == 'pull_request'      
+      run: cat BenchmarkDotNet.Artifacts/results/*.md >> $env:GITHUB_STEP_SUMMARY # Adjust path and filename if necessary

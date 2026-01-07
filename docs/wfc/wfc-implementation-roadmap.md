@@ -48,9 +48,28 @@ Conclusion: This is a partial WFC implementation (observation + propagation) but
 - File: update [WfcProvider.cs](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs).
 
 2. Entropy & Selection Heuristics
-- Compute Shannon entropy using uniform probabilities or priors.
-- Tie-break with noise, distance from origin, or heuristic favoring edges/corners.
-- Consider Most Constrained + Most Constraining selection for stability.
+- Entropy metric:
+  - Current: simple domain size (candidate count). The solver picks the cell with the fewest remaining candidates; ties are resolved via the injected randomness provider.
+  - Option: Shannon entropy $H = -\sum p_i \log p_i$ using tile priors/weights to prefer cells with higher information gain.
+  - Hybrid: Most Constrained (lowest entropy) + Most Constraining (highest impact on neighbors) for improved stability.
+- Tie-breaking strategy:
+  - Current: random among equal-entropy cells using `IRandomProvider` (see [WfcProvider.cs](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)).
+  - Deterministic mode: for testability, keep candidate ordering stable and inject a deterministic provider.
+  - Alternatives: bias ties by screen/world position (e.g., top-left to bottom-right), Perlin noise, or distance to chunk center.
+- Weight strategies (tile choice within a cell):
+  - Current: neighbor-match boost, computed as `weight = 1 + 3 * (neighbor matches)`. Non-backtracking uses a weighted roll; backtracking orders candidates by weight desc then tile id asc and explores sequentially.
+  - Tunable factors: adjust the base (`1`) and multiplier (`3`) to control locality vs. variation; consider diminishing returns (e.g., logarithmic boosts) to avoid streaking.
+  - Context-aware weights: include heightmap class, biome, or global frequency penalties (e.g., soft caps to keep tile distribution balanced).
+  - Probabilistic mixing: combine heuristics with `NextDouble()` (e.g., 80% heuristic, 20% uniform) to preserve diversity.
+- Determinism & testing:
+  - Use `IRandomProvider` with a deterministic implementation for unit tests; keep candidate ordering stable (sort by tile id when weights tie).
+  - Avoid HashSet iteration nondeterminism by ordering before any selection; document tie-breakers explicitly.
+- Practical tuning tips:
+  - Start with small multipliers; increase only if contradictions persist or visuals look too noisy.
+  - Monitor `wfc_contradictions`, `wfc_backtracks`, and `wfc_stats` via [TerrainPerformanceEventSource.cs](TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs); adjust weights to reduce rollback pressure.
+  - Balance `maxBacktrackSteps` and `maxDepth` with heuristic aggressiveness; strong locality weights reduce branching but may raise contradiction hotspots.
+  - Use the debug overlay to visually inspect collapse patterns; consider an entropy heatmap to identify problem areas.
+ - See also: [05 — Heuristics](docs/map-generation/wfc/05-heuristics.md) for a focused deep-dive and "Try It" tips.
 
 3. Rule Tables & AC-3 Propagation
 - Precompute adjacency tables: `allowed[(tile, dir)] = {neighbors}` from `TileTypeRegistry`.

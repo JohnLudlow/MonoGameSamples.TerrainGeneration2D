@@ -1,10 +1,9 @@
 using Gum.DataTypes;
 using Gum.Forms.Controls;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 using Microsoft.Xna.Framework;
 using MonoGameGum;
 using MonoGameGum.GueDeriving;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Input;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UI;
 

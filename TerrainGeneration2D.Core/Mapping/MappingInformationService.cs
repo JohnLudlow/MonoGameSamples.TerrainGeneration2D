@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
 

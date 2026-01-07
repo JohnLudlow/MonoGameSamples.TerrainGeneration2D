@@ -1,5 +1,3 @@
-using System;
-
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 
 /// <summary>

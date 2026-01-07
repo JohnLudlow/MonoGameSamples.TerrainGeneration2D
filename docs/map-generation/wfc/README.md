@@ -12,6 +12,7 @@ Sections:
 - [02 — Domains](02-domains.md)
 - [03 — Propagation](03-propagation.md)
 - [04 — Backtracking](04-backtracking.md)
+- [05 — Heuristics](05-heuristics.md)
 - [05 — Integration](05-integration.md)
 - [06 — Performance](06-performance.md)
 
