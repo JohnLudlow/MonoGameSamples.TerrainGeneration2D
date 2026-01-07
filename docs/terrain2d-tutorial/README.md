@@ -115,6 +115,13 @@ Expand to WFC stages:
 - Runtime config: quick tuning guide in [12-config-wfc-weights.md](./12-config-wfc-weights.md).
 - Determinism: inject a test `IRandomProvider` for reproducible tie-breaks; see examples in [WfcProvider.cs](../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs) and tests.
 
+## Runtime Settings Panel
+- Toggle with F10 during gameplay to open a compact, scrollable panel.
+- Adjust heuristics and terrain parameters; changes do not apply immediately.
+- Click "Apply Changes" to regenerate visible chunks using the camera viewport.
+- Use "Clear Saves" to delete persisted chunk data under TerrainGeneration2D.Core/Content/saves; future loads will regenerate from current settings.
+- Tip: Toggle the debug overlay with F12 to visualize active chunk borders and viewport bounds while testing adjustments.
+
 Refer to the tests appendix for project setup and commands:
 - [tests-appendix.md](./tests-appendix.md)
 
