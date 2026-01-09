@@ -1,10 +1,12 @@
 # Tile Configuration Guide
 
 ## How rules work
+
 - `TerrainRuleConfiguration` fields are consumed by `TerrainGeneration2D.Core/Mapping/TileTypes/BeachTile.cs` and `MountainTile.cs`; other tile types only check adjacency via the `MatchesNeighbor` helper in `TerrainGeneration2D.Core/Mapping/TileTypes/TileTypes.cs`.
 - Every tile’s `EvaluateRules(TileRuleContext)` can access `TileRuleContext.GetCandidateGroupMetrics` or `GetNeighborGroupMetrics` (which call `TerrainGeneration2D.Core/Mapping/MappingInformationService.cs`) to inspect contiguous regions before accepting a candidate.
 
 ## Applying a configuration
+
 - Pass a customized `TerrainRuleConfiguration` when you construct `TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs` in `GameScene`:
 
 ```csharp
@@ -21,6 +23,7 @@ _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDi
 Every change to `config` immediately alters the Wave Function Collapse constraints that produce your map.
 
 ## Heightmap configuration
+
 - FastNoiseLite drives the heightmap implementation in `TerrainGeneration2D.Core/Mapping/HeightMap/HeightMapGenerator.cs`. Pass a `HeightMapConfiguration` alongside `TerrainRuleConfiguration` when constructing `ChunkedTilemap` to tune continent scale, mountain frequency, and contribution weights:
 
 ```csharp
@@ -37,11 +40,13 @@ _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDi
    terrainRuleConfiguration: config,
    heightMapConfiguration: heightConfig);
 ```
+
 - Each tile now receives a `HeightSample` (altitude + noise derivatives). Rule checks include `TileRuleContext.CandidateHeight.Altitude` so oceans, beaches, plains, forests, snow, and mountains only validate when the altitude band matches the thresholds in `TerrainRuleConfiguration`, and mountains also require a mountain-specific noise spike (`MountainNoiseThreshold`).
 - `GenericTileType` exists solely as a placeholder for any sprite index beyond the named biome IDs; it always returns `false`, so Wave Function Collapse never places it unless you subclass the type with your own logic.
 - `NullTileType` (tile ID 0) remains registered as a sentinel but is filtered out of the initial WFC possibilities list, so void tiles no longer appear in the generated world.
 
 ## Scenario recipes
+
 1. **Large continents (non-ocean landmasses)**
    - Increase `MountainRangeMax`/`MountainWidthMax` (e.g., 512, 200) so mountain seeds do not splice continents apart, and raise `BeachOceanSizeMin`/`BeachOceanSizeMax` (e.g., 400–2000) so beaches only spawn when oceans become very large.
    - Result: plains/forest chunks can grow until they reach ocean edges, which must itself become huge before a beach is allowed, keeping more long, uninterrupted land.
@@ -65,4 +70,5 @@ _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDi
 Adjust these recipes incrementally and iterate with `dotnet run --project TerrainGeneration2D/TerrainGeneration2D.csproj`; delete `Content/saves` between experiments so the new rules are exercised through chunk regeneration rather than cached saves.
 
 ## Runtime configuration
+
 - You can tweak `TerrainRuleConfiguration`, `HeightMapConfiguration`, and WFC heuristic weights at runtime via appsettings. See the tutorial: [12-config-wfc-weights.md](./terrain2d-tutorial/12-config-wfc-weights.md).

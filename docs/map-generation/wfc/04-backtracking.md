@@ -5,11 +5,13 @@ Purpose: introduce decision points and reversible state so contradictions can be
 ## Data Structures
 
 Backtracking introduces explicit, reversible state. We model two concepts:
+
 1) a decision point (which cell we’re choosing and the order we’ll try its candidates), and 2) a change log (every mutation we make so we can roll it back). These appear in code as `DecisionFrame` and `ChangeLog`.
 
 ### DecisionFrame — what it represents and how it’s used
 
 A `DecisionFrame` captures a single branching point in the search. When the solver selects the lowest-entropy cell `(x,y)`, it computes an ordered list of candidate tiles for that cell. The frame stores:
+
 - where the decision applies (`X`, `Y`),
 - which candidates are available in the exact order we plan to try,
 - which candidate index we’ll attempt next (`NextIndex`), and
@@ -22,6 +24,7 @@ The solver pushes a `DecisionFrame` onto a stack before attempting any candidate
 ### Change and ChangeLog — capturing reversible mutations
 
 Every time we remove a value from a domain, set a cell’s output, or auto-collapse a domain of size 1, we record an entry in the `ChangeLog`. The log is append-only and supports checkpoint/rollback:
+
 - `Mark()` returns the current length (a checkpoint),
 - `RollbackTo(mark, domains, output)` walks entries in reverse and restores the domains/output to their exact pre-decision state.
 
@@ -30,12 +33,14 @@ About naming: earlier drafts used generic auxiliary fields `A` and `B`. More des
 ## WfcProvider Additions
 
 Add the following private fields:
+
 - `Stack<DecisionFrame> _decisions`
 - `ChangeLog _changes`
 - `bool _enableBacktracking`
 - Optional limits: `int _backtrackLimit`, `int _steps`
 
 Overload method signatures to thread the recorder (no behavioral change unless backtracking is enabled):
+
 - `public bool Generate(int maxIterations = 10000)` (existing)
 - `public bool Generate(bool enableBacktracking, int maxIterations = 10000, int? maxBacktrackSteps = null, int? maxDepth = null)` (new)
 - `private bool CollapseCell(int x, int y)` (existing)
@@ -57,18 +62,18 @@ Example: XML-documented shapes (abbreviated)
 /// </summary>
 private sealed class DecisionFrame
 {
-	/// <summary>The x-coordinate of the chosen cell.</summary>
-	public int X { get; init; }
-	/// <summary>The y-coordinate of the chosen cell.</summary>
-	public int Y { get; init; }
-	/// <summary>Ordered list of tile IDs to try at (X,Y).</summary>
-	public int[] Candidates { get; init; } = Array.Empty<int>();
-	/// <summary>Index of the next candidate to attempt.</summary>
-	public int NextIndex { get; set; }
-	/// <summary>Checkpoint into the change log taken before trying any candidate.</summary>
-	public int ChangesMark { get; init; }
-	/// <summary>Depth of this frame in the decision stack (for diagnostics).</summary>
-	public int Depth { get; init; }
+ /// <summary>The x-coordinate of the chosen cell.</summary>
+ public int X { get; init; }
+ /// <summary>The y-coordinate of the chosen cell.</summary>
+ public int Y { get; init; }
+ /// <summary>Ordered list of tile IDs to try at (X,Y).</summary>
+ public int[] Candidates { get; init; } = Array.Empty<int>();
+ /// <summary>Index of the next candidate to attempt.</summary>
+ public int NextIndex { get; set; }
+ /// <summary>Checkpoint into the change log taken before trying any candidate.</summary>
+ public int ChangesMark { get; init; }
+ /// <summary>Depth of this frame in the decision stack (for diagnostics).</summary>
+ public int Depth { get; init; }
 }
 
 /// <summary>
@@ -82,23 +87,23 @@ private enum ChangeKind { DomainRemoved, CellCollapsed, OutputSet }
 /// </summary>
 private readonly struct Change
 {
-	/// <summary>The mutation category.</summary>
-	public ChangeKind Kind { get; }
-	/// <summary>Target cell x-coordinate.</summary>
-	public int X { get; }
-	/// <summary>Target cell y-coordinate.</summary>
-	public int Y { get; }
-	/// <summary>When <see cref="ChangeKind.DomainRemoved"/>, the tile ID removed from the domain.</summary>
-	public int RemovedTileId { get; }
-	/// <summary>When <see cref="ChangeKind.CellCollapsed"/>, the tile ID chosen for the collapse.</summary>
-	public int ChosenTileId { get; }
-	/// <summary>When <see cref="ChangeKind.OutputSet"/>, the previous output tile ID.</summary>
-	public int PrevOutput { get; }
-	/// <summary>When <see cref="ChangeKind.OutputSet"/>, the new output tile ID.</summary>
-	public int NextOutput { get; }
-	/// <summary>Optional snapshot (e.g., full previous domain for a collapse).</summary>
-	public IReadOnlyCollection<int>? PrevDomainSnapshot { get; }
-	// Factory helpers omitted; implementation stores enough data to reverse the operation.
+ /// <summary>The mutation category.</summary>
+ public ChangeKind Kind { get; }
+ /// <summary>Target cell x-coordinate.</summary>
+ public int X { get; }
+ /// <summary>Target cell y-coordinate.</summary>
+ public int Y { get; }
+ /// <summary>When <see cref="ChangeKind.DomainRemoved"/>, the tile ID removed from the domain.</summary>
+ public int RemovedTileId { get; }
+ /// <summary>When <see cref="ChangeKind.CellCollapsed"/>, the tile ID chosen for the collapse.</summary>
+ public int ChosenTileId { get; }
+ /// <summary>When <see cref="ChangeKind.OutputSet"/>, the previous output tile ID.</summary>
+ public int PrevOutput { get; }
+ /// <summary>When <see cref="ChangeKind.OutputSet"/>, the new output tile ID.</summary>
+ public int NextOutput { get; }
+ /// <summary>Optional snapshot (e.g., full previous domain for a collapse).</summary>
+ public IReadOnlyCollection<int>? PrevDomainSnapshot { get; }
+ // Factory helpers omitted; implementation stores enough data to reverse the operation.
 }
 
 /// <summary>
@@ -109,17 +114,17 @@ private readonly struct Change
 /// </summary>
 private sealed class ChangeLog
 {
-	private readonly List<Change> _changes = new();
-	/// <summary>Create a checkpoint representing the current tail of the log.</summary>
-	public int Mark() => _changes.Count;
-	/// <summary>Record removal of a single tile from a domain at (x,y).</summary>
-	public void RecordDomainRemoved(int x, int y, int tileId) { /* append */ }
-	/// <summary>Record collapsing a domain to a single tile, with a snapshot for undo.</summary>
-	public void RecordCellCollapsed(int x, int y, IEnumerable<int> prevDomain, int chosen) { /* append */ }
-	/// <summary>Record setting the output at (x,y) to a new tile, keeping the previous value.</summary>
-	public void RecordOutputSet(int x, int y, int previous, int next) { /* append */ }
-	/// <summary>Undo all mutations recorded after <paramref name="mark"/>.</summary>
-	public void RollbackTo(int mark, HashSet<int>?[,] domains, int[,] output) { /* undo in reverse */ }
+ private readonly List<Change> _changes = new();
+ /// <summary>Create a checkpoint representing the current tail of the log.</summary>
+ public int Mark() => _changes.Count;
+ /// <summary>Record removal of a single tile from a domain at (x,y).</summary>
+ public void RecordDomainRemoved(int x, int y, int tileId) { /* append */ }
+ /// <summary>Record collapsing a domain to a single tile, with a snapshot for undo.</summary>
+ public void RecordCellCollapsed(int x, int y, IEnumerable<int> prevDomain, int chosen) { /* append */ }
+ /// <summary>Record setting the output at (x,y) to a new tile, keeping the previous value.</summary>
+ public void RecordOutputSet(int x, int y, int previous, int next) { /* append */ }
+ /// <summary>Undo all mutations recorded after <paramref name="mark"/>.</summary>
+ public void RollbackTo(int mark, HashSet<int>?[,] domains, int[,] output) { /* undo in reverse */ }
 }
 ```
 
@@ -127,7 +132,7 @@ private sealed class ChangeLog
 
 ASCII sequence of the main loop inside `Generate(enableBacktracking: true, ...)`:
 
-```
+```plain
 Solver                       DecisionStack                ChangeLog                   Domains/Output
 |                            |                            |                           |                         |
 | -> DS: FindLowestEntropy() |                            |                           |                         |
@@ -157,6 +162,7 @@ Success criteria: all domains are `null` (collapsed) and `Generate()` returns `t
 ## Diagnostics
 
 Augment WFC events in `TerrainPerformanceEventSource` and invoke them in the backtracking loop:
+
 - `WfcDecisionPush` when pushing a `DecisionFrame`
 - `WfcApplyChoice` before attempting a candidate
 - `WfcContradiction` when propagation empties a domain
@@ -178,7 +184,7 @@ private const int WfcStatsId         = 24;
 
 [NonEvent]
 public void WfcDecisionPush(int depth, int x, int y, int candidateCount)
-	=> WfcDecisionPush(depth, x, y, candidateCount.ToString());
+ => WfcDecisionPush(depth, x, y, candidateCount.ToString());
 
 [Event(WfcDecisionPushId, Level = EventLevel.Informational)]
 private void WfcDecisionPush(int depth, int x, int y, string candidates) { WriteEvent(WfcDecisionPushId, depth, x, y, candidates); }
@@ -219,41 +225,42 @@ Where it lives: TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs, class `Chun
 // class ChunkedTilemap
 private Chunk GenerateChunk(Point chunkCoords)
 {
-	var chunk = new Chunk(chunkCoords);
-	int chunkSeed = _masterSeed + chunkCoords.X * 73856093 + chunkCoords.Y * 19349663;
-	var random = new Random(chunkSeed);
+ var chunk = new Chunk(chunkCoords);
+ int chunkSeed = _masterSeed + chunkCoords.X * 73856093 + chunkCoords.Y * 19349663;
+ var random = new Random(chunkSeed);
 
-	if (_useWaveFunctionCollapse)
-	{
-		var chunkOrigin = new Point(chunkCoords.X * Chunk.ChunkSize, chunkCoords.Y * Chunk.ChunkSize);
-		var wfc = new WfcProvider(Chunk.ChunkSize, Chunk.ChunkSize, _tileTypeRegistry, random, _terrainRuleConfig, _heightProvider, chunkOrigin);
+ if (_useWaveFunctionCollapse)
+ {
+  var chunkOrigin = new Point(chunkCoords.X * Chunk.ChunkSize, chunkCoords.Y * Chunk.ChunkSize);
+  var wfc = new WfcProvider(Chunk.ChunkSize, Chunk.ChunkSize, _tileTypeRegistry, random, _terrainRuleConfig, _heightProvider, chunkOrigin);
 
-		// Backtracking enabled with sane limits
-		bool ok = wfc.Generate(enableBacktracking: true, maxIterations: 10_000, maxBacktrackSteps: 5_000, maxDepth: 256);
-		if (ok)
-		{
-			var output = wfc.GetOutput();
-			for (int y = 0; y < Chunk.ChunkSize; y++)
-				for (int x = 0; x < Chunk.ChunkSize; x++)
-					chunk[x, y] = output[x, y];
-		}
-		else
-		{
-			GenerateRandomChunk(chunk, random); // Fallback remains deterministic
-		}
-	}
-	else
-	{
-		GenerateRandomChunk(chunk, random);
-	}
+  // Backtracking enabled with sane limits
+  bool ok = wfc.Generate(enableBacktracking: true, maxIterations: 10_000, maxBacktrackSteps: 5_000, maxDepth: 256);
+  if (ok)
+  {
+   var output = wfc.GetOutput();
+   for (int y = 0; y < Chunk.ChunkSize; y++)
+    for (int x = 0; x < Chunk.ChunkSize; x++)
+     chunk[x, y] = output[x, y];
+  }
+  else
+  {
+   GenerateRandomChunk(chunk, random); // Fallback remains deterministic
+  }
+ }
+ else
+ {
+  GenerateRandomChunk(chunk, random);
+ }
 
-	chunk.IsDirty = true;
-	return chunk;
+ chunk.IsDirty = true;
+ return chunk;
 }
 ```
 
 Navigation
+
 - Up: [WFC README](README.md)
 - Previous: [03 — Propagation](03-propagation.md)
 - Next: [05 — Integration](05-integration.md)
- - Next (alternate): [05 — Heuristics](05-heuristics.md)
+- Next (alternate): [05 — Heuristics](05-heuristics.md)

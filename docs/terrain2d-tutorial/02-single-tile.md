@@ -1,13 +1,16 @@
 ﻿# Phase 02 - Fill the map with a single tile
 
 In this phase you will:
+
 - Add a tileset texture
 - Draw a grid of a single tile to cover the screen
 - Emit a basic log and performance counter (optional)
 - Write tests for logic-only pieces (TDD)
 
 ## 0. Write tests (TDD)
+
 Create `TerrainGeneration2D.Tests/TilesetMathTests.cs` to validate the index→rectangle math without needing a graphics device:
+
 ```csharp
 using Microsoft.Xna.Framework;
 
@@ -51,20 +54,26 @@ public class TilesetMathTests
     }
 }
 ```
+
 Run:
+
 ```bash
 dotnet test TerrainGeneration2D.Tests/TerrainGeneration2D.Tests.csproj
 ```
 
 Notes:
+
 - Keep tests logic-only; do not require a `GraphicsDevice`. This phase validates the index→rectangle math; the runtime uses `TextureRegion`-based `Tileset`.
 
 ## 1. Add content asset
+
 - Place the provided `atlas.png` into `TerrainGeneration2D.Content/Assets/images/terrain-atlas.png`.
 - Build the solution to have the content builder process assets (it will appear under the game's `Content/images`).
 
 ### Load the atlas texture (Game)
+
 A minimal example to load the processed atlas in your game:
+
 ```csharp
 private Texture2D _atlas = null!;
 
@@ -74,10 +83,13 @@ protected override void LoadContent()
     _atlas = Content.Load<Texture2D>("images/terrain-atlas");
 }
 ```
+
 The full render example later in this phase shows using `_atlas` with `Tileset` to draw.
 
 ## 2. Reference Core from Game
+
 Add a project reference from the Game to Core (if not already added):
+
 ```bash
 dotnet add src/TerrainGeneration2D/TerrainGeneration2D.csproj reference src/TerrainGeneration2D.Core/TerrainGeneration2D.Core.csproj
 ```
@@ -312,10 +324,13 @@ var fullRegion = new TextureRegion(_atlas);
 // Or a sub-rectangle (x, y, width, height) inside the atlas
 var subRegion = new TextureRegion(_atlas, 0, 0, 160, 160);
 ```
+
 You'll pass a `TextureRegion` to `Tileset` to slice it into tile-sized regions.
 
 ## 3. Use Tileset in Core (TextureRegion-based)
+
 This repo already provides a `Tileset` that is built from a `TextureRegion` and exposes `GetTile(int)` returning a `TextureRegion`. Instantiate it from your atlas texture:
+
 ```csharp
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 
@@ -324,9 +339,11 @@ _tileset = new Tileset(new TextureRegion(_atlas), 16, 16); // tile size per your
 ```
 
 ## 4. Render a single tile grid in the Game
+
 Extend the game class you created in Phase 01 to load the atlas and draw tile 0 across the viewport. This augments your existing `TerrainGenerationGame` (no top-level statements, no overwrites).
 
 TerrainGeneration2D/TerrainGenerationGame.cs — code excerpt; unrelated members omitted for brevity:
+
 ```csharp
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -373,12 +390,15 @@ internal sealed class TerrainGenerationGame : GameHostBase
 ```
 
 Run:
+
 ```bash
 dotnet run --project src/TerrainGeneration2D/TerrainGeneration2D.csproj
 ```
+
 You should see the screen filled with the first tile from your atlas.
 
 See also:
+
 - Previous phase: [01 — Setup](01-setup.md)
 - Next steps with deterministic random fill in [05-random-tiles.md](05-random-tiles.md).
 - Tutorial index: [README.md](README.md).

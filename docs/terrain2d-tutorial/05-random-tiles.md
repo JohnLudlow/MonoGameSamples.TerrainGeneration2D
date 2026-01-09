@@ -1,6 +1,7 @@
 ﻿# Phase 05 - Fill the map with random tiles (deterministic)
 
 In this phase you will:
+
 - Create a tilemap array
 - Fill it with random tiles from the atlas (using a fixed seed)
 - Draw only visible tiles
@@ -10,7 +11,9 @@ In this phase you will:
 - Add a debugging UI toggle (F12) and tooltip showing tile details
 
 ## 0. Write the test (TDD)
+
 Create `TerrainGeneration2D.Tests/RandomTilesTests.cs`:
+
 ```csharp
 namespace TerrainGeneration2D.Tests;
 
@@ -53,13 +56,17 @@ public class RandomTilesTests
     }
 }
 ```
+
 Run:
+
 ```bash
 dotnet test TerrainGeneration2D.Tests/TerrainGeneration2D.Tests.csproj
 ```
+
 Tests should pass as they only exercise `Tilemap` and `Random`.
 
 ## 1. Add a Tilemap class (Core)
+
 Conceptual example (this repo uses `TerrainGeneration2D.Core/Graphics/ChunkedTilemap` instead). Prefer properties over public fields:
 Create `TerrainGeneration2D.Core/Tilemap.cs`:
 
@@ -91,6 +98,7 @@ public class Tilemap
 ```
 
 ## 2. Fill with deterministic random tiles (Game)
+
 Edit your game code to add map generation and drawing (this repo already renders via chunked tilemap; use this as conceptual guidance).
 
 TerrainGeneration2D/TerrainGenerationGame.cs — code excerpt; unrelated members omitted for brevity:
@@ -156,19 +164,23 @@ protected override void Draw(GameTime gameTime)
 Note: For a `TextureRegion` overview and `Tileset` setup, see Phase 02 — Implement TextureRegion in [02-single-tile.md](02-single-tile.md).
 
 ## See also
+
 - Previous phase: [04 — Performance](04-performance.md)
 - Next phase: [06 — Adjacency rules](06-adjacency-rules.md)
 - Tutorial index: [README.md](README.md)
 
 Run:
+
 ```bash
 dotnet run --project TerrainGeneration2D/TerrainGeneration2D.csproj
 ```
+
 You’ll see a mosaic of randomly chosen tiles and logs/counters indicating generation work.
 
 Tip: Keep the seed constant (`new Random(12345)`) to make the result reproducible.
 
 ### Prerequisite: Minimal GameController (input helper)
+
 Add a simple input helper so the code below compiles and behaves consistently.
 
 Create `TerrainGeneration2D/GameController.cs`:
@@ -232,6 +244,7 @@ public static class GameController
 ```
 
 ### Prerequisite: Minimal Camera2D (2D transform)
+
 Add a tiny camera utility used for movement, zoom, and sprite batching transforms.
 
 Create `TerrainGeneration2D.Core/Graphics/Camera2D.cs`:
@@ -273,6 +286,7 @@ public class Camera2D
 ```
 
 ## 3. Wire input controls (camera movement, zoom, pan)
+
 Update your scene or game host to use `GameController` helpers. Example:
 
 ```csharp
@@ -350,6 +364,7 @@ private bool _showDebug;
 ```
 
 Apply `_camera.GetTransformMatrix()` when drawing sprites:
+
 ```csharp
 _spriteBatch.Begin(transformMatrix: _camera.GetTransformMatrix(), samplerState: SamplerState.PointClamp);
 // draw tiles here
@@ -359,6 +374,7 @@ _spriteBatch.End();
 This ensures consistent input wiring via `GameController` without touching low-level input directly.
 
 ## 4. Debug UI toggle (F12) with chunk boundaries
+
 Add a simple overlay that draws chunk boundaries when F12 is toggled:
 
 ```csharp
@@ -415,6 +431,7 @@ protected override void LoadContent()
 This overlays red lines at chunk boundaries. Press F12 to toggle `_showDebug` as shown earlier in the input section.
 
 ## 5. Tooltip showing tile details
+
 Display a tooltip with the hovered tile and its chunk coordinates:
 
 ```csharp

@@ -13,3 +13,11 @@ Welcome to the documentation index. Key entries:
 - Tutorials: [docs/terrain2d-tutorial/README.md](terrain2d-tutorial/README.md)
 - Architecture: [docs/architecture-class-diagram.md](architecture-class-diagram.md)
 - Performance & Debugging: [docs/performance-and-debugging.md](performance-and-debugging.md)
+
+## Templates
+
+- Feature/Component Doc Template: [docs/templates/feature-doc-template.md](templates/feature-doc-template.md)
+
+## Features
+
+- Chunked Tilemap: [docs/features/chunked-tilemap.md](features/chunked-tilemap.md)

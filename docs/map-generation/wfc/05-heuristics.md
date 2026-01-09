@@ -108,7 +108,7 @@ flowchart TD
 
 Weighted vs. uniform priors (example probabilities and entropy):
 
-```
+```plain
 Domain candidates: {A, B, C}
 Weights (contextual): {8, 1, 1}
 Probabilities: p(A)=0.8, p(B)=0.1, p(C)=0.1
@@ -131,6 +131,7 @@ Rendered diagrams (for non-Mermaid renderers):
 ![Weighted vs uniform probabilities](../../assets/heuristics-weighted-bars.svg)
 
 ### Sample: Lowest-Entropy Selection and Tie-Breaking
+
 Project: TerrainGeneration2D.Core, file: [WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
 
 ```csharp
@@ -177,9 +178,10 @@ private (int x, int y) FindLowestEntropy()
 - Deterministic ordering: sort candidates by weight descending, then tile id ascending. This keeps backtracking exploration stable.
 - Context-aware weights: include heightmap/biome signals or global frequency caps to avoid overuse of certain tiles.
 - Mixed strategies: combine heuristic and uniform randomness (e.g., 80/20) via `NextDouble()` to retain variation.
- - Backtracking linkage: this ordering is consumed by the decision frames in backtracking to explore candidates deterministically; see [04 — Backtracking](04-backtracking.md).
+  - Backtracking linkage: this ordering is consumed by the decision frames in backtracking to explore candidates deterministically; see [04 — Backtracking](04-backtracking.md).
 
 ### Sample: Weighted Collapse (Non-Backtracking)
+
 Project: TerrainGeneration2D.Core, file: [WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
 
 ```csharp
@@ -219,6 +221,7 @@ private bool CollapseCell(int x, int y)
 ```
 
 ### Sample: Candidate Ordering (Backtracking)
+
 Project: TerrainGeneration2D.Core, file: [WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
 
 ```csharp
@@ -242,6 +245,7 @@ stack.Push(frame);
 - Tests: implement a deterministic provider that returns fixed values to make choices predictable. Example in [TerrainGeneration2D.Tests/MappingTests.cs](../../../TerrainGeneration2D.Tests/MappingTests.cs).
 
 ### Sample: Deterministic Provider and Injection
+
 Project: TerrainGeneration2D.Tests, file: [MappingTests.cs](../../../TerrainGeneration2D.Tests/MappingTests.cs)
 
 ```csharp
@@ -260,6 +264,7 @@ var success = wfc.Generate(enableBacktracking: true, maxIterations: 10000, maxBa
 ```
 
 ### Sample: Mixed Strategy (Heuristic + Uniform)
+
 Project: TerrainGeneration2D.Core, file: [WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
 
 ```csharp
@@ -323,6 +328,7 @@ int ChooseTile(List<(int tile, int weight)> weightedOptions)
 - Integration: chunks construct `WfcProvider` per chunk and pass backtracking limits; see [ChunkedTilemap.cs](../../../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs).
 
 ## Navigation
+
 - Up: [WFC README](README.md)
 - Previous: [04 — Backtracking](04-backtracking.md)
 - Next: [05 — Integration](05-integration.md)

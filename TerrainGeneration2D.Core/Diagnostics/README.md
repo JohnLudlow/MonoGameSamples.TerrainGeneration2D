@@ -7,12 +7,14 @@ The `TerrainPerformanceEventSource` provides performance telemetry for the terra
 ## Event Categories
 
 ### Trace Events
+
 - **UpdateActiveChunksBegin/End**: Tracks chunk activation/deactivation
 - **ChunkLoadBegin/End**: Monitors chunk loading from disk
 - **ChunkSaveBegin/End**: Monitors chunk saving to disk  
 - **WaveFunctionCollapseBegin/End**: Tracks WFC algorithm execution
 
 ### Performance Counters
+
 - **active-chunk-count**: Current number of loaded chunks in memory
 - **chunks-saved-per-second**: Rate of chunk persistence operations
 
@@ -48,16 +50,19 @@ This will write all events and counters to the console output.
 ### Option 2: dotnet-counters (Production Monitoring)
 
 Install the tool:
+
 ```bash
 dotnet tool install --global dotnet-counters
 ```
 
 Monitor the running game:
+
 ```bash
 dotnet-counters monitor --process-id <PID> JohnLudlow.TerrainGeneration2D.Performance
 ```
 
 List available counters:
+
 ```bash
 dotnet-counters list --process-id <PID>
 ```
@@ -65,16 +70,19 @@ dotnet-counters list --process-id <PID>
 ### Option 3: dotnet-trace (Event Capture)
 
 Install the tool:
+
 ```bash
 dotnet tool install --global dotnet-trace
 ```
 
 Capture events to a file:
+
 ```bash
 dotnet-trace collect --process-id <PID> --providers JohnLudlow.TerrainGeneration2D.Performance
 ```
 
 View the trace file:
+
 ```bash
 dotnet-trace report trace.nettrace
 ```
@@ -91,7 +99,7 @@ dotnet-trace report trace.nettrace
 
 With `ConsoleEventListener` enabled, you'll see output like:
 
-```
+```plain
 [INFO] UpdateActiveChunksBegin: UpdateActiveChunks bounds 0,0 -> 2,2
 [INFO] ChunkLoadBegin: Chunk load begin 0,0
 [INFO] ChunkLoadEnd: Chunk load end 0,0 success=False
@@ -144,6 +152,7 @@ services.AddOpenTelemetry()
 ## Performance Impact
 
 EventSource has minimal overhead when:
+
 - Events are disabled (default state)
 - No listeners are attached
 - Events are enabled but filtered by level
@@ -152,22 +161,26 @@ The `IsEnabled()` checks in each event method ensure zero allocation when events
 
 ## Troubleshooting
 
-**Events not appearing?**
+### Events not appearing?
+
 - Ensure an `EventListener` is created and enables the event source
 - Check that `EventLevel` is set appropriately (Verbose, Informational, etc.)
 - Verify the event source name matches exactly: `"JohnLudlow.TerrainGeneration2D.Performance"`
 
-**Counters showing zeros?**
+### Counters showing zeros?
+
 - Counters update based on `EventCounterIntervalSec` setting (default 1 second)
 - Ensure events that increment counters are actually being called
 - Check that `EnableEvents` includes the `EventCounterIntervalSec` argument
 
-**Too much output?**
+### Too much output?
+
 - Reduce `EventLevel` from `Verbose` to `Informational`
 - Filter specific events in your listener's `OnEventWritten` method
 - Disable the listener when not actively debugging
 
-**ERROR: Event has ID X which is already in use**
+### ERROR: Event has ID X which is already in use
+
 - This occurs when event IDs conflict with EventSource infrastructure (IDs 1-2) or EventCounter (IDs 1-9)
 - Solution: Use event IDs starting from 10 or higher
 - The TerrainPerformanceEventSource uses IDs 10-17 to avoid conflicts
@@ -175,7 +188,9 @@ The `IsEnabled()` checks in each event method ensure zero allocation when events
 ## Technical Notes
 
 ### Event ID Ranges
+
 EventSource reserves certain event IDs for internal use:
+
 - **IDs 1-2**: Reserved for EventSource manifest and metadata
 - **IDs 1-9**: May be used by EventCounter infrastructure
 - **IDs 10+**: Safe for custom events
@@ -183,6 +198,7 @@ EventSource reserves certain event IDs for internal use:
 Our implementation uses IDs 10-17 for trace events to avoid conflicts.
 
 ### EventCounter vs WriteEvent
+
 - `EventCounter.WriteMetric()` and `IncrementingEventCounter.Increment()` are **not** WriteEvent calls
 - They generate internal events for counter aggregation
 - Counters appear in `dotnet-counters` and monitoring tools, not in trace events

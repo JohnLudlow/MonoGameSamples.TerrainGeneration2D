@@ -1,11 +1,14 @@
 ﻿# Phase 09 - WFC Propagation (Arc-consistency) (TDD)
 
 Goal:
+
 - After collapsing a cell, propagate constraints to neighbors
 - Maintain a queue of affected cells until no changes remain
 
 ## 0. Tests (TDD)
+
 Create `TerrainGeneration2D.Tests/WfcPropagationTests.cs`:
+
 ```csharp
 namespace TerrainGeneration2D.Tests;
 
@@ -35,7 +38,9 @@ public class WfcPropagationTests
 ```
 
 ## 1. Engine propagation methods (Core)
+
 Update `TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs`:
+
 ```csharp
 // ...existing code...
 public void Collapse(int x, int y, int tile)
@@ -84,6 +89,7 @@ private IEnumerable<(int x,int y, Direction dir)> Neighbors(int x, int y)
 Proceed to backtracking in the next phase.
 
 ## Heuristics: Entropy and Selection
+
 - Entropy: pick the cell with the smallest domain (fewest candidates). For advanced tuning, consider Shannon entropy $H = -\sum p_i \log p_i$ with tile priors.
 - Tie-breaking: resolve equal-entropy cells via an injected randomness provider for stability in production, and a deterministic provider in tests.
 - Weights: when choosing a tile for a cell, favor neighbors of the same type with a simple boost (e.g., `1 + k * matches`). Keep candidate ordering stable (sort by tile id) to avoid nondeterminism.
@@ -96,6 +102,7 @@ Proceed to backtracking in the next phase.
 > - Runtime tuning idea: add a config value (e.g., `WfcWeights.NeighborMatchBoost`) in appsettings and thread it into `WfcProvider` to scale the neighbor-match multiplier. Start small (e.g., 1–3) and observe contradictions/backtracks via diagnostics.
 
 ## See also
+
 - Previous phase: [08 — WFC Domains & Entropy](08-wfc-domains.md)
 - Next phase: [10 — WFC Backtracking](10-wfc-backtracking.md)
 - Tutorial index: [README.md](README.md)

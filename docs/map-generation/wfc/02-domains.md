@@ -3,6 +3,7 @@
 Purpose: describe how domains and outputs are represented and initialized.
 
 ## Representation
+
 Each cell has a domain of possible tile IDs. We use a 2D array of `HashSet<int>?` where `null` means collapsed, and a separate `int[,]` to store the chosen tile IDs.
 
 ```csharp
@@ -19,6 +20,7 @@ private readonly int[,] _output;
 ```
 
 ## Initialization
+
 On construction, we seed every domain with all valid tile IDs and mark outputs as unset.
 
 ```csharp
@@ -27,18 +29,20 @@ On construction, we seed every domain with all valid tile IDs and mark outputs a
 /// </summary>
 private void InitializeDomains(TileTypeRegistry tileRegistry, int width, int height)
 {
-	var all = tileRegistry.ValidTileIds;
-	for (int y = 0; y < height; y++)
-	for (int x = 0; x < width; x++)
-	{
-		_possibilities[x, y] = new HashSet<int>(all);
-		_output[x, y] = -1;
-	}
+  var all = tileRegistry.ValidTileIds;
+  for (int y = 0; y < height; y++)
+  for (int x = 0; x < width; x++)
+  {
+    _possibilities[x, y] = new HashSet<int>(all);
+    _output[x, y] = -1;
+  }
 }
 ```
 
 ## Context for Rule Evaluation
+
 Rule checks compute whether a candidate tile is compatible with a neighbor, given:
+
 - Tile rule definitions (`TileTypeRegistry` and concrete tile types)
 - Biome/height context (`IHeightProvider` samples)
 - Configuration (`TerrainRuleConfiguration`)
@@ -51,6 +55,7 @@ These inputs are packaged into a `TileRuleContext` passed to rule evaluators dur
 - Rule evaluation: [TerrainGeneration2D.Core/Mapping/TileAdjacencyRules.cs](../../../TerrainGeneration2D.Core/Mapping/TileAdjacencyRules.cs)
 
 Navigation
+
 - Up: [WFC README](README.md)
 - Previous: [01 — Overview](01-overview.md)
 - Next: [03 — Propagation](03-propagation.md)

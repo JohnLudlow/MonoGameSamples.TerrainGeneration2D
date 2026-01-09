@@ -15,31 +15,31 @@ foreach ($file in $mdFiles) {
   $lines = Get-Content -LiteralPath $file.FullName
   for ($i = 0; $i -lt $lines.Count; $i++) {
     $line = $lines[$i]
-    $matches = [regex]::Matches($line, "\[.*?\]\((.*?)\)")
-    foreach ($m in $matches) {
-      $target = $m.Groups[1].Value
+    $match = [regex]::Match($line, "\[.*?\]\((.*?)\)")
+    while ($match.Success) {
+      $target = $match.Groups[1].Value
 
       # Allow external links
-      if ($target -match "^(https?://|mailto:)") { continue }
+      if ([regex]::IsMatch($target, "^(https?://|mailto:)")) { $match = $match.NextMatch(); continue }
 
       # Disallow absolute local paths and root-anchored paths
-      if ($target -match "^[A-Za-z]:\\") {
+      if ([regex]::IsMatch($target, "^[A-Za-z]:\\")) {
         $errors += @{ File = $file.FullName; Line = $i + 1; Issue = "Absolute local path"; Target = $target }
-        continue
+        $match = $match.NextMatch(); continue
       }
-      if ($target -match "^/") {
+      if ([regex]::IsMatch($target, "^/")) {
         $errors += @{ File = $file.FullName; Line = $i + 1; Issue = "Root-anchored path"; Target = $target }
-        continue
+        $match = $match.NextMatch(); continue
       }
-      if ($target -match "^(file|vscode)://") {
+      if ([regex]::IsMatch($target, "^(file|vscode)://")) {
         $errors += @{ File = $file.FullName; Line = $i + 1; Issue = "Unsupported URI scheme"; Target = $target }
-        continue
+        $match = $match.NextMatch(); continue
       }
 
       # Guard against escaping repo root via too many ../ segments
-      if ($target -match "^(\.\./){4,}") {
+      if ([regex]::IsMatch($target, "^(\.\.\/){4,}")) {
         $errors += @{ File = $file.FullName; Line = $i + 1; Issue = "Path escapes repo root"; Target = $target }
-        continue
+        $match = $match.NextMatch(); continue
       }
 
       # Strip fragment and query for existence check
@@ -61,6 +61,7 @@ foreach ($file in $mdFiles) {
       } elseif ($abs) {
         $errors += @{ File = $file.FullName; Line = $i + 1; Issue = "Resolved outside repo"; Target = $target }
       }
+      $match = $match.NextMatch()
     }
   }
 }

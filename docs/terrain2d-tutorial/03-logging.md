@@ -1,13 +1,16 @@
 ﻿# Phase 03 - Logging
 
 In this phase you will:
+
 - Add structured logging with Microsoft.Extensions.Logging
 - Log generation phases and input actions
 - Optimize hot-path logging using `LoggerMessage` source generator
 - Configure logging levels via `appsettings.json` (Default=DEBUG, key namespaces)
 
 ## 0. Write tests (TDD)
+
 Create `TerrainGeneration2D.Tests/LoggingTests.cs`:
+
 ```csharp
 using Microsoft.Extensions.Logging;
 
@@ -26,6 +29,7 @@ public class LoggingTests
 ```
 
 ## 1. Add logging packages (Game)
+
 ```bash
 cd src/TerrainGeneration2D
 dotnet add package Microsoft.Extensions.Logging
@@ -40,9 +44,11 @@ dotnet add package Microsoft.Extensions.Configuration.EnvironmentVariables
 Note: You do not need a separate “Generators” package. The `LoggerMessage` source generator is included with modern `Microsoft.Extensions.Logging` for current target frameworks.
 
 ### 1a. Configure logging via appsettings.json
+
 Add `appsettings.json` to your game project so log levels are configurable without code changes. Use a default of DEBUG and add major namespaces for clarity.
 
 Create `TerrainGeneration2D/appsettings.json`:
+
 ```json
 {
     "Logging": {
@@ -60,6 +66,7 @@ Create `TerrainGeneration2D/appsettings.json`:
 ```
 
 Ensure it’s copied to the output directory by updating your game csproj:
+
 ```xml
 <ItemGroup>
     <None Update="appsettings.json">
@@ -78,6 +85,7 @@ Ensure it’s copied to the output directory by updating your game csproj:
 ```
 
 Wire configuration into logging in `Program.cs` or your bootstrap code:
+
 ```csharp
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -103,6 +111,7 @@ static class Log
 ```
 
 ## 2. Optional: minimal factory (no config file)
+
 If you prefer to skip `appsettings.json`, you can use a minimal factory setup:
 
 ```csharp
@@ -122,7 +131,9 @@ static class Log
 ```
 
 ## 3. Use the logger (basic)
+
 TerrainGeneration2D/TerrainGenerationGame.cs — code excerpt; unrelated members omitted for brevity:
+
 ```csharp
 private readonly ILogger _log = Log.Create<TerrainGenerationGame>();
 
@@ -140,6 +151,7 @@ protected override void LoadContent()
 ```
 
 ### 3a. Verify config-driven levels
+
 Add a few log lines at different levels and run the game to confirm filtering via `appsettings.json`.
 
 ```csharp
@@ -154,11 +166,13 @@ protected override void Initialize()
 ```
 
 Run with the default config (Default=Debug from appsettings.json) — you should see Debug/Information/Warning (Trace is filtered):
+
 ```pwsh
 dotnet run --project src/TerrainGeneration2D/TerrainGeneration2D.csproj
 ```
 
 Tighten the level to Warning to suppress Debug/Information — edit `appsettings.json`:
+
 ```json
 {
     "Logging": {
@@ -168,9 +182,11 @@ Tighten the level to Warning to suppress Debug/Information — edit `appsettings
     }
 }
 ```
+
 Run again — only Warning (and above) appears.
 
 Use environment-specific overrides by creating `appsettings.Development.json`:
+
 ```json
 {
     "Logging": {
@@ -178,7 +194,9 @@ Use environment-specific overrides by creating `appsettings.Development.json`:
     }
 }
 ```
+
 Then set the environment and run:
+
 ```pwsh
 $env:DOTNET_ENVIRONMENT = "Development"
 dotnet run --project src/TerrainGeneration2D/TerrainGeneration2D.csproj
@@ -187,6 +205,7 @@ Remove-Item Env:DOTNET_ENVIRONMENT
 ```
 
 ## 4. Optimize with `LoggerMessage` (compile-time generated methods)
+
 Create a partial class to surface strongly-typed logging APIs without runtime boxing/formatting overhead:
 
 ```csharp
@@ -210,6 +229,7 @@ static partial class GenLog
 
 Use them in your game host class.
 TerrainGeneration2D/TerrainGenerationGame.cs — code excerpt; unrelated members omitted for brevity:
+
 ```csharp
 private readonly ILogger _log = Log.Create<GameHost>();
 
@@ -234,20 +254,24 @@ void Generate()
 ```
 
 Notes:
+
 - The `Microsoft.Extensions.Logging.Generators` package emits source at compile-time.
 - Generated methods avoid string interpolation and object array allocations in hot paths.
 - Keep `EventId`s stable and documented.
 
 ## 5. Correlate with diagnostics
+
 - Emit a log when you call `TerrainPerformanceEventSource.Log.*` events such as `UpdateActiveChunksBegin/End`, `ChunkLoadBegin/End`, `ChunkSaveBegin/End`, or `WaveFunctionCollapseBegin/End`.
 - Aligns trace logs with counters like `active-chunk-count` and `chunks-saved-per-second` when debugging performance (see Diagnostics README).
 
 ## 6. Next steps
+
 - Add file logging provider.
 - Introduce logging scopes around generation and drawing.
 - Route errors to a telemetry pipeline (Seq, OpenTelemetry).
 
 See also:
+
 - Previous phase: [02 — Single tile](02-single-tile.md)
 - Next phase: [04 — Performance](04-performance.md)
 - Tutorial index: [README.md](README.md)

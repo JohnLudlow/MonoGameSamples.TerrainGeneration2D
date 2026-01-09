@@ -1,13 +1,16 @@
 ﻿# Event ID Conflict Resolution
 
 ## Issue
+
 When running the game, PerfView showed this error:
-```
+
+```plain
 ERROR: Exception in Command Processing for EventSource JohnLudlow.TerrainGeneration2D.Performance: 
 Event ChunkLoadBegin has ID 3 which is already in use.
 ```
 
 ## Root Cause
+
 EventSource reserves certain event IDs for internal use:
 
 | ID Range | Purpose | Reserved By |
@@ -19,6 +22,7 @@ EventSource reserves certain event IDs for internal use:
 Our original implementation used IDs 1-8, which conflicted with the infrastructure.
 
 ## Solution
+
 Changed all event IDs to start from 10:
 
 ```csharp
@@ -65,7 +69,8 @@ public void ChunkLoadBegin(...)
 ## Verification
 
 ### Before Fix
-```
+
+```plain
 # PerfView shows:
 ERROR: Event ChunkLoadBegin has ID 3 which is already in use.
 
@@ -74,7 +79,8 @@ ERROR: Event ChunkLoadBegin has ID 3 which is already in use.
 ```
 
 ### After Fix
-```
+
+```plain
 # PerfView shows no errors
 # Console shows:
 [INFO] UpdateActiveChunksBegin: UpdateActiveChunks bounds 0,0 -> 2,2
@@ -98,6 +104,7 @@ ERROR: Event ChunkLoadBegin has ID 3 which is already in use.
 ## Testing
 
 Run this to verify no event ID conflicts:
+
 ```bash
 # Start the game
 dotnet run --project TerrainGeneration2D/TerrainGeneration2D.csproj
@@ -112,10 +119,12 @@ dotnet-trace report trace.nettrace | grep ERROR
 Should show **no errors**.
 
 ## References
+
 - [EventSource Documentation](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventsource)
 - [EventCounter Documentation](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventcounter)
 - Event ID reservation is mentioned in EventSource best practices but not always obvious
 
 ## Impact
+
 - **Before**: Zero events emitted, counters non-functional, silent failures
 - **After**: All events emit correctly, counters work in dotnet-counters and Visual Studio

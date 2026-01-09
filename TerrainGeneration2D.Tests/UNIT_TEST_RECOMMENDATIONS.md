@@ -1,13 +1,15 @@
 # Unit Test Recommendations for TerrainGeneration2D
 
 ## Overview
+
 Focus on testing the map generation logic in the Core library, particularly chunk management, coordinate conversions, and deterministic generation.
 
 ## Recommended Test Structure
 
 ### 1. ChunkedTilemap Tests (`ChunkedTilemapTests.cs`)
 
-#### Test: Coordinate Conversion
+#### Test: Tile-to-Chunk Coordinate Conversion
+
 ```csharp
 [Theory]
 [InlineData(0, 0, 0, 0)]      // First tile of first chunk
@@ -27,6 +29,7 @@ public void TileToChunkCoordinates_ConvertsCorrectly(int tileX, int tileY, int e
 ```
 
 #### Test: Deterministic Generation
+
 ```csharp
 [Fact]
 public void GenerateChunk_SameSeedProducesSameTiles()
@@ -62,6 +65,7 @@ public void GenerateChunk_DifferentSeedsProduceDifferentTiles()
 ```
 
 #### Test: Chunk Persistence
+
 ```csharp
 [Fact]
 public void SaveAndLoad_PreservesChunkData()
@@ -90,6 +94,7 @@ public void SaveAndLoad_PreservesChunkData()
 ```
 
 #### Test: Chunk Loading Strategy
+
 ```csharp
 [Fact]
 public void UpdateActiveChunks_LoadsOnlyVisibleChunks()
@@ -134,6 +139,7 @@ public void UpdateActiveChunks_UnloadsDistantChunks()
 ### 2. Chunk Tests (`ChunkTests.cs`)
 
 #### Test: Chunk Boundaries
+
 ```csharp
 [Fact]
 public void Chunk_AccessWithinBounds_Succeeds()
@@ -165,6 +171,7 @@ public void Chunk_AccessOutOfBounds_ThrowsException(int x, int y)
 ```
 
 #### Test: Dirty Flag
+
 ```csharp
 [Fact]
 public void Chunk_SetTile_MarksDirty()
@@ -194,6 +201,7 @@ public void Chunk_NewChunk_IsNotDirty()
 ### 3. Camera2D Tests (`Camera2DTests.cs`)
 
 #### Test: Zoom Clamping
+
 ```csharp
 [Theory]
 [InlineData(5.0f, 4.0f)]    // Above max
@@ -213,7 +221,8 @@ public void Zoom_ClampsToValidRange(float inputZoom, float expectedZoom)
 }
 ```
 
-#### Test: Coordinate Conversion
+#### Test: Coordinate Conversion (Screen/World round-trip)
+
 ```csharp
 [Fact]
 public void ScreenToWorld_WorldToScreen_RoundTrip()
@@ -237,6 +246,7 @@ public void ScreenToWorld_WorldToScreen_RoundTrip()
 ```
 
 #### Test: Transform Matrix
+
 ```csharp
 [Fact]
 public void GetTransformMatrix_ChangesWithZoomAndPosition()
@@ -263,6 +273,7 @@ public void GetTransformMatrix_ChangesWithZoomAndPosition()
 ### 4. Chunk Serialization Tests (`ChunkSerializationTests.cs`)
 
 #### Test: Binary Format Validation
+
 ```csharp
 [Fact]
 public void SaveChunk_ProducesValidBinaryFormat()
@@ -316,6 +327,7 @@ public void SaveChunk_ProducesValidBinaryFormat()
 ### 5. Mapping & Tile Rules Tests (`MappingTests.cs`)
 
 #### Test: Mapping Information Metrics
+
 ```csharp
 [Fact]
 public void GetGroupMetrics_ReturnsCorrectDimensions()
@@ -338,6 +350,7 @@ public void GetGroupMetrics_ReturnsCorrectDimensions()
 ```
 
 #### Test: Tile Rule Enforcement
+
 ```csharp
 [Fact]
 public void TileTypes_RejectNeighborViolations()
@@ -361,6 +374,7 @@ public void TileTypes_RejectNeighborViolations()
 ```
 
 #### Test: WFC Filters Candidates
+
 ```csharp
 [Fact]
 public void WaveFunctionCollapse_PropagationFiltersOptions()
@@ -381,6 +395,7 @@ public void WaveFunctionCollapse_PropagationFiltersOptions()
 ## Test Project Setup
 
 ### Create Test Project
+
 ```bash
 dotnet new xunit -n TerrainGeneration2D.Tests -f net10.0
 cd TerrainGeneration2D.Tests
@@ -390,6 +405,7 @@ dotnet add package Moq
 ```
 
 ### Add to Solution
+
 ```bash
 dotnet sln TerrainGeneration2D.slnx add TerrainGeneration2D.Tests/TerrainGeneration2D.Tests.csproj
 ```

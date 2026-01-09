@@ -1,6 +1,7 @@
 ﻿# Phase 01 - Setup a blank MonoGame project (powder blue screen)
 
 In this phase you will:
+
 - Create a new solution with two projects:
   - Game (MonoGame DesktopGL)
   - Core library for map, generation, and diagnostics
@@ -12,6 +13,7 @@ Note: This tutorial is designed to be implemented in a separate repository. The 
 Target: .NET 10
 
 ## 1. Create folders
+
 ```bash
 mkdir Terrain2DTutorial
 cd Terrain2DTutorial
@@ -19,6 +21,7 @@ mkdir src docs
 ```
 
 ## 2. Create solution and projects
+
 ```bash
 cd src
 # Solution
@@ -36,7 +39,9 @@ dotnet sln add TerrainGeneration2D.Core/TerrainGeneration2D.Core.csproj
 ```
 
 ## 3. Write minimal tests (TDD)
+
 Create `TerrainGeneration2D.Tests/SetupTests.cs`:
+
 ```csharp
 namespace TerrainGeneration2D.Tests;
 
@@ -50,12 +55,15 @@ public class SetupTests
     }
 }
 ```
+
 Run:
+
 ```bash
 dotnet test TerrainGeneration2D.Tests/TerrainGeneration2D.Tests.csproj
 ```
 
 ## 4. Add MonoGame dependencies to the Game project
+
 Edit `TerrainGeneration2D/TerrainGeneration2D.csproj`:
 
 ```xml
@@ -73,6 +81,7 @@ Edit `TerrainGeneration2D/TerrainGeneration2D.csproj`:
 Note: The latest 3.8.5 prerelease is currently `3.8.5-preview.2`. Check NuGet for updates.
 
 ## 5. Add a Content Pipeline project
+
 Create a new project to build and package content using the MonoGame Content Pipeline.
 
 ```bash
@@ -114,6 +123,7 @@ Create `TerrainGeneration2D.Content/TerrainGeneration2D.Content.csproj`:
 Implement the Content Builder. Create a `Builder` folder with two files:
 
 1) `TerrainGeneration2D.Content/Builder/Builder.cs` (entry point)
+
 ```csharp
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Content.Builder;
 using Microsoft.Xna.Framework.Content.Pipeline;
@@ -141,6 +151,7 @@ return builder.FailedToBuild > 0 ? -1 : 0;
 ```
 
 2) `TerrainGeneration2D.Content/Builder/TerrainGeneration2DContentBuilder.cs` (what to include)
+
 ```csharp
 using Microsoft.Xna.Framework.Content.Pipeline;
 using MonoGame.Framework.Content.Pipeline.Builder;
@@ -183,6 +194,7 @@ internal sealed class TerrainGeneration2DContentBuilder : ContentBuilder
 ```
 
 How it works:
+
 - `Builder.cs` configures the platform, source directory (`Assets`), and runs the builder.
 - `TerrainGeneration2DContentBuilder` declares which assets to process (`Include`) vs copy as-is (`IncludeCopy`).
 - The Game project’s MSBuild target runs this Content project after each build and outputs into the game’s build folder.
@@ -203,6 +215,7 @@ copy atlas.png TerrainGeneration2D.Content/Assets/images/terrain-atlas.png
 ```
 
 You can also run the content builder directly to test it:
+
 ```bash
 dotnet run --project TerrainGeneration2D.Content/TerrainGeneration2D.Content.csproj -- build -p DesktopGL -s Assets -o TerrainGeneration2D/bin/Debug/net10.0/Content
 ```
@@ -229,6 +242,7 @@ Integrate the content build into the Game project by adding this target to `Terr
 ```
 
 ## 6. Create the GameHostBase base class
+
 Create `TerrainGeneration2D.Core/GameHostBase.cs` as a reusable base class your game can derive from:
 
 ```csharp
@@ -277,9 +291,11 @@ dotnet add src/TerrainGeneration2D/TerrainGeneration2D.csproj reference src/Terr
 ```
 
 ## 7. Create the Game host
+
 Define your game class by deriving from the `GameHostBase` you created, then run it from `Program.cs`.
 
 TerrainGeneration2D/TerrainGenerationGame.cs — code excerpt; unrelated members omitted for brevity:
+
 ```csharp
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -307,6 +323,7 @@ internal sealed class TerrainGenerationGame : GameHostBase
 ```
 
 `TerrainGeneration2D/Program.cs`:
+
 ```csharp
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D;
 
@@ -321,6 +338,7 @@ public static class Program
 ```
 
 ## 8. Build & run
+
 ```bash
 # From the repo root (one level above src), build the solution
 dotnet build src/Terrain2D.sln
@@ -340,9 +358,11 @@ You should see a window with a powder-blue background.
 // In GameHostBase constructor (see TerrainGeneration2D.Core/GameHostBase.cs)
 Window.AllowUserResizing = true;
 ```
+
 Note: Resizing applies when not in fullscreen.
 
 ## 9. Verify the Content Pipeline output
+
 Add a quick placeholder asset and confirm it lands in the game output folder on build.
 
 ```bash
@@ -359,9 +379,11 @@ dir TerrainGeneration2D/bin/Debug/net10.0/Content/images
 You should see your asset (e.g., verify.txt or your image) under the game's Content/images folder. If not, re-check the MSBuild target in `TerrainGeneration2D/TerrainGeneration2D.csproj` and the content project path.
 
 ## Troubleshooting
+
 - If a window doesn’t appear, check your GPU drivers and OpenGL support.
 - If the project fails to restore, confirm the package reference and internet access.
 
 ## See also
+
 - Next phase: [02 — Single tile](02-single-tile.md)
 - Tutorial index: [README.md](README.md)

@@ -3,12 +3,14 @@
 Purpose: discuss hotspots and diagnostics for WFC and chunk generation.
 
 ## Hot paths
+
 - Entropy scan for the next cell (min remaining values).
 - Propagation queue processing and neighbor constraint checks.
 - Backtracking: undo application and re-propagation after rollbacks.
 - Height sampling if constraints depend on elevation/biome.
 
 ## Practical tips
+
 - Data layout: prefer arrays; keep structs small; reuse buffers to avoid per-iteration allocations.
 - Precompute: adjacency tables and bitset-compatible masks to speed set intersections.
 - Heuristics: random but deterministic tie-breakers; bias towards cells near solved regions.
@@ -16,6 +18,7 @@ Purpose: discuss hotspots and diagnostics for WFC and chunk generation.
 - Cache: memoize height/biome samples within a chunk solve.
 
 ## Diagnostics with EventSource
+
 Emit timings and counters around key phases to correlate spikes with inputs and settings.
 
 ```csharp
@@ -28,9 +31,11 @@ Emit timings and counters around key phases to correlate spikes with inputs and 
 Monitor with `dotnet-counters` or `dotnet-trace` as described in the diagnostics README.
 
 Code references:
+
 - EventSource: [TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs](../../../TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs)
 - Emission sites: [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
 
 Navigation
+
 - Up: [WFC README](README.md)
 - Previous: [05 — Integration](05-integration.md)
