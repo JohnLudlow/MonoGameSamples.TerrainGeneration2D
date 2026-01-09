@@ -13,10 +13,10 @@
 - Tests: Comprehensive unit tests pass; tutorials aligned with APIs.
 
 Key files:
-- [TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs](TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs)
-- [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
-- [TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs](TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs)
-- [TerrainGeneration2D/GameController.cs](TerrainGeneration2D/GameController.cs)
+- [TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs](../../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs)
+- [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
+- [TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs](../../TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs)
+- [TerrainGeneration2D/GameController.cs](../../TerrainGeneration2D/GameController.cs)
 
 ## WFC Evaluation (Current Algorithm)
 - Domains: Each cell tracks a `HashSet<int>` of candidate tiles initialized from `TileTypeRegistry.ValidTileIds`.
@@ -45,7 +45,7 @@ Conclusion: This is a partial WFC implementation (observation + propagation) but
 - Add decision stack with `(x,y, candidates, index)`.
 - Snapshot domains or maintain an undo log to revert changes cheaply.
 - On contradiction, pop and try next candidate; terminate when all collapsed or no candidates remain.
-- File: update [WfcProvider.cs](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs).
+- File: update [WfcProvider.cs](../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs).
 
 2. Entropy & Selection Heuristics
 - Entropy metric:
@@ -53,7 +53,7 @@ Conclusion: This is a partial WFC implementation (observation + propagation) but
   - Option: Shannon entropy $H = -\sum p_i \log p_i$ using tile priors/weights to prefer cells with higher information gain.
   - Hybrid: Most Constrained (lowest entropy) + Most Constraining (highest impact on neighbors) for improved stability.
 - Tie-breaking strategy:
-  - Current: random among equal-entropy cells using `IRandomProvider` (see [WfcProvider.cs](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)).
+  - Current: random among equal-entropy cells using `IRandomProvider` (see [WfcProvider.cs](../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)).
   - Deterministic mode: for testability, keep candidate ordering stable and inject a deterministic provider.
   - Alternatives: bias ties by screen/world position (e.g., top-left to bottom-right), Perlin noise, or distance to chunk center.
 - Weight strategies (tile choice within a cell):
@@ -66,10 +66,10 @@ Conclusion: This is a partial WFC implementation (observation + propagation) but
   - Avoid HashSet iteration nondeterminism by ordering before any selection; document tie-breakers explicitly.
 - Practical tuning tips:
   - Start with small multipliers; increase only if contradictions persist or visuals look too noisy.
-  - Monitor `wfc_contradictions`, `wfc_backtracks`, and `wfc_stats` via [TerrainPerformanceEventSource.cs](TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs); adjust weights to reduce rollback pressure.
+  - Monitor `wfc_contradictions`, `wfc_backtracks`, and `wfc_stats` via [TerrainPerformanceEventSource.cs](../../TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs); adjust weights to reduce rollback pressure.
   - Balance `maxBacktrackSteps` and `maxDepth` with heuristic aggressiveness; strong locality weights reduce branching but may raise contradiction hotspots.
   - Use the debug overlay to visually inspect collapse patterns; consider an entropy heatmap to identify problem areas.
- - See also: [05 — Heuristics](docs/map-generation/wfc/05-heuristics.md) for a focused deep-dive and "Try It" tips.
+ - See also: [05 — Heuristics](../map-generation/wfc/05-heuristics.md) for a focused deep-dive and "Try It" tips.
 
 3. Rule Tables & AC-3 Propagation
 - Precompute adjacency tables: `allowed[(tile, dir)] = {neighbors}` from `TileTypeRegistry`.
@@ -80,7 +80,7 @@ Conclusion: This is a partial WFC implementation (observation + propagation) but
 - Seed WFC domains at chunk edges from already-generated neighbor chunks.
 - When generating chunk `(cx,cy)`, import boundary constraints from `(cx-1,cy)`, `(cx,cy-1)`, etc.
 - Ensure persistence maintains seam constraints; handle regeneration coherently.
-- Files: [ChunkedTilemap.cs](TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs) and [WfcProvider.cs](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs).
+- Files: [ChunkedTilemap.cs](../../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs) and [WfcProvider.cs](../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs).
 
 5. Heightmap Integration
 - Cache `IHeightProvider` samples per chunk to avoid repeated calls.
@@ -89,7 +89,7 @@ Conclusion: This is a partial WFC implementation (observation + propagation) but
 6. Performance & Diagnostics
 - Add counters: `wfc_observations`, `wfc_propagations`, `wfc_backtracks`, `wfc_contradictions`.
 - Add timings per chunk for observation/propagation/backtracking phases.
-- Files: [TerrainPerformanceEventSource.cs](TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs).
+- Files: [TerrainPerformanceEventSource.cs](../../TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs).
 
 7. Tests (TDD)
 - Domain initialization and entropy correctness.

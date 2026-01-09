@@ -9,7 +9,7 @@ Scope:
 
 Key code:
 - [TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs](../../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs)
-- [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse.cs](../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse.cs)
+- [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
 - [TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs](../../TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs)
 
 Sub-wikis:

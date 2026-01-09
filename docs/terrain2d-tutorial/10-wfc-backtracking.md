@@ -98,7 +98,7 @@ Proceed to integration in the next phase.
 - Candidate ordering: in backtracking, order by weight descending (e.g., neighbor-match boost) then tile id ascending to keep exploration deterministic.
 - Weights: tune the neighbor-match multiplier conservatively to reduce contradictions without causing streaking; consider context-aware boosts (heightmap/biome).
 - Tuning with limits: balance `maxBacktrackSteps` and `maxDepth` with heuristic aggressiveness—strong locality reduces branching but can increase rollback pressure.
-- References: see [docs/wfc/wfc-implementation-roadmap.md](docs/wfc/wfc-implementation-roadmap.md) and implementation in [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs).
+- References: see [wfc-implementation-roadmap.md](../wfc/wfc-implementation-roadmap.md) and implementation in [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs).
 
 > Try It
 >
@@ -106,6 +106,6 @@ Proceed to integration in the next phase.
 > - Runtime tuning idea: expose `WfcWeights` (e.g., `Base`, `NeighborMatchBoost`) via config and adjust alongside `maxBacktrackSteps`/`maxDepth`. Track `WfcStats` to see how changes affect backtracks and max depth.
 
 ## See also
-- Previous phase: [09 — WFC Propagation](docs/terrain2d-tutorial/09-wfc-propagation.md)
-- Next phase: [11 — WFC Integration](docs/terrain2d-tutorial/11-wfc-integration.md)
-- Tutorial index: [docs/terrain2d-tutorial/README.md](docs/terrain2d-tutorial/README.md)
+- Previous phase: [09 — WFC Propagation](09-wfc-propagation.md)
+- Next phase: [11 — WFC Integration](11-wfc-integration.md)
+- Tutorial index: [README.md](README.md)

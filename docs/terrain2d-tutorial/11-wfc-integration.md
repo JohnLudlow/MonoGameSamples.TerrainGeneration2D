@@ -36,6 +36,6 @@ public class WfcIntegrationTests
 This completes WFC integration.
 
 ## See also
-- Previous phase: [10 — WFC Backtracking](docs/terrain2d-tutorial/10-wfc-backtracking.md)
-- Earlier phases: [08 — Domains](docs/terrain2d-tutorial/08-wfc-domains.md), [09 — Propagation](docs/terrain2d-tutorial/09-wfc-propagation.md)
-- Tutorial index: [docs/terrain2d-tutorial/README.md](docs/terrain2d-tutorial/README.md)
+- Previous phase: [10 — WFC Backtracking](10-wfc-backtracking.md)
+- Earlier phases: [08 — Domains](08-wfc-domains.md), [09 — Propagation](09-wfc-propagation.md)
+- Tutorial index: [README.md](README.md)

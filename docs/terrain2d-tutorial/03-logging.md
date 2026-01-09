@@ -248,6 +248,6 @@ Notes:
 - Route errors to a telemetry pipeline (Seq, OpenTelemetry).
 
 See also:
-- Previous phase: [02 — Single tile](docs/terrain2d-tutorial/02-single-tile.md)
-- Next phase: [04 — Performance](docs/terrain2d-tutorial/04-performance.md)
-- Tutorial index: [docs/terrain2d-tutorial/README.md](docs/terrain2d-tutorial/README.md)
+- Previous phase: [02 — Single tile](02-single-tile.md)
+- Next phase: [04 — Performance](04-performance.md)
+- Tutorial index: [README.md](README.md)

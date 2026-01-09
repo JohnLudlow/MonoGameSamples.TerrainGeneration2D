@@ -363,5 +363,5 @@ You should see your asset (e.g., verify.txt or your image) under the game's Cont
 - If the project fails to restore, confirm the package reference and internet access.
 
 ## See also
-- Next phase: [02 — Single tile](docs/terrain2d-tutorial/02-single-tile.md)
-- Tutorial index: [docs/terrain2d-tutorial/README.md](docs/terrain2d-tutorial/README.md)
+- Next phase: [02 — Single tile](02-single-tile.md)
+- Tutorial index: [README.md](README.md)
