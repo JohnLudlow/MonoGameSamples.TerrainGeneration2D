@@ -379,6 +379,6 @@ dotnet run --project src/TerrainGeneration2D/TerrainGeneration2D.csproj
 You should see the screen filled with the first tile from your atlas.
 
 See also:
-- Previous phase: [01 — Setup](docs/terrain2d-tutorial/01-setup.md)
-- Next steps with deterministic random fill in [docs/terrain2d-tutorial/05-random-tiles.md](docs/terrain2d-tutorial/05-random-tiles.md).
-- Tutorial index: [docs/terrain2d-tutorial/README.md](docs/terrain2d-tutorial/README.md).
+- Previous phase: [01 — Setup](01-setup.md)
+- Next steps with deterministic random fill in [05-random-tiles.md](05-random-tiles.md).
+- Tutorial index: [README.md](README.md).

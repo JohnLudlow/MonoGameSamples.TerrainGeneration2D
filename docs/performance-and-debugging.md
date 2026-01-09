@@ -14,7 +14,7 @@
 + After the trace completes, run `dotnet-trace ps` (or the task manager) to verify the process ID and reopen the trace if needed; you can also replay the timeline with `perfview /trace:terrain-events.nettrace` or `speedscope terrain-events.speedscope.json` if you convert the file.
 
 ## Benchmark extension
-- The benchmark suite in [TerrainGeneration2D.Benchmarks/Program.cs](TerrainGeneration2D.Benchmarks/Program.cs) now exposes parameterized scenarios:
+- The benchmark suite in [TerrainGeneration2D.Benchmarks/Program.cs](../TerrainGeneration2D.Benchmarks/Program.cs) now exposes parameterized scenarios:
 	- Map sizes: 512, 1024, 2048 tiles per side
 	- Entropy strategy: Domain, Shannon, Combined (Domain+Shannon with tie-break)
 	- WFC time budget per chunk: 20ms, 50ms, 100ms

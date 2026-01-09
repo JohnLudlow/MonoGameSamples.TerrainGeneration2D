@@ -1,5 +1,10 @@
 # Docs Index
 
+[![Build and Test](https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/actions/workflows/main.yml/badge.svg)](https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/actions/workflows/main.yml)
+![.NET Version](https://img.shields.io/badge/.NET-10.0-blue)
+![MonoGame](https://img.shields.io/badge/MonoGame-DesktopGL-orange)
+[![License](https://img.shields.io/github/license/JohnLudlow/MonoGameSamples.TerrainGeneration2D)](https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D)
+
 Welcome to the documentation index. Key entries:
 
 - Map Generation wiki: [docs/map-generation/README.md](map-generation/README.md)

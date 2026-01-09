@@ -129,6 +129,6 @@ Run the game—you’ll see continents, shorelines, forests, mountains, and snow
 After choosing a biome, you can still apply the simple neighbor rule from phase 06 to reduce harsh borders.
 
 ## See also
-- Previous phase: [06 — Adjacency rules](docs/terrain2d-tutorial/06-adjacency-rules.md)
-- Next phase: [08 — WFC Domains & Entropy](docs/terrain2d-tutorial/08-wfc-domains.md)
-- Tutorial index: [docs/terrain2d-tutorial/README.md](docs/terrain2d-tutorial/README.md)
+- Previous phase: [06 — Adjacency rules](06-adjacency-rules.md)
+- Next phase: [08 — WFC Domains & Entropy](08-wfc-domains.md)
+- Tutorial index: [README.md](README.md)

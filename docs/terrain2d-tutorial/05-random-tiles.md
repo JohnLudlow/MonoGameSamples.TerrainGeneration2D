@@ -153,12 +153,12 @@ protected override void Draw(GameTime gameTime)
 }
 ```
 
-Note: For a `TextureRegion` overview and `Tileset` setup, see Phase 02 — Implement TextureRegion in [docs/terrain2d-tutorial/02-single-tile.md](docs/terrain2d-tutorial/02-single-tile.md).
+Note: For a `TextureRegion` overview and `Tileset` setup, see Phase 02 — Implement TextureRegion in [02-single-tile.md](02-single-tile.md).
 
 ## See also
-- Previous phase: [04 — Performance](docs/terrain2d-tutorial/04-performance.md)
-- Next phase: [06 — Adjacency rules](docs/terrain2d-tutorial/06-adjacency-rules.md)
-- Tutorial index: [docs/terrain2d-tutorial/README.md](docs/terrain2d-tutorial/README.md)
+- Previous phase: [04 — Performance](04-performance.md)
+- Next phase: [06 — Adjacency rules](06-adjacency-rules.md)
+- Tutorial index: [README.md](README.md)
 
 Run:
 ```bash

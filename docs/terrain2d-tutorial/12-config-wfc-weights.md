@@ -63,7 +63,7 @@ These values are passed to `HeightMapGenerator` to shape the overall terrain.
 
 ## Applying Changes
 - The config is read when `GameScene` constructs the tilemap. Restart the game to apply changes.
-- To observe a full regeneration, delete the saves folder: [TerrainGeneration2D.Core/Content/saves](../../TerrainGeneration2D.Core/Content/saves). Chunks will be re-generated with the new weights.
+- To observe a full regeneration, delete the saves folder at TerrainGeneration2D.Core/Content/saves. Chunks will be re-generated with the new weights.
 
 ## Try It
 - Make selection neutral to neighbors: set `NeighborMatchBoost` to `0` and restart.

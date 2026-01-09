@@ -102,7 +102,7 @@ You will see `fps` reported once per second.
 - Counters are emitted when listeners pass `EventCounterIntervalSec` in `EnableEvents`.
 
 ## 5. Try It
-- Create the file shown in [TerrainGeneration2D.Core/Diagnostics/GamePerformanceEventSource.cs](TerrainGeneration2D.Core/Diagnostics/GamePerformanceEventSource.cs) and add the `Draw()` snippet in your game class to report FPS.
+- Create the file shown in [TerrainGeneration2D.Core/Diagnostics/GamePerformanceEventSource.cs](../../TerrainGeneration2D.Core/Diagnostics/GamePerformanceEventSource.cs) and add the `Draw()` snippet in your game class to report FPS.
 - Build and run the game:
 ```pwsh
 dotnet build src/Terrain2D.sln
@@ -136,6 +136,6 @@ Notes:
 - Full listener tests require an `EventListener` and are integration-level; here we only assert that reporting a counter does not throw.
 
 ## See also
-- Previous phase: [03 — Logging](docs/terrain2d-tutorial/03-logging.md)
-- Next phase: [05 — Random tiles](docs/terrain2d-tutorial/05-random-tiles.md)
-- Tutorial index: [docs/terrain2d-tutorial/README.md](docs/terrain2d-tutorial/README.md)
+- Previous phase: [03 — Logging](03-logging.md)
+- Next phase: [05 — Random tiles](05-random-tiles.md)
+- Tutorial index: [README.md](README.md)

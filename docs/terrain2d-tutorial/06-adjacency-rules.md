@@ -284,6 +284,6 @@ Run the game and look for edge consistency. Tweak tile IDs, rule parameters, and
 - In the next phase we’ll introduce heightmaps to drive tile selection and further constrain options.
 
 ## See also
-- Previous phase: [05 — Random tiles](docs/terrain2d-tutorial/05-random-tiles.md)
-- Next phase: [07 — Heightmap rules](docs/terrain2d-tutorial/07-heightmap.md)
-- Tutorial index: [docs/terrain2d-tutorial/README.md](docs/terrain2d-tutorial/README.md)
+- Previous phase: [05 — Random tiles](05-random-tiles.md)
+- Next phase: [07 — Heightmap rules](07-heightmap.md)
+- Tutorial index: [README.md](README.md)

@@ -67,6 +67,6 @@ public sealed class WfcEngine
 Proceed to propagation in the next phase.
 
 ## See also
-- Previous phase: [07 — Heightmap rules](docs/terrain2d-tutorial/07-heightmap.md)
-- Next phase: [09 — WFC Propagation](docs/terrain2d-tutorial/09-wfc-propagation.md)
-- Tutorial index: [docs/terrain2d-tutorial/README.md](docs/terrain2d-tutorial/README.md)
+- Previous phase: [07 — Heightmap rules](07-heightmap.md)
+- Next phase: [09 — WFC Propagation](09-wfc-propagation.md)
+- Tutorial index: [README.md](README.md)
