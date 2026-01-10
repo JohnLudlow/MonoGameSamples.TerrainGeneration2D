@@ -38,4 +38,4 @@ Code references:
 Navigation
 
 - Up: [WFC README](README.md)
-- Previous: [05 — Integration](05-integration.md)
+- Previous: [06 — Integration](06-integration.md)

@@ -46,4 +46,4 @@ Navigation
 
 - Up: [WFC README](README.md)
 - Previous: [04 — Backtracking](04-backtracking.md)
-- Next: [06 — Performance](06-performance.md)
+- Next: [07 — Performance](07-performance.md)

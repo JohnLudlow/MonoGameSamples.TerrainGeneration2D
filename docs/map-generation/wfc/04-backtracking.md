@@ -262,5 +262,5 @@ Navigation
 
 - Up: [WFC README](README.md)
 - Previous: [03 — Propagation](03-propagation.md)
-- Next: [05 — Integration](05-integration.md)
-- Next (alternate): [05 — Heuristics](05-heuristics.md)
+- Next: [05 — Heuristics](05-heuristics.md)
+- See also: [06 — Integration](06-integration.md)

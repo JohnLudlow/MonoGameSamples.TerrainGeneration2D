@@ -331,4 +331,4 @@ int ChooseTile(List<(int tile, int weight)> weightedOptions)
 
 - Up: [WFC README](README.md)
 - Previous: [04 — Backtracking](04-backtracking.md)
-- Next: [05 — Integration](05-integration.md)
+- Next: [06 — Integration](06-integration.md)
