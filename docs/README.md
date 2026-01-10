@@ -18,6 +18,10 @@ Welcome to the documentation index. Key entries:
 
 - Feature/Component Doc Template: [docs/templates/feature-doc-template.md](templates/feature-doc-template.md)
 
+## Plans
+
+- Wave Function Collapse Completion: [docs/plans/wfc-completion-plan.md](plans/wfc-completion-plan.md)
+
 ## Features
 
 - Chunked Tilemap: [docs/features/chunked-tilemap.md](features/chunked-tilemap.md)

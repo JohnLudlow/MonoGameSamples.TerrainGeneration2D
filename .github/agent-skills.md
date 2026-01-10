@@ -14,17 +14,6 @@ Concise, repeatable sequences for common repo workflows.
 - Verification: exit code 0; no new warnings if feasible; failing tests investigated.
 - Rollback: revert recent changes if build/test fails; re-run.
 
-## check-doc-links
-
-- Purpose: Validate internal documentation links.
-- Commands:
-  - `scripts/check-doc-links.ps1`
-- Inputs: changed doc paths.
-- Outputs: link validation report.
-- Preconditions: Windows PowerShell; docs updated.
-- Verification: script reports no invalid links.
-- Rollback: fix broken links or remove invalid references, then re-run.
-
 ## run-game
 
 - Purpose: Launch the game for interactive validation.
@@ -75,43 +64,6 @@ Concise, repeatable sequences for common repo workflows.
 - Verification: events/counters visible; provider name matches.
 - Rollback: stop monitoring; disable listener if needed.
 
-## elaborate-feature-doc
-
-- Purpose: Produce a feature/component documentation that adheres to repo standards.
-- Steps:
-  - Create or update a doc under [docs](../docs) or add a component README alongside code.
-  - Include required elements: overview, intent/use-cases, architecture/data flow references, domain terms, constraints, example snippets, KaTeX math where relevant.
-  - Reference concrete files and config (e.g., [TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs](../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs), [TerrainGeneration2D/appsettings.json](../TerrainGeneration2D/appsettings.json)).
-  - Link from [docs/README.md](../docs/README.md) and validate links.
-- Commands:
-  - `scripts/check-doc-links.ps1`
-- Inputs: feature name, affected components, config keys.
-- Outputs: new/updated doc path; docs index entry.
-- Preconditions: gather architecture/context; decide doc location.
-- Verification: link check passes; content follows principles; examples compile.
-- Rollback: revert doc if requirements unmet; fix and re-run.
-- Naming: place feature docs at `docs/features/<feature-name>.md`; use kebab-case (e.g., `chunked-tilemap.md`), no spaces, concise names.
-
-## implement-refactor-process
-
-- Purpose: Execute the docs-first implementation/refactor flow with tests and performance hygiene.
-- Steps:
-  - Document-before-implement: add/update short design or component README.
-  - Implement with XML docs for public APIs; respect `.editorconfig`; avoid hot-path allocations/LINQ.
-  - Build and test; add/update unit tests in [TerrainGeneration2D.Tests](../TerrainGeneration2D.Tests).
-  - Run benchmarks when performance-sensitive and note results.
-  - Update docs and cross-links; validate with link checker.
-- Commands:
-  - `dotnet build TerrainGeneration2D.slnx`
-  - `dotnet test TerrainGeneration2D.Tests/TerrainGeneration2D.Tests.csproj`
-  - `dotnet run --project TerrainGeneration2D.Benchmarks/TerrainGeneration2D.Benchmarks.csproj`
-  - `scripts/check-doc-links.ps1`
-- Inputs: change summary, target files/APIs.
-- Outputs: code changes with XML docs; tests; updated docs.
-- Preconditions: confirm constraints; plan small, reversible steps.
-- Verification: build/test pass; benchmarks acceptable; docs updated and links valid.
-- Rollback: revert changes if failing gates; iterate with smaller scope.
-
 ## regenerate-visible-chunks
 
 - Purpose: Regenerate chunks currently within the camera’s expanded viewport using current settings.
@@ -124,21 +76,6 @@ Concise, repeatable sequences for common repo workflows.
 - Preconditions: game running; camera positioned; Content present.
 - Verification: terrain changes reflect current heuristics/config; overlay shows updated states.
 - Rollback: restore prior saves if necessary.
-
-## update-docs-index
-
-- Purpose: Add new documentation links to the main docs index and validate.
-- Steps:
-  - Edit [docs/README.md](../docs/README.md) to include the new doc link.
-  - Keep section structure and link style consistent.
-  - Run link checker.
-- Commands:
-  - `scripts/check-doc-links.ps1`
-- Inputs: doc path and title.
-- Outputs: updated docs index entry.
-- Preconditions: doc exists and is committed.
-- Verification: link check passes; index renders correctly.
-- Rollback: remove or correct the entry if invalid.
 
 ## add-xml-docs
 
