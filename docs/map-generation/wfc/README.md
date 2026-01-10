@@ -15,7 +15,7 @@ Sections:
 - [03 — Propagation](03-propagation.md)
 - [04 — Backtracking](04-backtracking.md)
 - [05 — Heuristics](05-heuristics.md)
-- [05 — Integration](05-integration.md)
-- [06 — Performance](06-performance.md)
+- [06 — Integration](06-integration.md)
+- [07 — Performance](07-performance.md)
 
 Up: [docs/map-generation/README.md](../README.md)

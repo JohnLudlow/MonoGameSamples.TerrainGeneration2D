@@ -31,5 +31,5 @@ Use this skill when the user wants to check whether documentation fits required 
 - Check for correctness compared to current implementation / goals
 - Check for adherence to the checklist
 - Check for adherence to the template
-- Use `npx markdownlint-cli **/*.md` to check for markdown errors
+- Use `npx markdownlint-cli **/*.md` to check for and report markdown errors
 - Use [check-doc-links.ps1](../../../scripts/check-doc-links.ps1) to check for bad links

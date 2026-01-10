@@ -30,4 +30,4 @@ Use this skill when the user wants to describe a new feature.
 - Verification: link check passes; content follows principles; examples compile.
 - Rollback: revert doc if requirements unmet; fix and re-run.
 - Naming: place feature docs at `docs/features/<feature-name>.md`; use kebab-case (e.g., `chunked-tilemap.md`), no spaces, concise names.
-- Use the [review process](../feature-doc-review/SKILL.md) to check the document for issues
+- Use the [review process](../feature-doc-review/SKILL.md) to check the document for issues and fix them

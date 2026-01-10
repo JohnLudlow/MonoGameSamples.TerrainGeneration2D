@@ -7,6 +7,7 @@ This plan outlines the implementation steps needed to complete the Wave Function
 The goal is to transform the existing partial implementation into a robust, high-performance, and well-tested WFC library that can generate seamless terrain across chunk boundaries while maintaining deterministic behavior and supporting future adaptation into a standalone library for production strategy games.
 
 **Primary Use Cases:**
+
 - Real-time terrain generation for strategy games with infinite scrolling
 - Seamless chunk boundaries ensuring visual and logical consistency across generated terrain
 - Deterministic generation for multiplayer games requiring identical maps across clients
@@ -14,6 +15,7 @@ The goal is to transform the existing partial implementation into a robust, high
 - Performance-constrained environments with strict frame-time budgets (≤100ms generation time)
 
 **Target Constraints:**
+
 - Runtime Performance: Chunk generation must complete within configurable time budgets (20-100ms)
 - Memory Efficiency: Minimal heap allocations during generation to maintain stable frame rates
 - Deterministic Behavior: Identical inputs must produce identical outputs across platforms and sessions
@@ -69,6 +71,7 @@ The WFC completion requires careful consideration of the existing MonoGame archi
 **Core WFC Algorithm Flow:**
 
 The Wave Function Collapse algorithm operates through iterative observation and constraint propagation:
+
 1. Initialization: All cells start with full domain (all possible tiles)
 2. Cell Selection: Choose cell with minimum entropy using heuristics
 3. Observation: Collapse cell to single tile value
@@ -90,7 +93,7 @@ AC-3 Arc Consistency time complexity: $O(ed^3)$ where $e$ = number of arcs, $d$ 
 
 **Data Flow Architecture:**
 
-```
+```plain
 ChunkedTilemap -> WfcProvider -> RuleTable -> AC3Propagator
       ↓              ↓              ↓              ↓
 BoundaryConstraints <- EntropyProvider <- ChangeLog <- TimeBudgetManager
@@ -115,6 +118,7 @@ The current WFC implementation evaluates adjacency rules at runtime for each con
 AC-3 (Arc Consistency 3) algorithm maintains consistency between neighboring cell domains by ensuring every value in a domain has at least one supporting value in adjacent domains. The implementation uses an arc queue to process constraint propagation systematically, detecting contradictions early and reducing backtracking frequency.
 
 Key architectural changes:
+
 - **Rule preprocessing**: Convert TileType adjacency rules into BitSet lookup tables during initialization
 - **Domain representation**: Use HashSet<int> for small domains (≤32 tiles), BitSet for larger tile sets
 - **Arc queue management**: Efficient queue processing with neighbor enumeration and direction mapping
@@ -254,12 +258,14 @@ Implement boundary constraint system to ensure 100% consistency between adjacent
 Chunk boundary consistency is achieved by extracting tile constraints from already-generated neighboring chunks and applying them as domain restrictions before WFC solving begins. This prevents the WFC algorithm from selecting tiles that would create visual discontinuities or logical inconsistencies across chunk boundaries.
 
 The system operates in two phases:
+
 1. **Constraint extraction**: Read boundary tiles from existing neighbor chunks and create constraint objects
 2. **Domain restriction**: Apply constraints by limiting WFC domains to only compatible tiles along boundaries
 
 Boundary mapping logic handles coordinate transformation between chunk-local coordinates and world coordinates, ensuring proper alignment across different chunk generation orders. The system supports partial neighbor constraints when not all neighboring chunks exist yet.
 
 Key technical considerations:
+
 - **Deterministic generation**: Boundary constraints must not affect generation determinism
 - **Memory efficiency**: Constraint objects are lightweight structs to minimize allocation overhead
 - **Flexible boundaries**: Support for incomplete neighbor sets during initial world generation
@@ -446,18 +452,21 @@ Achieve 60% reduction in memory allocations and 80% reduction in height-related 
 Performance optimization focuses on eliminating repeated computations and memory allocations in WFC hot paths. Height sampling, which drives terrain rule evaluation, represents a significant computational cost that can be amortized through intelligent caching strategies.
 
 Caching architecture implements multi-level caching:
+
 - **Chunk-level caching**: Precompute all height samples for a 64×64 chunk area when first accessed
 - **Spatial locality**: Cache neighboring chunk samples to support boundary constraint calculations
 - **LRU eviction**: Remove least recently used chunk caches when memory pressure increases
 - **Dirty tracking**: Invalidate caches only when underlying height parameters change
 
 Time budget management adapts to runtime performance characteristics:
+
 - **Historical analysis**: Track generation times and adjust budget allocation across WFC phases
 - **Progressive quality**: Implement fallback algorithms when WFC exceeds time budget
 - **Early termination**: Detect partial solutions that meet minimum quality thresholds
 - **Adaptive heuristics**: Switch to faster heuristics under time pressure
 
 Memory optimization strategies:
+
 - **Object pooling**: Reuse domain HashSet instances across multiple WFC runs
 - **Struct optimization**: Use value types for frequently allocated objects like coordinates
 - **Lazy initialization**: Defer expensive computations until actually needed
@@ -527,18 +536,21 @@ Create reusable WFC library that can solve non-tile problems and supports plugin
 Library abstraction separates the core WFC algorithm from terrain-specific implementation details, creating a generic constraint satisfaction framework. This enables reuse for other procedural generation problems like building layouts, quest generation, or resource placement.
 
 Generic design principles:
+
 - **Type parameterization**: Generic solver interfaces supporting arbitrary cell and value types
 - **Constraint abstraction**: Rule systems independent of specific domain knowledge (tiles, building blocks, etc.)
 - **Plugin architecture**: Extensible entropy providers, constraint validators, and heuristic strategies
 - **Configuration injection**: Dependency injection for all algorithm components
 
 The plugin system enables runtime customization:
+
 - **Entropy providers**: Custom cell selection strategies (Shannon entropy, domain size, spatial preferences)
 - **Constraint providers**: Domain-specific rule systems (adjacency, distance, resource constraints)
 - **Heuristic providers**: Tie-breaking strategies and optimization preferences
 - **Diagnostic providers**: Custom performance monitoring and debugging hooks
 
 Library structure supports multiple consumption patterns:
+
 - **Embedded usage**: Direct integration into game engines with minimal overhead
 - **Service oriented**: REST API wrapper for multi-language integration
 - **Batch processing**: Command-line tools for offline content generation
@@ -595,18 +607,21 @@ Achieve ≥95% code coverage with comprehensive unit, integration, property-base
 Comprehensive testing strategy validates both algorithmic correctness and performance characteristics across the entire WFC implementation. Testing architecture covers multiple validation levels from unit-level algorithm verification to end-to-end integration scenarios.
 
 Property-based testing validates fundamental WFC guarantees:
+
 - **Constraint satisfaction**: All generated outputs must satisfy adjacency rules regardless of input complexity
 - **Completeness**: Algorithm terminates with valid solution or explicit failure indication
 - **Determinism**: Identical inputs produce identical outputs across platforms and runs
 - **Performance bounds**: Generation time scales predictably within documented limits
 
 Performance regression testing prevents algorithmic degradation:
+
 - **Baseline establishment**: Record performance metrics for core algorithm components
 - **Automated benchmarking**: Continuous integration runs benchmark suites on every change
 - **Statistical analysis**: Use percentile-based performance validation (95th percentile under budget)
 - **Memory profiling**: Track allocation patterns and garbage collection behavior
 
 Integration testing validates real-world scenarios:
+
 - **Multi-chunk generation**: Test seam consistency across various chunk generation orders
 - **Save/load persistence**: Verify deterministic regeneration from saved state
 - **Configuration variations**: Test across different rule sets, tile counts, and constraint densities
@@ -677,6 +692,7 @@ Provide comprehensive documentation enabling developers unfamiliar with WFC to b
 Documentation strategy targets multiple developer skill levels and use cases, from newcomers learning constraint satisfaction concepts to experienced developers optimizing performance for production deployments.
 
 Layered documentation approach:
+
 - **Conceptual guides**: WFC algorithm explanation with visual examples and step-by-step walkthroughs
 - **API reference**: Complete interface documentation with parameter explanations and usage examples
 - **Implementation guides**: End-to-end tutorials for common integration scenarios
@@ -684,12 +700,14 @@ Layered documentation approach:
 - **Troubleshooting guides**: Common issues, diagnostic techniques, and resolution strategies
 
 Interactive learning materials:
+
 - **Minimal examples**: Simple, compilable demonstrations of core concepts
 - **Progressive complexity**: Tutorial series building from basic to advanced usage
 - **Visual debugging**: Tools to visualize WFC state progression and constraint propagation
 - **Performance profiling**: Guided exercises in optimization and bottleneck identification
 
 Production deployment guidance:
+
 - **Integration patterns**: Best practices for game engine integration and lifecycle management
 - **Configuration tuning**: Systematic approach to parameter optimization for specific use cases
 - **Monitoring setup**: Diagnostic configuration and performance metric interpretation
