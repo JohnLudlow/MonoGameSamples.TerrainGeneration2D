@@ -2,45 +2,71 @@
 
 ## Overview
 
-This plan outlines the implementation steps needed to complete the Wave Function Collapse (WFC) algorithm in the MonoGame TerrainGeneration2D project. The current implementation provides a foundation with basic observation, constraint propagation, and backtracking capabilities, but lacks several critical components for a production-ready WFC system suitable for strategy games.
+This plan outlines the implementation steps needed to complete the Wave Function Collapse
+(WFC) algorithm in the MonoGame TerrainGeneration2D project. The current implementation
+provides a foundation with basic observation, constraint propagation, and backtracking
+capabilities, but lacks several critical components for a production-ready WFC system
+suitable for strategy games.
 
-The goal is to transform the existing partial implementation into a robust, high-performance, and well-tested WFC library that can generate seamless terrain across chunk boundaries while maintaining deterministic behavior and supporting future adaptation into a standalone library for production strategy games.
+The goal is to transform the existing partial implementation into a robust,
+high-performance, and well-tested WFC library that can generate seamless terrain across
+chunk boundaries while maintaining deterministic behavior and supporting future adaptation
+into a standalone library for production strategy games.
 
 **Primary Use Cases:**
 
 - Real-time terrain generation for strategy games with infinite scrolling
-- Seamless chunk boundaries ensuring visual and logical consistency across generated terrain
-- Deterministic generation for multiplayer games requiring identical maps across clients
-- Plugin architecture support enabling custom rule systems and tile types for different biomes
-- Performance-constrained environments with strict frame-time budgets (≤100ms generation time)
+- Seamless chunk boundaries ensuring visual and logical consistency across
+  generated terrain
+- Deterministic generation for multiplayer games requiring identical maps across
+  clients
+- Plugin architecture support enabling custom rule systems and tile types for
+  different biomes
+- Performance-constrained environments with strict frame-time budgets
+  (≤100ms generation time)
 
 **Target Constraints:**
 
-- Runtime Performance: Chunk generation must complete within configurable time budgets (20-100ms)
-- Memory Efficiency: Minimal heap allocations during generation to maintain stable frame rates
-- Deterministic Behavior: Identical inputs must produce identical outputs across platforms and sessions
-- Extensibility: Support for future tile types, rule systems, and generation algorithms without core changes
-- Developer Onboarding: Clear interfaces and comprehensive documentation for teams unfamiliar with constraint satisfaction
+- Runtime Performance: Chunk generation must complete within configurable time budgets
+  (20-100ms)
+- Memory Efficiency: Minimal heap allocations during generation to maintain stable
+  frame rates
+- Deterministic Behavior: Identical inputs must produce identical outputs across
+  platforms and sessions
+- Extensibility: Support for future tile types, rule systems, and generation
+  algorithms without core changes
+- Developer Onboarding: Clear interfaces and comprehensive documentation for teams
+  unfamiliar with constraint satisfaction
 
 ## Feature requirements
 
-- **AC-3 Constraint Propagation**: Replace current propagation with proper arc consistency algorithm for 40% reduction in contradictions
-- **Precomputed Rule Tables**: Achieve 70% performance improvement in rule evaluation through lookup tables
-- **Boundary Constraint System**: Ensure 100% consistency between adjacent chunk boundaries with no visual seams
-- **Performance Optimization**: 60% reduction in memory allocations and 80% reduction in height-related computations
-- **Library Abstraction**: Generic WFC solver interface supporting non-tile domains and plugin architecture
-- **Comprehensive Testing**: ≥95% code coverage with unit, integration, property-based, and performance regression tests
-- **Developer Documentation**: Complete onboarding materials enabling productivity within 2 weeks for WFC newcomers
+- **AC-3 Constraint Propagation**: Replace current propagation with proper arc
+  consistency algorithm for 40% reduction in contradictions
+- **Precomputed Rule Tables**: Achieve 70% performance improvement in rule evaluation
+  through lookup tables
+- **Boundary Constraint System**: Ensure 100% consistency between adjacent chunk
+  boundaries with no visual seams
+- **Performance Optimization**: 60% reduction in memory allocations and 80% reduction
+  in height-related computations
+- **Library Abstraction**: Generic WFC solver interface supporting non-tile domains
+  and plugin architecture
+- **Comprehensive Testing**: ≥95% code coverage with unit, integration,
+  property-based, and performance regression tests
+- **Developer Documentation**: Complete onboarding materials enabling productivity
+  within 2 weeks for WFC newcomers
 
 ## Feature status
 
 - In design
 
-The WFC implementation is currently partial with basic functionality in place, but requires significant completion work to meet production requirements for strategy game integration.
+The WFC implementation is currently partial with basic functionality in place, but
+requires significant completion work to meet production requirements for strategy game
+integration.
 
 ## Definition of terms
 
-Detailed list of terms not considered 'common english'. Include references to articles about the term
+Detailed list of terms not considered 'common english'. Include references to
+articles about the term
 
 | Term | Meaning | Reference |
 | ---- | ------- | --------- |

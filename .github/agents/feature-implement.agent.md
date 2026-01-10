@@ -1,7 +1,7 @@
 ---
 description: Take a planned feature and implement it
 name: FeatureImplementer
-tools: ['vscode/runCommand', 'read', 'edit', 'search', 'web', 'agent', 'todo']
+tools: ['vscode/runCommand', 'execute/runInTerminal', 'read', 'edit', 'search', 'web', 'agent', 'todo']
 model: Claude Sonnet 4
 ---
 # Planning instructions

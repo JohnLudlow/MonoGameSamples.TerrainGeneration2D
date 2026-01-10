@@ -1,7 +1,7 @@
 ---
 description: Generate an implementation plan for new features or refactoring existing code.
 name: FeaturePlanner
-tools: ['vscode/runCommand', 'read', 'edit', 'search', 'web', 'agent', 'todo']
+tools: ['vscode/runCommand', 'execute/runInTerminal', 'read', 'edit', 'search', 'web', 'agent', 'todo']
 model: Claude Sonnet 4
 handoffs:
   - label: Implement Plan
