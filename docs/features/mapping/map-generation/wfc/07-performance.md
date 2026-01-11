@@ -30,10 +30,10 @@ Emit timings and counters around key phases to correlate spikes with inputs and 
 
 Monitor with `dotnet-counters` or `dotnet-trace` as described in the diagnostics README.
 
-Code references:
+References:
 
-- EventSource: [TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs](../../../TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs)
-- Emission sites: [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
+- Diagnostics overview: see [Mapping Area](../README.md) and [Performance & Debugging](../../../../performance-and-debugging.md)
+- Emission sites: see WFC and map-generation implementation notes
 
 Navigation
 

@@ -125,10 +125,10 @@ Expand to WFC stages:
 
 ## Heuristics
 
-- Cell selection: default is lowest domain size. See Shannon entropy option and trade-offs in [map-generation/wfc/05-heuristics.md](../map-generation/wfc/05-heuristics.md).
+- Cell selection: default is lowest domain size. See Shannon entropy option and trade-offs in [WFC Heuristics](../features/mapping/map-generation/wfc/05-heuristics.md).
 - Tile choice: neighbor-match weighting is configurable via `WfcWeights` in [TerrainGeneration2D/appsettings.json](../../TerrainGeneration2D/appsettings.json).
 - Runtime config: quick tuning guide in [12-config-wfc-weights.md](./12-config-wfc-weights.md).
-- Determinism: inject a test `IRandomProvider` for reproducible tie-breaks; see examples in [WfcProvider.cs](../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs) and tests.
+- Determinism: inject a test `IRandomProvider` for reproducible tie-breaks; see examples in WFC docs and tests.
 
 ## Runtime Settings Panel
 

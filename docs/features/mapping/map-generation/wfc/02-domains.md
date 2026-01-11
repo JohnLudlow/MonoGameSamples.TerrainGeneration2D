@@ -50,9 +50,9 @@ Rule checks compute whether a candidate tile is compatible with a neighbor, give
 
 These inputs are packaged into a `TileRuleContext` passed to rule evaluators during propagation.
 
-- Code references:
-- Data + setup: [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
-- Rule evaluation: [TerrainGeneration2D.Core/Mapping/TileAdjacencyRules.cs](../../../TerrainGeneration2D.Core/Mapping/TileAdjacencyRules.cs)
+References:
+
+- See [Map Generation overview](../README.md) for algorithm and setup notes.
 
 Navigation
 

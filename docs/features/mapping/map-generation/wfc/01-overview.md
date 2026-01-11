@@ -43,10 +43,10 @@ private bool Generate(int maxIterations = 10000)
 }
 ```
 
-Code references:
+References:
 
-- Algorithm: [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
-- Integration: [TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs](../../../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs)
+- Algorithm: see [Map Generation overview](../README.md)
+- Integration: [Chunked Tilemap](../../chunked-tilemap.md)
 
 Navigation
 

@@ -4,9 +4,9 @@ This sub-wiki documents how WFC is applied to generate terrain tiles: domains, c
 
 Start here if you want a high-level overview, then follow the ordered sections.
 
-Code anchor:
+References:
 
-- [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
+- See the [Map Generation overview](../README.md) for high-level code anchors and pipeline.
 
 Sections:
 
@@ -18,4 +18,4 @@ Sections:
 - [06 — Integration](06-integration.md)
 - [07 — Performance](07-performance.md)
 
-Up: [docs/map-generation/README.md](../README.md)
+Up: [Map Generation overview](../README.md)

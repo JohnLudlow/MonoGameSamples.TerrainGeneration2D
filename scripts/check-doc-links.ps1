@@ -5,7 +5,14 @@ param(
 # Lints markdown links in the docs folder to ensure they don't escape the repo root
 # and they don't use absolute local paths. Exits with non-zero code on violations.
 
-$repoRoot = (Get-Location).Path
+# Determine repo root relative to the script location; fall back to current location
+try {
+  $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+} catch {
+  $repoRoot = (Get-Location).Path
+}
+# Normalize for comparisons
+$repoRoot = [System.IO.Path]::GetFullPath($repoRoot)
 $errors = @()
 
 # Gather markdown files
@@ -36,11 +43,7 @@ foreach ($file in $mdFiles) {
         $match = $match.NextMatch(); continue
       }
 
-      # Guard against escaping repo root via too many ../ segments
-      if ([regex]::IsMatch($target, "^(\.\.\/){4,}")) {
-        $errors += @{ File = $file.FullName; Line = $i + 1; Issue = "Path escapes repo root"; Target = $target }
-        $match = $match.NextMatch(); continue
-      }
+      # Root-escape detection handled via absolute path resolution below
 
       # Strip fragment and query for existence check
       $pathOnly = $target.Split('#')[0].Split('?')[0]
@@ -53,7 +56,7 @@ foreach ($file in $mdFiles) {
         $abs = $null
       }
 
-      if ($abs -and $abs.StartsWith($repoRoot)) {
+      if ($abs -and $abs.ToLower().StartsWith($repoRoot.ToLower())) {
         # Check existence for local relative links only
         if (-not (Test-Path -LiteralPath $abs)) {
           $errors += @{ File = $file.FullName; Line = $i + 1; Issue = "Missing target"; Target = $target }

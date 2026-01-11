@@ -1,47 +1,81 @@
-# <Feature/Component Name>
+# Feature Title
 
 ## Overview
 
-- Brief description of the feature/component and its role in the game.
-- State the primary goals and the “why” behind the design.
+Detailed description of the feature including purpose and intent as well as intended use cases
 
-## Intent & Use-Cases
+## Feature requirements
 
-- Enumerate key use-cases and user flows.
-- Call out constraints (runtime limits, memory, platform specifics).
+Detailed description of the feature and its requirements
 
-## Architecture & Data Flow
+## Feature status
 
-- Describe how this integrates with existing systems (scene lifecycle, services).
-- Reference concrete files by path for clarity (e.g., TerrainGeneration2D.Core/Core.cs, TerrainGeneration2D/Scenes/GameScene.cs, TerrainGeneration2D.Core/Graphics/Camera2D.cs, TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs).
-- Add a simple flow diagram in text or link to an image in the docs folder if available.
+An indication of current status.
 
-## Domain Terms
+- Not started
+- In discovery
+- In design
+- In development
+- In test
+- In review
+- Completed
+- Abandoned
+- Blocked
 
-- Define domain-specific terms once.
-- Keep terminology consistent across docs and code.
+May also include additional information such as reason for the feature being blocked.
 
-## Configuration
+If the feature is composed of multiple parts and some are implemented, list the components and their status.
 
-- Reference relevant keys in TerrainGeneration2D/appsettings.json.
-- Explain defaults and how runtime toggles (F10) influence behavior.
+## Definition of terms
 
-## Algorithms & Math
+Detailed list of terms not considered 'common english'. Include references to articles about the term
 
-- Keep equations near algorithm discussion.
-- Inline examples: $H = w_c C + w_m M + w_d D$.
-- Block examples:
+| Term | Meaning | Reference |
+| ---- | ------- | --------- |
+|      |         |           |
+|      |         |           |
 
-$$
-E = -\sum_i p_i \log p_i
-$$
+## Architectural considerations and constraints
 
-## Examples
+Detailed model of the feature's architectural consideration and flow of data within the system.
+
+- Include constraints such as performance considerations or affected components
+- Include ASCII-art or mermaid diagrams where appropriate
+- Include KaTeX math where relevant, with plain-English explanations
+
+## Implementation guide
+
+Detailed step-by-step implementation guide, including code snippets, unit tests and benchmarks.
+
+If requested, write steps to follow Test Driven Development principles, leading with a minimal breaking
+test, follwed by a minimal change to fix the test, followed by refactor, repeating until the feature is
+complete.
+
+If the feature is extensive and complex, create multiple subsections to make these steps more legible.
+
+### Phase N
+
+#### Objective
+
+Paragraph description of objective.
+
+Description of success criteria
+
+#### Technical details
+
+Detailed description of how this part of the feature works.
+
+Include technical details, diagrams, and deeper explanation of what this element tries to achieve.
+
+#### Examples
 
 - Minimal, compile-ready examples with XML docs.
 - Include the relevant API and usage snippets.
 
 ```csharp
+// path/to/file.cs
+// parent class or method name
+
 /// <summary>
 /// Selects the next cell using Shannon entropy when enabled.
 /// </summary>
@@ -53,29 +87,4 @@ public int SelectNextCell(/* params */)
   // example body
   return 0;
 }
-```
-
-## Performance Notes
-
-- Call out hot paths; avoid LINQ/boxing in per-frame loops.
-- Reference diagnostics tools: counters, traces (see Diagnostics README).
-
-## Follow-ups / Decisions
-
-- Open questions, trade-offs, and future work.
-- Record decisions that impact behavior or constraints.
-
-## Changelog
-
-- Date and summary of changes as feature evolves.
-
----
-
-Validation
-
-- Update [docs/README.md](../README.md) with a link to this document.
-- Run link validation:
-
-```powershell
-scripts/check-doc-links.ps1
 ```

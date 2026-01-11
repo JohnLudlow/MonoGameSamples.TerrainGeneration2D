@@ -67,10 +67,10 @@ private bool ConstrainNeighbor(int x, int y, Direction dirToNeighbor, int neighb
 }
 ```
 
-Code references:
+References:
 
-- Selection + loop: [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
-- Neighbor constraints: [TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
+- Selection + loop: see [Map Generation overview](../README.md)
+- Neighbor constraints: see [02 — Domains](02-domains.md)
 
 Navigation
 

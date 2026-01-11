@@ -5,6 +5,10 @@ description: Produce a feature/component documentation that adheres to repo stan
 
 # Feature Elaboration
 
+## Purpose of this skill
+
+The purpose of this skill is to generate a document that describes how a feature might be implemented, with enough context and explanatory content that a developer with limited domain knowledge would be able to progress with feature implementation.
+
 ## When to use this skill
 
 Use this skill when the user wants to describe a new feature.
@@ -20,7 +24,7 @@ Use this skill when the user wants to describe a new feature.
 
 ## How to generate the new feature document
 
-- Create or update a Markdown Document under [docs](../../docs/features) using the [provided template](../../../docs/plans/feature-template.md).
+- Create or update a Markdown Document under [docs](../../docs/features) using the [provided template](../../../docs/templates/feature-doc-template.md).
 
 - Link from [docs/README.md](../docs/README.md) and validate links.
 

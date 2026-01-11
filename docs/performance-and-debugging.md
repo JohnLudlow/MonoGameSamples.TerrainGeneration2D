@@ -58,10 +58,12 @@
   - Use the allocated bytes/op and Gen0/Gen1 counts to compare Domain vs Shannon when the time budget is tight (20ms) vs more generous (100ms).
   - Compare `GenerateAndScrollChunks` across map sizes to understand the impact of chunk buffer churn and save frequency.
 
-## Debugging overlay plan
+## Debugging Overlay
 
-- Build a Gum/MonoGame overlay that draws current chunk bounds using `ChunkedTilemap.TileToChunkCoordinates` + `Chunk.ChunkSize`. White lines can highlight the 3×3 buffered area and the currently rendered viewport. Maintain a boolean `ShowDebugBounds` in `GameScene` that toggles when F12 is pressed (listen in `Update()` once per frame). When enabled, draw the overlay after chunk rendering (e.g., using `SpriteBatch.DrawRectangle` helpers or a simple pixel texture). Add tooltips showing chunk coordinates and whether they are loaded or pending save.
-- Tie the overlay toggle to `GameController` (new `IsDebugOverlayActive()` method) so input handling stays centralized. Persist the state in `GameSceneUI` if you want to display the status in the Gum tree (e.g., a corner label that says "Debug Bounds: ON/OFF"). This UI helps confirm which chunks are active and if chunk saves are blocking scrolls.
+- Implemented: F12 toggles a debug overlay in the scene. The overlay draws current active-chunk borders (orange=dirty, green=clean) and the viewport bounds. See [TerrainGeneration2D/Scenes/GameScene.cs](../TerrainGeneration2D/Scenes/GameScene.cs) for `DrawDebugOverlay()` and the `_showDebugOverlay` toggle logic.
+- Input: The toggle uses `GameController.ToggleDebugOverlay()`; handled in `GameScene.Update()` once per frame. See [TerrainGeneration2D/GameController.cs](../TerrainGeneration2D/GameController.cs).
+- Rendering: The overlay draws after terrain using a 1×1 pixel texture and `SpriteBatch` to render rectangles around chunk boundaries and the viewport. This confirms culling and buffer behavior during scrolling.
+- Tooltips: Tile/Chunk tooltips are provided by `TooltipManager` and update when tile coords change. See [TerrainGeneration2D/UI/TooltipManager.cs](../TerrainGeneration2D/UI/TooltipManager.cs).
 
 ## Terrain parameter tuning UI plan
 

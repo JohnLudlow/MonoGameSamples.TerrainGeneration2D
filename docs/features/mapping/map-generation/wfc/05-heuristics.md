@@ -2,7 +2,7 @@
 
 > See also
 >
-> - Roadmap: deeper context and tuning tips in [wfc-implementation-roadmap.md](../../wfc/wfc-implementation-roadmap.md)
+> - Roadmap: deeper context and tuning tips in [WFC README](README.md)
 > - Backtracking: candidate ordering and rollback in [04-backtracking.md](04-backtracking.md)
 
 Purpose: describe how the solver chooses the next cell to collapse and which tile to place, and how to tune those decisions for stability, determinism, and aesthetics.
@@ -13,7 +13,7 @@ Purpose: describe how the solver chooses the next cell to collapse and which til
 - Shannon entropy option: compute $H = -\sum p_i \log p_i$ using tile priors for richer selection. Cells with higher information gain can be prioritized.
 - Most Constrained + Most Constraining: after selecting the most constrained cell, prefer ones that impact many neighbors (e.g., near boundaries) to stabilize propagation.
 - Tie-breaking:
-  - Runtime: break equal-entropy ties via the injected randomness provider; see [WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs).
+  - Runtime: break equal-entropy ties via the injected randomness provider; see Map Generation overview.
   - Deterministic tests: inject a deterministic provider to ensure reproducible tie-breaking.
   - Current flags (runtime-configurable):
     - `Heuristics.UseMostConstrainingTieBreak`: prefer cells that influence more undecided neighbors.
@@ -70,7 +70,7 @@ Configuration suggestion:
 - Heuristics.UseShannonEntropy: `true|false`
 - Heuristics.UniformPickFraction: `0..1` (blend uniform with weighted)
 - Heuristics.MostConstrainingBias: `0..1` (soft influence bias over tied cells)
-- See runtime config doc: [12-config-wfc-weights.md](../../terrain2d-tutorial/12-config-wfc-weights.md)
+- See runtime config doc: [Runtime Settings Panel](../../../ui/runtime-settings-panel.md)
 
 ## What's Still To Implement (Heuristics)
 
@@ -124,15 +124,11 @@ Uniform baseline (k=3): H = ln 3 ≈ 1.099
 ⇒ Weighted priors reduce H vs. uniform, making this cell a stronger candidate.
 ```
 
-Rendered diagrams (for non-Mermaid renderers):
-
-![Entropy vs domain size (uniform)](../../assets/heuristics-entropy-curve.svg)
-
-![Weighted vs uniform probabilities](../../assets/heuristics-weighted-bars.svg)
+Rendered diagrams: use the Mermaid blocks above; external images removed.
 
 ### Sample: Lowest-Entropy Selection and Tie-Breaking
 
-Project: TerrainGeneration2D.Core, file: [WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
+Project: TerrainGeneration2D.Core, file: WfcProvider.cs
 
 ```csharp
 // Picks the cell with the smallest domain (fewest candidates).
@@ -182,7 +178,7 @@ private (int x, int y) FindLowestEntropy()
 
 ### Sample: Weighted Collapse (Non-Backtracking)
 
-Project: TerrainGeneration2D.Core, file: [WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
+Project: TerrainGeneration2D.Core, file: WfcProvider.cs
 
 ```csharp
 // Compute neighbor-match boost and perform a weighted roll
@@ -222,7 +218,7 @@ private bool CollapseCell(int x, int y)
 
 ### Sample: Candidate Ordering (Backtracking)
 
-Project: TerrainGeneration2D.Core, file: [WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
+Project: TerrainGeneration2D.Core, file: WfcProvider.cs
 
 ```csharp
 // Order candidates by weight desc, then tile id asc for deterministic exploration
@@ -240,13 +236,13 @@ stack.Push(frame);
 
 ## Determinism & Randomness Provider
 
-- Abstraction: `IRandomProvider` decouples randomness from the algorithm. See [RandomProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/RandomProvider.cs).
+- Abstraction: `IRandomProvider` decouples randomness from the algorithm.
 - Adapter: `RandomAdapter` wraps `System.Random` for runtime.
-- Tests: implement a deterministic provider that returns fixed values to make choices predictable. Example in [TerrainGeneration2D.Tests/MappingTests.cs](../../../TerrainGeneration2D.Tests/MappingTests.cs).
+- Tests: implement a deterministic provider that returns fixed values to make choices predictable.
 
 ### Sample: Deterministic Provider and Injection
 
-Project: TerrainGeneration2D.Tests, file: [MappingTests.cs](../../../TerrainGeneration2D.Tests/MappingTests.cs)
+Project: TerrainGeneration2D.Tests, file: MappingTests.cs
 
 ```csharp
 // Deterministic IRandomProvider for reproducible choices in tests
@@ -265,7 +261,7 @@ var success = wfc.Generate(enableBacktracking: true, maxIterations: 10000, maxBa
 
 ### Sample: Mixed Strategy (Heuristic + Uniform)
 
-Project: TerrainGeneration2D.Core, file: [WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs)
+Project: TerrainGeneration2D.Core, file: WfcProvider.cs
 
 ```csharp
 // Blend heuristic weighting with uniform randomness to retain variation
@@ -297,17 +293,17 @@ int ChooseTile(List<(int tile, int weight)> weightedOptions)
 - Entropy selection: lowest domain size; ties resolved via `IRandomProvider`.
 - Non-backtracking collapse: weighted roll using neighbor-match boost; candidate list sorted by tile id to avoid HashSet nondeterminism.
 - Backtracking: candidates ordered by weight desc, then tile id asc; changes recorded via `ChangeLog` to support rollback.
-- Files: [WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs), [ChangeLog.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/ChangeLog.cs).
+- Files: WfcProvider.cs, ChangeLog.cs.
 
 ## Diagnostics
 
 - Use `TerrainPerformanceEventSource` to track WFC phases and stats: decisions, contradictions, backtracks, max depth.
 - Validate heuristic changes by inspecting `WfcStats` and toggling the debug overlay.
-- File: [TerrainPerformanceEventSource.cs](../../../TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs).
+- File: TerrainPerformanceEventSource.cs.
 
 ## Integration
 
-- Runtime: `ChunkedTilemap` constructs `WfcProvider` per chunk; backtracking enabled with sane limits. See [ChunkedTilemap.cs](../../../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs).
+- Runtime: `ChunkedTilemap` constructs `WfcProvider` per chunk; backtracking enabled with sane limits. See [Chunked Tilemap](../../chunked-tilemap.md).
 - Tuning knobs: adjust backtracking limits alongside weight multipliers to balance performance and stability.
 
 ## Try It
@@ -321,11 +317,11 @@ int ChooseTile(List<(int tile, int weight)> weightedOptions)
 
 ## Implementation Notes
 
-- Non-backtracking collapse: uses neighbor-match weighted selection in [WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs) and stabilizes candidate ordering with a tile-id sort to avoid HashSet nondeterminism.
-- Backtracking loop: orders candidates by weight desc then tile id asc, captures them in `DecisionFrame`, and records reversible mutations via [ChangeLog.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/ChangeLog.cs); contradictions trigger rollback and alternate candidate exploration.
-- Randomness provider: `IRandomProvider` methods (`NextInt`, `NextDouble`) are consumed throughout selection; runtime uses [RandomAdapter](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/RandomProvider.cs), tests inject deterministic providers.
-- Diagnostics: decision/contradiction/rollback events emitted via [TerrainPerformanceEventSource.cs](../../../TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs) help tune weights and backtracking limits.
-- Integration: chunks construct `WfcProvider` per chunk and pass backtracking limits; see [ChunkedTilemap.cs](../../../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs).
+- Non-backtracking collapse: uses neighbor-match weighted selection in WfcProvider and stabilizes candidate ordering with a tile-id sort to avoid HashSet nondeterminism.
+- Backtracking loop: orders candidates by weight desc then tile id asc, captures them in `DecisionFrame`, and records reversible mutations via ChangeLog; contradictions trigger rollback and alternate candidate exploration.
+- Randomness provider: `IRandomProvider` methods (`NextInt`, `NextDouble`) are consumed throughout selection; runtime uses a `RandomAdapter`, tests inject deterministic providers.
+- Diagnostics: decision/contradiction/rollback events emitted via TerrainPerformanceEventSource help tune weights and backtracking limits.
+- Integration: chunks construct `WfcProvider` per chunk and pass backtracking limits; see [Chunked Tilemap](../../chunked-tilemap.md).
 
 ## Navigation
 

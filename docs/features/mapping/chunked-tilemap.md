@@ -98,7 +98,7 @@ public void RegenerateChunksInView(Rectangle viewportWorldBounds, bool overwrite
 Validation
 
 - Link this doc from the index and validate:
-  - Update docs/README.md
+  - Update docs/features/mapping/README.md
   - Run:
 
 ```powershell
