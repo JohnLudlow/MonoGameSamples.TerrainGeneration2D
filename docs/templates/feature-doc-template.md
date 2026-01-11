@@ -4,6 +4,10 @@
 
 Detailed description of the feature including purpose and intent as well as intended use cases
 
+## Table of contents
+
+- Table of contents with links to child sections
+
 ## Feature requirements
 
 Detailed description of the feature and its requirements

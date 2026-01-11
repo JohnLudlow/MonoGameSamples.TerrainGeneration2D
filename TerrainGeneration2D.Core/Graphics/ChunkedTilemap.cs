@@ -130,7 +130,7 @@ public class ChunkedTilemap
                 {
                     for (var localX = 0; localX < Chunk.ChunkSize; localX++)
                     {
-                        chunk[localX, localY] = output[localX, localY];
+                        chunk[localX, localY] = output[localX][localY];
                     }
                 }
                 if (_logger != null) GameLoggerMessages.MapGenerateEnd(_logger, true);

@@ -30,15 +30,28 @@ public class MappingTests
         }
     }
 
+    /// <summary>
+    /// Helper method to create empty jagged array for tests.
+    /// </summary>
+    private static int[][] CreateEmptyJaggedArray(int rows, int cols)
+    {
+        var result = new int[rows][];
+        for (int i = 0; i < rows; i++)
+        {
+            result[i] = new int[cols];
+        }
+        return result;
+    }
+
     [Fact]
     public void MappingInformationService_ReturnsCorrectGroupMetrics()
     {
-        var output = new int[4, 4]
+        var output = new int[][]
         {
-            { 1, 1, 2, 2 },
-            { 1, 1, 2, 2 },
-            { 3, 3, 3, 4 },
-            { 3, 3, 3, 4 }
+            [1, 1, 2, 2],
+            [1, 1, 2, 2],
+            [3, 3, 3, 4],
+            [3, 3, 3, 4]
         };
 
         var service = new MappingInformationService(output);
@@ -61,7 +74,7 @@ public class MappingTests
         };
 
         var registry = TileTypeRegistry.CreateDefault(7, config);
-        var mapping = new MappingInformationService(new int[2, 2]);
+        var mapping = new MappingInformationService(CreateEmptyJaggedArray(2, 2));
         var context = new TileRuleContext(
             new TilePoint(0, 0),
             TerrainTileIds.Beach,
@@ -82,13 +95,13 @@ public class MappingTests
     {
         var registry = TileTypeRegistry.CreateDefault(5);
         var random = new Random(123);
-        var wfc = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+        var wfc = new Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
 
         var success = wfc.Generate(maxIterations: 1000);
         Assert.True(success);
 
         var output = wfc.GetOutput();
-        Assert.All(output.Cast<int>(), tile => Assert.InRange(tile, 0, registry.TileCount - 1));
+        Assert.All(output.SelectMany(row => row), tile => Assert.InRange(tile, 0, registry.TileCount - 1));
     }
 
     [Fact]
@@ -96,13 +109,13 @@ public class MappingTests
     {
         var registry = TileTypeRegistry.CreateDefault(5);
         var random = new Random(456);
-        var wfc = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+        var wfc = new Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
 
         var success = wfc.Generate(enableBacktracking: true, maxIterations: 1000, maxBacktrackSteps: 2048, maxDepth: 128);
         Assert.True(success);
 
         var output = wfc.GetOutput();
-        Assert.All(output.Cast<int>(), tile => Assert.InRange(tile, 0, registry.TileCount - 1));
+        Assert.All(output.SelectMany(row => row), tile => Assert.InRange(tile, 0, registry.TileCount - 1));
     }
 
     [Fact]
@@ -138,9 +151,10 @@ public class MappingTests
     [Fact]
     public void WaveFunctionCollapse_Backtracking_Recovers_From_Contradiction()
     {
-        // Registry with one universally invalid tile (1) and one universally valid tile (2)
+        // Registry with one universally invalid tile (0), one universally invalid tile (1) and one universally valid tile (2)
         var registry = new TileTypeRegistry(new TileType[]
         {
+            new AlwaysInvalidTileType(0),
             new AlwaysInvalidTileType(1),
             new AlwaysValidTileType(2)
         });

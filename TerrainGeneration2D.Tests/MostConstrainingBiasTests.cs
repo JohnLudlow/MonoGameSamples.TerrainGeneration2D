@@ -42,8 +42,8 @@ public sealed class MostConstrainingBiasTests
       new WfcWeightConfiguration(),
       heuristics);
 
-    var poss = TestHelpers.GetPrivateField<HashSet<int>?[,]>(wfc, "_possibilities");
-    var output = TestHelpers.GetPrivateField<int[,]>(wfc, "_output");
+    var poss = TestHelpers.GetPrivateField<HashSet<int>?[][]>(wfc, "_possibilities");
+    var output = TestHelpers.GetPrivateField<int[][]>(wfc, "_output");
     Assert.NotNull(poss);
     Assert.NotNull(output);
 
@@ -52,20 +52,20 @@ public sealed class MostConstrainingBiasTests
     {
       for (var x = 0; x < 3; x++)
       {
-        poss![x, y] = null;
-        output![x, y] = -1;
+        poss![x][y] = null;
+        output![x][y] = -1;
       }
     }
 
     // Two candidate cells with equal domain size: corner (0,0) and center (1,1)
-    poss![0, 0] = new HashSet<int>(new[] { 1, 2 }); // lower influence
-    poss[1, 1] = new HashSet<int>(new[] { 1, 2 }); // higher influence
+    poss![0][0] = new HashSet<int>(new[] { 1, 2 }); // lower influence
+    poss[1][1] = new HashSet<int>(new[] { 1, 2 }); // higher influence
 
     // Make center's neighbors undecided to raise influence
-    poss[1, 0] = new HashSet<int>(new[] { 1 });
-    poss[1, 2] = new HashSet<int>(new[] { 1 });
-    poss[0, 1] = new HashSet<int>(new[] { 1 });
-    poss[2, 1] = new HashSet<int>(new[] { 1 });
+    poss[1][0] = new HashSet<int>(new[] { 1 });
+    poss[1][2] = new HashSet<int>(new[] { 1 });
+    poss[0][1] = new HashSet<int>(new[] { 1 });
+    poss[2][1] = new HashSet<int>(new[] { 1 });
 
     // Leave corner with no undecided neighbors to keep its influence minimal
 

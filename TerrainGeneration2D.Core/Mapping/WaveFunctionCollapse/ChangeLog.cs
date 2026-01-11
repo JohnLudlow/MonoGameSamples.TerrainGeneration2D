@@ -21,7 +21,7 @@ internal sealed class ChangeLog
   /// <summary>Record setting the output at (x,y) to a new tile, keeping the previous value.</summary>
   public void RecordOutputSet(int x, int y, int previous, int next) => _changes.Add(Change.OutputSet(x, y, previous, next));
   /// <summary>Undo all mutations recorded after <paramref name="mark"/>.</summary>
-  public void RollbackTo(int mark, HashSet<int>?[,] domains, int[,] output)
+  public void RollbackTo(int mark, HashSet<int>?[][] domains, int[][] output)
   {
     for (var i = _changes.Count - 1; i >= mark; i--)
     {
@@ -29,17 +29,17 @@ internal sealed class ChangeLog
       switch (c.Kind)
       {
         case ChangeKind.OutputSet:
-          output[c.X, c.Y] = c.PrevOutput;
+          output[c.X][c.Y] = c.PrevOutput;
           break;
+          
         case ChangeKind.CellCollapsed:
-          domains[c.X, c.Y] = new HashSet<int>(c.PrevDomainSnapshot ?? Array.Empty<int>());
+          domains[c.X][c.Y] = new HashSet<int>(c.PrevDomainSnapshot ?? Array.Empty<int>());
           break;
+
         case ChangeKind.DomainRemoved:
-          var d = domains[c.X, c.Y];
-          if (d != null)
-          {
-            d.Add(c.RemovedTileId);
-          }
+          var d = domains[c.X][c.Y];
+          d?.Add(c.RemovedTileId);
+          
           break;
       }
     }

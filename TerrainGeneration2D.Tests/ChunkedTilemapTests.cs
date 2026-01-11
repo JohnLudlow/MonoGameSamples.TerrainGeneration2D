@@ -1,9 +1,10 @@
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests;
 using Microsoft.Xna.Framework;
 
-namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests;
+namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D;
 
-public class ChunkedTilemapTests : IDisposable
+public sealed class ChunkedTilemapTests : IDisposable
 {
     private readonly string _testSaveDir;
 
