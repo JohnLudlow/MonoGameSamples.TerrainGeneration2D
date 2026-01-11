@@ -10,6 +10,7 @@ This tutorial walks through building the TerrainGeneration2D sample from scratch
 2. **Scaffold the solution**
    - Run `dotnet new sln -n TerrainGeneration2D`.
    - Create the core projects:
+
      ```bash
      dotnet new mgdesktopgl -o TerrainGeneration2D
      dotnet new classlib -o TerrainGeneration2D.Core
@@ -17,6 +18,7 @@ This tutorial walks through building the TerrainGeneration2D sample from scratch
      dotnet new xunit -o TerrainGeneration2D.Tests
      dotnet new console -o TerrainGeneration2D.Benchmarks
      ```
+
    - Add them to the solution (e.g., `dotnet sln add TerrainGeneration2D/TerrainGeneration2D.csproj ...`).
    - Copy the `dotnet-tools.json` from this repo or register the needed global tools (Gum registry/builder) in the content project.
 
@@ -55,16 +57,19 @@ This tutorial walks through building the TerrainGeneration2D sample from scratch
    - Ensure `GameScene.Initialize` clears `GumService.Default.Root.Children` before instantiating these helpers so new nodes aren’t reused across scenes.
 
 10. **Hook up diagnostics and counters**
-   - Use `dotnet-counters monitor --process-id <pid>` with the custom counters `JohnLudlow.TerrainGeneration2D.Performance-active-chunk-count` and `...-chunks-saved-per-second` (see docs/performance-and-debugging.md) to watch chunk load/save behavior.
-   - Capture `TerrainPerformanceEventSource` events with `dotnet-trace collect --process-id <pid> --providers "JohnLudlow.TerrainGeneration2D.Performance::Informational"` and view them in PerfView or Speedscope.
-   - Refer to `EVENT_ID_CONFLICT_FIX.md` for the necessary event ID ranges (start at 10) to avoid conflicts.
+
+- Use `dotnet-counters monitor --process-id <pid>` with the custom counters `JohnLudlow.TerrainGeneration2D.Performance-active-chunk-count` and `...-chunks-saved-per-second` (see docs/performance-and-debugging.md) to watch chunk load/save behavior.
+- Capture `TerrainPerformanceEventSource` events with `dotnet-trace collect --process-id <pid> --providers "JohnLudlow.TerrainGeneration2D.Performance::Informational"` and view them in PerfView or Speedscope.
+- Refer to `EVENT_ID_CONFLICT_FIX.md` for the necessary event ID ranges (start at 10) to avoid conflicts.
 
 11. **Finalize assets & saves**
-   - Add textures (e.g., `images/terrain-atlas.png`), Gum definitions, fonts, and audio to `TerrainGeneration2D.Content/Assets`. Update the Gum builder in `TerrainGeneration2D.Content/Builder/TerrainGeneration2DContentBuilder.cs` so `dotnet build` copies them into the runtime Content folder.
-   - When running the game, the runtime will store gzipped chunk files under `Content/saves`. Deleting that folder triggers chunk regeneration and exercises both `LoadChunk` and `GenerateChunk` paths.
+
+- Add textures (e.g., `images/terrain-atlas.png`), Gum definitions, fonts, and audio to `TerrainGeneration2D.Content/Assets`. Update the Gum builder in `TerrainGeneration2D.Content/Builder/TerrainGeneration2DContentBuilder.cs` so `dotnet build` copies them into the runtime Content folder.
+- When running the game, the runtime will store gzipped chunk files under `Content/saves`. Deleting that folder triggers chunk regeneration and exercises both `LoadChunk` and `GenerateChunk` paths.
 
 12. **Add tests and benchmarks**
-   - Write unit tests for `Camera2D`, `Chunk`, and chunk persistence (`ChunkedTilemap.SaveAll`, `LoadChunk`), modeling them after `TerrainGeneration2D.Tests/ChunkedTilemapTests.cs`.
-   - Add benchmark logic (see `TerrainGeneration2D.Benchmarks/Program.cs`) to simulate scrolling across multiple chunks and saving them so you can measure generation latency.
+
+- Write unit tests for `Camera2D`, `Chunk`, and chunk persistence (`ChunkedTilemap.SaveAll`, `LoadChunk`), modeling them after `TerrainGeneration2D.Tests/ChunkedTilemapTests.cs`.
+- Add benchmark logic (see `TerrainGeneration2D.Benchmarks/Program.cs`) to simulate scrolling across multiple chunks and saving them so you can measure generation latency.
 
 By following these steps—create the solution, implement the core/scene helpers, port the chunk and WFC machinery, wire Gum UI, and add diagnostics—you end up with the same TerrainGeneration2D sample currently in this repo. Let me know if you’d like a checklist version or a repository template to bootstrap faster.

@@ -1,11 +1,14 @@
 ﻿# Phase 11 - WFC Integration (Chunked generation, instrumentation) (TDD)
 
 Goal:
+
 - Use WFC for chunk generation
 - Instrument performance and logging
 
 ## 0. Tests (TDD)
+
 Create `TerrainGeneration2D.Tests/WfcIntegrationTests.cs`:
+
 ```csharp
 namespace TerrainGeneration2D.Tests;
 
@@ -26,6 +29,7 @@ public class WfcIntegrationTests
 ```
 
 ## 1. Wire into GameScene (pseudo)
+
 - Replace random fill with WFC:
   - Initialize `WfcEngine` with chunk size
   - Collapse cells until solved
@@ -36,6 +40,7 @@ public class WfcIntegrationTests
 This completes WFC integration.
 
 ## See also
+
 - Previous phase: [10 — WFC Backtracking](10-wfc-backtracking.md)
 - Earlier phases: [08 — Domains](08-wfc-domains.md), [09 — Propagation](09-wfc-propagation.md)
 - Tutorial index: [README.md](README.md)

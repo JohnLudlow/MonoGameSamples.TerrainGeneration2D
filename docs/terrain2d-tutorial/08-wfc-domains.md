@@ -1,11 +1,14 @@
 ﻿# Phase 08 - WFC Domains & Entropy (TDD)
 
 Goal:
+
 - Maintain a set of candidate tiles per cell (domain)
 - Compute entropy and choose the next cell to collapse
 
 ## 0. Tests (TDD)
+
 Create `TerrainGeneration2D.Tests/WfcDomainTests.cs`:
+
 ```csharp
 namespace TerrainGeneration2D.Tests;
 
@@ -30,7 +33,9 @@ public class WfcDomainTests
 ```
 
 ## 1. Engine skeleton (Core)
+
 Create `TerrainGeneration2D.Core/WfcEngine.cs` (conceptual; this repo uses `Mapping/WaveFunctionCollapse.cs`):
+
 ```csharp
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
 
@@ -67,6 +72,7 @@ public sealed class WfcEngine
 Proceed to propagation in the next phase.
 
 ## See also
+
 - Previous phase: [07 — Heightmap rules](07-heightmap.md)
 - Next phase: [09 — WFC Propagation](09-wfc-propagation.md)
 - Tutorial index: [README.md](README.md)

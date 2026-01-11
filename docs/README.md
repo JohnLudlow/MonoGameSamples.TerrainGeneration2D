@@ -7,9 +7,31 @@
 
 Welcome to the documentation index. Key entries:
 
-- Map Generation wiki: [docs/map-generation/README.md](map-generation/README.md)
-  - Wave Function Collapse (WFC): [docs/map-generation/wfc/README.md](map-generation/wfc/README.md)
+- Map Generation wiki: [docs/features/mapping/map-generation/README.md](features/mapping/map-generation/README.md)
+  - Wave Function Collapse (WFC): [docs/features/mapping/map-generation/wfc/README.md](features/mapping/map-generation/wfc/README.md)
 
 - Tutorials: [docs/terrain2d-tutorial/README.md](terrain2d-tutorial/README.md)
 - Architecture: [docs/architecture-class-diagram.md](architecture-class-diagram.md)
 - Performance & Debugging: [docs/performance-and-debugging.md](performance-and-debugging.md)
+
+## Functional Areas
+
+- UI: [docs/features/ui/README.md](features/ui/README.md)
+- Mapping: [docs/features/mapping/README.md](features/mapping/README.md)
+
+## Templates
+
+- Feature/Component Doc Template: [docs/templates/feature-doc-template.md](templates/feature-doc-template.md)
+
+## Plans
+
+- Wave Function Collapse Completion: [docs/plans/wfc-completion-plan.md](plans/wfc-completion-plan.md)
+
+## Features
+
+- Chunked Tilemap: [docs/features/mapping/chunked-tilemap.md](features/mapping/chunked-tilemap.md)
+- Runtime Settings Panel: [docs/features/ui/runtime-settings-panel.md](features/ui/runtime-settings-panel.md)
+- Tooltip Manager: [docs/features/ui/tooltip-manager.md](features/ui/tooltip-manager.md)
+- Game Scene UI: [docs/features/ui/game-scene-ui.md](features/ui/game-scene-ui.md)
+- Debug Overlay: [docs/features/ui/debug-overlay.md](features/ui/debug-overlay.md)
+- Features Index: [docs/features/README.md](features/README.md)

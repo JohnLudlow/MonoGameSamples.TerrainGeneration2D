@@ -1,12 +1,15 @@
 ﻿# Phase 06 - Apply adjacency / nearness rules
 
 In this phase you will:
+
 - Introduce simple neighbor constraints
 - Ensure certain tiles don’t appear adjacent
 - Write tests first (TDD) to drive rule implementation
 
 ## 0) Write tests (TDD)
+
 Create `TerrainGeneration2D.Tests/AdjacencyRulesTests.cs`:
+
 ```csharp
 namespace TerrainGeneration2D.Tests;
 
@@ -38,20 +41,26 @@ public class AdjacencyRulesTests
     }
 }
 ```
+
 Run:
+
 ```bash
 dotnet test TerrainGeneration2D.Tests/TerrainGeneration2D.Tests.csproj
 ```
+
 Tests should fail until you add the rules below.
 
 ## 1) Add rule interfaces (Core)
+
 Create the file in your Core project:
+
 ```bash
 # from repository root
 mkdir -p TerrainGeneration2D.Core
 # create the interfaces and rules file
 echo > TerrainGeneration2D.Core/Rules.cs
 ```
+
 Then edit `TerrainGeneration2D.Core/Rules.cs` and paste:
 
 ```csharp
@@ -147,12 +156,14 @@ public static class ProximityRules
 ```
 
 If you haven’t already, ensure the Game project references the Core project:
+
 ```bash
 cd src
 dotnet add TerrainGeneration2D/TerrainGeneration2D.csproj reference TerrainGeneration2D.Core/TerrainGeneration2D.Core.csproj
 ```
 
 ## 2) Constrain random selection with rules
+
 Update map generation in `GameHost.Initialize` to choose a tile that doesn’t violate rules of already-placed neighbors.
 
 TerrainGeneration2D/TerrainGenerationGame.cs — code excerpt; unrelated members omitted for brevity:
@@ -248,7 +259,9 @@ Now forbidden tiles won’t appear next to each other horizontally or vertically
 ## 3) Example setups (with implementations)
 
 ### Water/land interface
+
 - Forbid Mountain adjacent to Ocean; allow Beach between them:
+
 ```csharp
 hardRules.Add(new NotAdjacentRule(Ocean));        // avoid ocean neighbors for most land
 hardRules.Add(new DirectionalBlockRule(Mountain, Ocean, Direction.West));
@@ -257,33 +270,42 @@ hardRules.Add(new DirectionalBlockRule(Mountain, Ocean, Direction.East));
 ```
 
 ### Climate bands
+
 - Forbid Snow next to Forest; prefer Plains next to Forest:
+
 ```csharp
 hardRules.Add(new NotAdjacentRule(Snow)); // already present for forest harsh edges
 softRules.Add(new PreferSameTileRule(1.2f)); // helps form bands
 ```
 
 ### Cliff logic
+
 - Block Beach north of Mountain (directional):
+
 ```csharp
 hardRules.Add(new DirectionalBlockRule(Beach, Mountain, Direction.North));
 ```
 
 ### Mountains away from coasts
+
 - Prohibit mountains within 5 tiles of ocean (radius proximity):
+
 ```csharp
 // already enforced in the generation loop via ProximityRules.IsMountainTooCloseToOcean(...)
 ```
 
 ## 4) Visual check
+
 Run the game and look for edge consistency. Tweak tile IDs, rule parameters, and radius until the generated map looks coherent.
 
 ## Notes
+
 - This is not full WFC; it’s a greedy neighbor filter (fast, simple). You can combine hard rules with soft weights for decent results.
 - Proximity checks run against already placed tiles; if you implement multi-pass generation, you can tighten or relax constraints in later passes.
 - In the next phase we’ll introduce heightmaps to drive tile selection and further constrain options.
 
 ## See also
+
 - Previous phase: [05 — Random tiles](05-random-tiles.md)
 - Next phase: [07 — Heightmap rules](07-heightmap.md)
 - Tutorial index: [README.md](README.md)

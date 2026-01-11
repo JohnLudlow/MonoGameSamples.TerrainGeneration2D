@@ -1,11 +1,14 @@
 ﻿# Phase 10 - WFC Backtracking (TDD)
 
 Goal:
+
 - Handle contradictions by backtracking to previous decisions
 - Use a decision stack and retry alternate candidates
 
 ## 0. Tests (TDD)
+
 Create `TerrainGeneration2D.Tests/WfcBacktrackingTests.cs`:
+
 ```csharp
 namespace TerrainGeneration2D.Tests;
 
@@ -28,7 +31,9 @@ public class WfcBacktrackingTests
 ```
 
 ## 1. Engine: Solve with backtracking
+
 Update `TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs`:
+
 ```csharp
 // ...existing code...
 public bool Solve(Dictionary<(int tile, Direction dir), HashSet<int>> rules, int seed)
@@ -93,6 +98,7 @@ private bool RevertLast()
 Proceed to integration in the next phase.
 
 ## Heuristics: Entropy and Selection
+
 - Entropy: select the lowest-entropy cell (fewest candidates). Optionally use Shannon entropy $H = -\sum p_i \log p_i$ with tile priors for richer selection.
 - Tie-breaking: resolve equal-entropy ties via `IRandomProvider` in runtime; keep deterministic providers in tests.
 - Candidate ordering: in backtracking, order by weight descending (e.g., neighbor-match boost) then tile id ascending to keep exploration deterministic.
@@ -106,6 +112,7 @@ Proceed to integration in the next phase.
 > - Runtime tuning idea: expose `WfcWeights` (e.g., `Base`, `NeighborMatchBoost`) via config and adjust alongside `maxBacktrackSteps`/`maxDepth`. Track `WfcStats` to see how changes affect backtracks and max depth.
 
 ## See also
+
 - Previous phase: [09 — WFC Propagation](09-wfc-propagation.md)
 - Next phase: [11 — WFC Integration](11-wfc-integration.md)
 - Tutorial index: [README.md](README.md)

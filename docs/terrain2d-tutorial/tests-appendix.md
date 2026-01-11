@@ -3,6 +3,7 @@
 This appendix helps you set up and run tests during the tutorial.
 
 ## Create the test project
+
 ```bash
 cd src
 dotnet new xunit -n TerrainGeneration2D.Tests -f net10.0
@@ -11,17 +12,21 @@ dotnet add reference ../TerrainGeneration2D.Core/TerrainGeneration2D.Core.csproj
 ```
 
 ## Add packages
+
 ```bash
 dotnet add package Microsoft.NET.Test.Sdk
 ```
 
 ## Useful commands
+
 ```bash
 dotnet test TerrainGeneration2D.Tests/TerrainGeneration2D.Tests.csproj
 ```
 
 ## Sample helpers
+
 Create `TerrainGeneration2D.Tests/TestHelpers.cs`:
+
 ```csharp
 namespace TerrainGeneration2D.Tests;
 

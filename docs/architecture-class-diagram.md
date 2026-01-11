@@ -53,4 +53,5 @@ classDiagram
     Chunk --> TileType : contains tile IDs
     Camera2D --> ChunkedTilemap : viewport bounds feed
     TerrainRuleConfiguration --> TileType : configures
+
 ```

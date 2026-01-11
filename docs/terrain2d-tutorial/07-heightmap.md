@@ -1,12 +1,15 @@
 ﻿# Phase 07 - Noise-based heightmap rules
 
 In this phase you will:
+
 - Generate a coherent heightmap using FastNoiseLite
 - Map heights to biomes (ocean, beach, plains, forest, mountain, snow)
 - Write tests first (TDD) to validate biome mapping
 
 ## 0. Write tests (TDD)
+
 Create `TerrainGeneration2D.Tests/HeightmapTests.cs`:
+
 ```csharp
 namespace TerrainGeneration2D.Tests;
 
@@ -50,19 +53,24 @@ public class HeightmapTests
     }
 }
 ```
+
 Run:
+
 ```bash
 dotnet test TerrainGeneration2D.Tests/TerrainGeneration2D.Tests.csproj
 ```
+
 Tests should pass after adding the height provider.
 
 ## 1. Add FastNoiseLite to Core
+
 ```bash
 cd TerrainGeneration2D.Core
 dotnet add package AlvorEngine.FastNoiseLite --version 1.0.0
 ```
 
 ## 2. Create a height provider (Core)
+
 Create `TerrainGeneration2D.Core/Heightmap.cs`:
 
 ```csharp
@@ -101,6 +109,7 @@ public class DefaultHeightProvider : IHeightProvider
 ```
 
 ## 3. Map heights to tiles (Game)
+
 In `GameHost.Initialize`, replace random selection with biome rules.
 
 TerrainGeneration2D/TerrainGenerationGame.cs — code excerpt; unrelated members omitted for brevity:
@@ -126,9 +135,11 @@ for (int x = 0; x < _mapWidth; x++)
 Run the game—you’ll see continents, shorelines, forests, mountains, and snow caps.
 
 ## 4. Optional: blend with adjacency filter
+
 After choosing a biome, you can still apply the simple neighbor rule from phase 06 to reduce harsh borders.
 
 ## See also
+
 - Previous phase: [06 — Adjacency rules](06-adjacency-rules.md)
 - Next phase: [08 — WFC Domains & Entropy](08-wfc-domains.md)
 - Tutorial index: [README.md](README.md)
