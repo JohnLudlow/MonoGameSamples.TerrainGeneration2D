@@ -557,15 +557,18 @@ The AC3Propagator integrates into the existing WFC architecture by replacing the
 // Key integration points for AC3Propagator in existing WfcProvider
 public class WfcProvider
 {
-    private readonly HashSet<int>?[][] _possibilities;
-    private readonly int[][] _output;
-    private readonly AC3Propagator _propagator;  // ← NEW: Add AC3 propagator
-    private readonly IRuleTable _ruleTable;     // ← NEW: Add rule table
+    protected readonly HashSet<int>?[][] _possibilities;
+    protected readonly int[][] _output;
+    protected readonly AC3Propagator _propagator;  // ← NEW: Add AC3 propagator
+    protected readonly IRuleTable _ruleTable;     // ← NEW: Add rule table
+    public int Width { get; }
+    public int Height { get; }
     
     public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, 
         IRandomProvider randomProvider, WfcConfiguration config)
     {
-        // Initialize jagged arrays (existing code structure maintained)
+        Width = width;
+        Height = height;
         _possibilities = new HashSet<int>?[width][];
         _output = new int[width][];
         for (int x = 0; x < width; x++)
@@ -573,11 +576,7 @@ public class WfcProvider
             _possibilities[x] = new HashSet<int>?[height];
             _output[x] = new int[height];
         }
-        
-        // ← NEW: Create precomputed rule table from tile registry
         _ruleTable = new PrecomputedRuleTable(tileRegistry);
-        
-        // Initialize domains with all possible tile types (existing logic)
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -589,26 +588,21 @@ public class WfcProvider
                 }
             }
         }
-        
-        // ← NEW: Initialize AC-3 propagator with domain reference
         _propagator = new AC3Propagator(_ruleTable, _possibilities);
     }
     
     // ← MODIFY: Update existing Generate() method to use AC-3
-    public bool Generate(int maxIterations = 10000, TimeSpan? timeBudget = null)
+    public virtual bool Generate(int maxIterations = 10000, TimeSpan? timeBudget = null)
     {
         // ... existing iteration and timing logic ...
-        
         while (!_collapsed && iterations < maxIterations)
         {
             // 1. Select cell with minimum entropy (existing logic preserved)
             var (x, y) = FindLowestEntropy();
-            
             // 2. Observe (collapse to single tile) - existing logic
             var selectedTile = ObserveCell(x, y);
             _output[x][y] = selectedTile;
             _possibilities[x][y] = null; // Mark as collapsed
-            
             // 3. ← CHANGE: Replace existing Propagate() with AC-3
             if (!_propagator.PropagateFrom(x, y, selectedTile))
             {
@@ -625,9 +619,8 @@ public class WfcProvider
     }
     
     // ← CHANGE: Update existing propagation methods or replace with AC-3
-    private bool Propagate(int startX, int startY)
+    protected bool Propagate(int startX, int startY)
     {
-        // Replace existing constraint propagation with:
         return _propagator.PropagateFrom(startX, startY, _output[startX][startY]);
     }
 }
@@ -657,6 +650,7 @@ The current WfcProvider has significant code duplication between the two Generat
 2. **Consolidate initialization**: Create `InitializeGeneration(bool enableBacktracking, TimeSpan? timeBudget)` helper
 3. **Unify decision handling**: Extract decision frame creation and candidate ordering into helper methods
 4. **Simplify method signatures**: Make the simpler Generate() method delegate to the full-featured version:
+
    ```csharp
    public bool Generate(int maxIterations = 10000, TimeSpan? timeBudget = null)
    {
@@ -667,7 +661,6 @@ The current WfcProvider has significant code duplication between the two Generat
 **Estimated Impact:** Refactoring could reduce the Generate methods from ~300 lines to ~150 lines while improving maintainability and reducing the risk of behavior divergence between the two approaches.
 
 **Priority:** Medium - This is a code quality improvement that should be addressed after the core AC-3 functionality is implemented.
-```
 
 **Rule Table Implementation:** This class shows how to convert TileTypeRegistry adjacency rules into efficient BitSet lookup tables during initialization, eliminating runtime rule evaluation costs.
 
@@ -692,6 +685,7 @@ public class PrecomputedRuleTable : IRuleTable
     public PrecomputedRuleTable(TileTypeRegistry registry)
     {
         _allowedNeighbors = new Dictionary<(int, Direction), BitSet>();
+        if (registry == null) throw new ArgumentNullException(nameof(registry));
         PrecomputeAllRules(registry);
     }
     
@@ -789,26 +783,199 @@ public class PrecomputedRuleTable : IRuleTable
 
 ```csharp
 // Integration with boundary constraints for chunk seaming
+### Integration Issues and Considerations
+### Suggested Code Fixes for EnhancedWfcProvider Integration
+
+To enable EnhancedWfcProvider to extend WfcProvider cleanly, apply the following changes to the WfcProvider base class:
+
+- **Constructor Signature:**
+    - Add a constructor to WfcProvider that takes (int width, int height, TileTypeRegistry tileRegistry, IRandomProvider randomProvider, WfcConfiguration config) if not already present, or update EnhancedWfcProvider to match the actual constructor signature.
+
+- **Member Visibility:**
+    - Change the visibility of _propagator and _possibilities from private to protected (or provide protected/internal properties or methods to access them) so that subclasses can use them for advanced behaviors.
+
+- **Expose Dimensions:**
+    - Add protected or public properties for Width and Height in WfcProvider if they are needed by subclasses (e.g., for boundary propagation or diagnostics).
+
+- **Extensibility Pattern:**
+    - For any member or method that is intended to be used or overridden by subclasses, use protected visibility and provide XML documentation describing its intended use.
+
+These changes will make the WFC system more extensible and allow for advanced features such as boundary-aware chunk generation and diagnostics in derived classes.
+/// <summary>
+/// Sample configuration class aggregating all WFC-related settings for chunk generation.
+/// </summary>
+public class WfcConfiguration
+{
+    /// <summary>
+    /// Tile selection weights.
+    /// </summary>
+    public WfcWeightConfiguration Weights { get; set; } = new WfcWeightConfiguration();
+
+    /// <summary>
+    /// Heuristic and entropy settings.
+    /// </summary>
+    public HeuristicsConfiguration Heuristics { get; set; } = new HeuristicsConfiguration();
+
+    /// <summary>
+    /// Time budget for WFC generation (in milliseconds).
+    /// </summary>
+    public int TimeBudgetMs { get; set; } = 50;
+
+    /// <summary>
+    /// Additional configuration fields as needed.
+    /// </summary>
+    // public ...
+}
+/// <summary>
+/// Enhanced WFC provider integrating advanced boundary constraint extraction and application for seamless chunk generation.
+/// </summary>
+/// <remarks>
+/// Ensures boundaries between adjacent chunks are consistent by applying neighbor constraints before AC-3 propagation.
+/// Supports partial neighbor constraints and deterministic domain restriction for robust terrain seaming.
+/// </remarks>
 public class EnhancedWfcProvider : WfcProvider
 {
     private readonly IBoundaryConstraintProvider _boundaryProvider;
+    private readonly bool _enableValidation;
+
+    /// <summary>
+    /// Initializes a new instance of EnhancedWfcProvider.
+    /// </summary>
+    /// <param name="width">Chunk width in tiles.</param>
+    /// <param name="height">Chunk height in tiles.</param>
+    /// <param name="tileRegistry">Tile type registry.</param>
+    /// <param name="randomProvider">Random provider for deterministic generation.</param>
+    /// <param name="config">WFC configuration.</param>
+    /// <param name="boundaryProvider">Boundary constraint provider.</param>
+    /// <param name="enableValidation">If true, validates chunk seams after generation.</param>
+    public EnhancedWfcProvider(
+        int width,
+        int height,
+        TileTypeRegistry tileRegistry,
+        IRandomProvider randomProvider,
+        WfcConfiguration config,
+        IBoundaryConstraintProvider boundaryProvider,
+        bool enableValidation = false)
+        : base(width, height, tileRegistry, randomProvider, config)
+    {
+        _boundaryProvider = boundaryProvider ?? throw new ArgumentNullException(nameof(boundaryProvider));
+        _enableValidation = enableValidation;
+    }
     
     public bool GenerateWithBoundaries(Dictionary<Point, Chunk> neighborChunks, 
         Point currentChunkCoords)
     {
         // Apply boundary constraints before generation
         ApplyBoundaryConstraints(neighborChunks, currentChunkCoords);
-        
         // Run standard AC-3 generation
         var success = Generate();
-        
         // Validate seam consistency (optional verification step)
         if (success && _enableValidation)
         {
             ValidateChunkSeams(neighborChunks, currentChunkCoords);
         }
-        
         return success;
+    }
+
+    /// <summary>
+    /// Verifies that tiles along shared chunk boundaries match adjacency rules and logs any mismatches.
+    /// </summary>
+    /// <param name="neighborChunks">Dictionary of neighboring chunks keyed by their coordinates.</param>
+    /// <param name="currentChunkCoords">Coordinates of the current chunk.</param>
+    private void ValidateChunkSeams(Dictionary<Point, Chunk> neighborChunks, Point currentChunkCoords)
+    {
+        foreach (var kvp in neighborChunks)
+        {
+            var neighborCoords = kvp.Key;
+            var neighborChunk = kvp.Value;
+            var sharedEdge = GetSharedEdge(currentChunkCoords, neighborCoords);
+            if (sharedEdge == null) continue;
+
+            var currentBoundary = ExtractBoundaryTiles(this, sharedEdge.Value, true);
+            var neighborBoundary = ExtractBoundaryTiles(neighborChunk, GetOppositeDirection(sharedEdge.Value), false);
+
+            for (int i = 0; i < currentBoundary.Length; i++)
+            {
+                if (!AdjacencyRulesMatch(currentBoundary[i], neighborBoundary[i], sharedEdge.Value))
+                {
+                    LogBoundaryMismatch(currentChunkCoords, neighborCoords, sharedEdge.Value, i, currentBoundary[i], neighborBoundary[i]);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Determines which edge is shared between two chunk coordinates.
+    /// </summary>
+    /// <param name="a">Coordinates of the first chunk.</param>
+    /// <param name="b">Coordinates of the second chunk.</param>
+    /// <returns>The shared edge direction, or null if not adjacent.</returns>
+    private Direction? GetSharedEdge(Point a, Point b)
+    {
+        if (a.X == b.X && a.Y == b.Y + 1) return Direction.North;
+        if (a.X == b.X && a.Y == b.Y - 1) return Direction.South;
+        if (a.X == b.X + 1 && a.Y == b.Y) return Direction.West;
+        if (a.X == b.X - 1 && a.Y == b.Y) return Direction.East;
+        return null;
+    }
+
+    /// <summary>
+    /// Extracts tile IDs along the specified edge from a chunk or provider.
+    /// </summary>
+    /// <param name="chunkOrProvider">Chunk or provider to extract from.</param>
+    /// <param name="edge">Edge to extract.</param>
+    /// <param name="isCurrent">True if extracting from the current chunk, false for neighbor.</param>
+    /// <returns>Array of tile IDs along the edge.</returns>
+    private int[] ExtractBoundaryTiles(object chunkOrProvider, Direction edge, bool isCurrent)
+    {
+        // Example: extract tile IDs along the specified edge
+        // Replace with actual chunk access in real code
+        return new int[Chunk.ChunkSize];
+    }
+
+    /// <summary>
+    /// Checks if two tiles match adjacency rules for a given edge.
+    /// </summary>
+    /// <param name="tileA">Tile ID from the current chunk.</param>
+    /// <param name="tileB">Tile ID from the neighbor chunk.</param>
+    /// <param name="edge">Edge direction being checked.</param>
+    /// <returns>True if adjacency rules are satisfied; otherwise, false.</returns>
+    private bool AdjacencyRulesMatch(int tileA, int tileB, Direction edge)
+    {
+        // Replace with actual rule table lookup
+        return true;
+    }
+
+    /// <summary>
+    /// Gets the opposite direction for a given edge.
+    /// </summary>
+    /// <param name="dir">Direction to invert.</param>
+    /// <returns>Opposite direction.</returns>
+    private Direction GetOppositeDirection(Direction dir)
+    {
+        return dir switch
+        {
+            Direction.North => Direction.South,
+            Direction.South => Direction.North,
+            Direction.East => Direction.West,
+            Direction.West => Direction.East,
+            _ => dir
+        };
+    }
+
+    /// <summary>
+    /// Logs a boundary mismatch between two chunks at a specific edge and position.
+    /// </summary>
+    /// <param name="chunkA">Coordinates of the first chunk.</param>
+    /// <param name="chunkB">Coordinates of the second chunk.</param>
+    /// <param name="edge">Edge direction where mismatch occurred.</param>
+    /// <param name="position">Position along the edge.</param>
+    /// <param name="tileA">Tile ID from the first chunk.</param>
+    /// <param name="tileB">Tile ID from the second chunk.</param>
+    private void LogBoundaryMismatch(Point chunkA, Point chunkB, Direction edge, int position, int tileA, int tileB)
+    {
+        // Replace with actual logging
+        Console.WriteLine($"Boundary mismatch at edge {edge} position {position}: chunk {chunkA} tile {tileA} vs chunk {chunkB} tile {tileB}");
     }
     
     private void ApplyBoundaryConstraints(Dictionary<Point, Chunk> neighbors, Point coords)

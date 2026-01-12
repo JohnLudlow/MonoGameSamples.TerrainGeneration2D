@@ -25,13 +25,23 @@ public class WfcProvider
   private readonly ICellEntropyProvider _shannonEntropy;
   private readonly int _width;
   private readonly int _height;
-  private readonly HashSet<int>?[][] _possibilities;
+
+  /// <summary>
+  /// Gets the width of the WFC grid.
+  /// </summary>
+  public int Width => _width;
+
+  /// <summary>
+  /// Gets the height of the WFC grid.
+  /// </summary>
+  public int Height => _height;
+  protected readonly HashSet<int>?[][] _possibilities;
   private readonly int[][] _output;
   private readonly MappingInformationService _mappingService;
   private readonly TerrainRuleConfiguration _config;
   private readonly IHeightProvider _heightProvider;
   private readonly Point _chunkOrigin;
-  private readonly AC3Propagator _propagator;
+  protected readonly AC3Propagator _propagator;
   private readonly IRuleTable _ruleTable;
   private bool _collapsed;
 

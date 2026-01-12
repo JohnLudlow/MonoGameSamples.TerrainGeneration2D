@@ -1,9 +1,3 @@
-// TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/BitSet.cs
-
-
-// TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/IRuleTable.cs
-
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System;
