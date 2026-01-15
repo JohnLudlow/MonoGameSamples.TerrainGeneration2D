@@ -1,3 +1,8 @@
+using System.Collections.Generic;
+
+/// <summary>
+/// Exposes the current domain grid for testing and diagnostics.
+/// </summary>
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -143,6 +148,9 @@ public class WfcProvider
   {
     ArgumentNullException.ThrowIfNull(random);
   }
+
+
+  public HashSet<int>?[][] Possibilities => _possibilities;
 
 
   /// <summary>
@@ -410,7 +418,7 @@ public class WfcProvider
   /// </summary>
   public int[][] GetOutput() => _output;
 
-  private (int x, int y) FindLowestEntropy()
+  internal (int x, int y) FindLowestEntropy()
   {
     // Collect candidate cells and compute both scores when enabled
     var candidateCells = new List<(int x, int y, double kScore, double hScore, int influence)>();
@@ -520,7 +528,7 @@ public class WfcProvider
     return (choice.x, choice.y);
   }
 
-  private bool CollapseCell(int x, int y)
+  internal bool CollapseCell(int x, int y)
   {
     var possibilities = _possibilities[x][y];
     if (possibilities == null || possibilities.Count == 0)

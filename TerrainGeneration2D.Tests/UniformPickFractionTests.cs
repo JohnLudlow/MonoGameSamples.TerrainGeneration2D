@@ -1,9 +1,7 @@
-using System.Collections.Generic;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 using Microsoft.Xna.Framework;
-using Xunit;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests;
 

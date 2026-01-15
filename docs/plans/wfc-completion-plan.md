@@ -627,6 +627,7 @@ public class WfcProvider
 ```
 
 **Current Implementation Status:** The actual [WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs) already contains:
+
 - ✅ Complete jagged array structure (`HashSet<int>?[][]`)
 - ✅ Comprehensive Generate() methods (with and without backtracking)
 - ✅ Advanced entropy-based cell selection with multiple heuristics
@@ -646,6 +647,7 @@ The current WfcProvider has significant code duplication between the two Generat
 4. **Duplicate cleanup logic**: Both have identical finally blocks for performance event logging
 
 **Refactoring Opportunities:**
+
 1. **Extract common generation loop**: Create `GenerateCore(GenerationContext context)` helper method containing the shared iteration logic
 2. **Consolidate initialization**: Create `InitializeGeneration(bool enableBacktracking, TimeSpan? timeBudget)` helper
 3. **Unify decision handling**: Extract decision frame creation and candidate ordering into helper methods
@@ -781,26 +783,28 @@ public class PrecomputedRuleTable : IRuleTable
 
 **Boundary Constraints Integration:** This enhanced WFC provider demonstrates how to integrate boundary constraints for seamless chunk generation, applying neighbor constraints before running AC-3 propagation.
 
-```csharp
-// Integration with boundary constraints for chunk seaming
 ### Integration Issues and Considerations
+
 ### Suggested Code Fixes for EnhancedWfcProvider Integration
 
 To enable EnhancedWfcProvider to extend WfcProvider cleanly, apply the following changes to the WfcProvider base class:
 
 - **Constructor Signature:**
-    - Add a constructor to WfcProvider that takes (int width, int height, TileTypeRegistry tileRegistry, IRandomProvider randomProvider, WfcConfiguration config) if not already present, or update EnhancedWfcProvider to match the actual constructor signature.
+  - Add a constructor to WfcProvider that takes (int width, int height, TileTypeRegistry tileRegistry, IRandomProvider randomProvider, WfcConfiguration config) if not already present, or update EnhancedWfcProvider to match the actual constructor signature.
 
 - **Member Visibility:**
-    - Change the visibility of _propagator and _possibilities from private to protected (or provide protected/internal properties or methods to access them) so that subclasses can use them for advanced behaviors.
+  - Change the visibility of _propagator and _possibilities from private to protected (or provide protected/internal properties or methods to access them) so that subclasses can use them for advanced behaviors.
 
 - **Expose Dimensions:**
-    - Add protected or public properties for Width and Height in WfcProvider if they are needed by subclasses (e.g., for boundary propagation or diagnostics).
+  - Add protected or public properties for Width and Height in WfcProvider if they are needed by subclasses (e.g., for boundary propagation or diagnostics).
 
 - **Extensibility Pattern:**
-    - For any member or method that is intended to be used or overridden by subclasses, use protected visibility and provide XML documentation describing its intended use.
+  - For any member or method that is intended to be used or overridden by subclasses, use protected visibility and provide XML documentation describing its intended use.
 
 These changes will make the WFC system more extensible and allow for advanced features such as boundary-aware chunk generation and diagnostics in derived classes.
+
+```csharp
+// Integration with boundary constraints for chunk seaming
 /// <summary>
 /// Sample configuration class aggregating all WFC-related settings for chunk generation.
 /// </summary>
