@@ -5,13 +5,19 @@ using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.Boundaries;
 
 /// <summary>
-/// Default implementation of boundary constraint management.
+/// Default implementation of <see cref="IBoundaryConstraintProvider"/> for managing chunk boundary constraints.
 /// </summary>
 /// <remarks>
-/// Ensures seamless transitions between chunks by constraining WFC domains.
+/// Ensures seamless transitions between chunks by extracting and applying boundary constraints for WFC domains.
 /// </remarks>
 public class BoundaryConstraintProvider : IBoundaryConstraintProvider
 {
+  /// <summary>
+  /// Extracts boundary constraints from a neighboring chunk along the specified shared edge.
+  /// </summary>
+  /// <param name="neighborChunk">The neighboring chunk to extract constraints from.</param>
+  /// <param name="sharedEdge">The direction of the shared edge (North, South, East, West).</param>
+  /// <returns>An array of <see cref="BoundaryConstraint"/> representing the constraints for the shared edge.</returns>
   public BoundaryConstraint[] ExtractConstraints(Chunk neighborChunk, Direction sharedEdge)
   {
     var constraints = new BoundaryConstraint[Chunk.ChunkSize];
@@ -50,6 +56,11 @@ public class BoundaryConstraintProvider : IBoundaryConstraintProvider
     return constraints;
   }
 
+  /// <summary>
+  /// Applies boundary constraints to the WFC domain grid before solving begins.
+  /// </summary>
+  /// <param name="domains">The WFC domain grid to constrain (nullable jagged array matching WfcProvider pattern).</param>
+  /// <param name="constraints">The boundary constraints to apply.</param>
   public void ApplyConstraints(HashSet<int>?[][] domains, BoundaryConstraint[] constraints)
   {
     foreach (var constraint in constraints)

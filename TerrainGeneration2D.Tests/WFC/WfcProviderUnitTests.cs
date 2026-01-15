@@ -1,5 +1,5 @@
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
 {
@@ -29,12 +29,12 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
         for (var y = 0; y < 2; y++)
           Assert.NotNull(provider.Possibilities[x][y]);
 
-            // Collapse cell (0,0) to tile 1 by setting domain
-            provider.Possibilities[0][0] = new HashSet<int> { 1 };
-            provider.CollapseCell(0, 0);
+      // Collapse cell (0,0) to tile 1 by setting domain
+      provider.Possibilities[0][0] = new HashSet<int> { 1 };
+      provider.CollapseCell(0, 0);
 
-            // Assert: Domain is null or empty after collapse
-            Assert.True(provider.Possibilities[0][0] == null || provider.Possibilities[0][0]?.Count == 0);
+      // Assert: Domain is null or empty after collapse
+      Assert.True(provider.Possibilities[0][0] == null || provider.Possibilities[0][0]?.Count == 0);
     }
 
     [Fact]
@@ -57,9 +57,9 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
       );
 
 
-            // Collapse (0,0) to tile 1 by setting domain
-            provider.Possibilities[0][0] = new HashSet<int> { 1 };
-            provider.CollapseCell(0, 0);
+      // Collapse (0,0) to tile 1 by setting domain
+      provider.Possibilities[0][0] = [1];
+      provider.CollapseCell(0, 0);
 
       // Act: Find lowest entropy cell
       var (x, y) = provider.FindLowestEntropy();
@@ -90,21 +90,21 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
 
             // Provide dummy/default values for context
             var ctx = new TileRuleContext(
-              default, 
-              tile.TileId, 
-              default, 
-              neighbor.TileId, 
+              default,
+              tile.TileId,
+              default,
+              neighbor.TileId,
               dir,
-              new TerrainRuleConfiguration(), 
-              default, 
-              default, 
+              new TerrainRuleConfiguration(),
+              default,
+              default,
               null
             );
 
             if (tile.EvaluateRules(ctx))
               runtimeAllowed.Add(neighbor.TileId);
           }
-          
+
           Assert.Equal(runtimeAllowed, [.. allowed.TileIds]);
         }
       }
@@ -117,12 +117,15 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
       var registry = TileTypeRegistry.CreateDefault(2, new TerrainRuleConfiguration());
       var ruleTable = new PrecomputedRuleTable(registry);
       var domains = new HashSet<int>?[2][];
+
       for (var x = 0; x < 2; x++)
       {
         domains[x] = new HashSet<int>?[2];
-        for (int y = 0; y < 2; y++)
-          domains[x][y] = new HashSet<int> { 0, 1 };
+
+        for (var y = 0; y < 2; y++)
+          domains[x][y] = [0, 1];
       }
+
       // Collapse (0,0) to 0
       domains[0][0] = null;
       var propagator = new AC3Propagator(ruleTable, domains);
