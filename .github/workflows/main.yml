@@ -84,6 +84,8 @@ jobs:
     - name: Download Coverage Baseline
       if: github.event_name == 'pull_request'
       shell: pwsh
+      env: 
+        GH_TOKEN: ${{ github.token }}
       run: |
         $artifacts = gh api /repos/${{ github.repository }}/actions/artifacts | ConvertFrom-Json
         $baseline = $artifacts.artifacts | Where-Object { $_.name -eq 'coverage-baseline' } | Sort-Object created_at -Descending | Select-Object -First 1
@@ -91,12 +93,6 @@ jobs:
           $url = "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$($baseline.id)/zip"
           Invoke-WebRequest -Uri $url -OutFile baseline.zip -Headers @{ "Authorization" = "token ${{ secrets.GITHUB_TOKEN }}"; "Accept" = "application/vnd.github.v3+json" }
           Expand-Archive baseline.zip baseline
-        }
-
-    - name: Set Baseline File
-      shell: pwsh
-      run: |
-        if (Test-Path baseline/coverage.cobertura.xml) {
           "HISTORY_DIR=baseline" | Out-File -FilePath $env:GITHUB_ENV -Append
         }
 
