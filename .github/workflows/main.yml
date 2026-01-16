@@ -214,8 +214,16 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v3
+    - name: Build
+      shell: pwsh
+      run: |
+        $dotnetParams = @(
+          "--no-restore",
+          "/m:1",
+          "--configuration", "$env:CONFIGURATION"
+        )
+
+        dotnet build @dotnetParams
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
