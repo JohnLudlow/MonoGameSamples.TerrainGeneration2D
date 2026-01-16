@@ -3,7 +3,10 @@
 
 name: Build and Test
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 
 jobs:
@@ -17,9 +20,9 @@ jobs:
     permissions:
       contents: write      
     outputs:
-      assemblySemVer: ${{ steps.setup.outputs.assemblySemVer }}
-      GitVersion_FullSemVer: ${{ steps.setup.outputs.GitVersion_FullSemVer }}
-      semVer: ${{ steps.setup.outputs.semVer }}
+      assemblySemVer: ${{ steps.version_step.outputs.assemblySemVer }}
+      GitVersion_FullSemVer: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}
+      semVer: ${{ steps.version_step.outputs.semVer }}
       
     steps:
     - uses: actions/checkout@v5
