@@ -629,22 +629,22 @@ public class WfcProvider
 
 **Current Implementation Status:**
 
-✅ Complete jagged array structure (`HashSet<int>?[][]`) for domains and outputs
-✅ Comprehensive `Generate()` methods (with and without backtracking)
-✅ Advanced entropy-based cell selection with multiple heuristics (domain size, Shannon entropy, most constraining variable, etc.)
-✅ Weighted tile selection with neighbor matching and configurable weights
-✅ Change logging and full backtracking support for contradiction recovery
-✅ AC3Propagator integration: arc consistency propagation is fully implemented and used for all constraint propagation
-✅ ChangeLog support in AC3Propagator: reversible propagation and backtracking are correctly supported
-✅ Chunk boundary constraints: interfaces and partial implementation for seamless chunk seaming
-✅ Runtime configuration via `appsettings.json` and F10 panel (heuristics, weights, time budget)
-✅ Diagnostics: performance event source, chunk save/load counters, and debug overlay
-✅ Extensive XML documentation for public APIs and non-trivial methods
-✅ Unit and integration tests for core WFC and chunking logic
-❌ **Missing: Precomputed rule tables** (adjacency rules are still evaluated at runtime)
-❌ **Missing: Full plugin architecture for entropy/constraint providers** (interfaces present, not fully pluggable)
-❌ **Missing: Library abstraction for non-tile domains** (currently terrain-specific)
-❌ **Missing: Comprehensive property-based and performance regression tests** (coverage improving, not at target)
+- ✅ Complete jagged array structure (`HashSet<int>?[][]`) for domains and outputs
+- ✅ Comprehensive `Generate()` methods (with and without backtracking)
+- ✅ Advanced entropy-based cell selection with multiple heuristics (domain size, Shannon entropy, most constraining variable, etc.)
+- ✅ Weighted tile selection with neighbor matching and configurable weights
+- ✅ Change logging and full backtracking support for contradiction recovery
+- ✅ AC3Propagator integration: arc consistency propagation is fully implemented and used for all constraint propagation
+- ✅ ChangeLog support in AC3Propagator: reversible propagation and backtracking are correctly supported
+- ✅ PrecomputedRuleTable implemented and used for all adjacency checks; all components requiring adjacency checks receive the shared instance, eliminating duplicate or legacy rule table construction
+- ✅ Chunk boundary constraints: interfaces and partial implementation for seamless chunk seaming
+- ✅ Runtime configuration via `appsettings.json` and F10 panel (heuristics, weights, time budget)
+- ✅ Diagnostics: performance event source, chunk save/load counters, and debug overlay
+- ✅ Extensive XML documentation for public APIs and non-trivial methods
+- ✅ Unit and integration tests for core WFC and chunking logic
+- ❌ **Missing: Full plugin architecture for entropy/constraint providers** (interfaces present, not fully pluggable)
+- ❌ **Missing: Library abstraction for non-tile domains** (currently terrain-specific)
+- ❌ **Missing: Comprehensive property-based and performance regression tests** (coverage improving, not at target)
 
 ### Phase 2: Chunk Seam Consistency
 

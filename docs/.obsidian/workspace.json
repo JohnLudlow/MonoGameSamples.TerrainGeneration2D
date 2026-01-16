@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "plans/wfc-completion-plan.md",
+                "file": "plans/wfc-completion-plan/property-and-performance-tests.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "wfc-completion-plan"
+              "title": "property-and-performance-tests"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "plans/wfc-completion-plan.md",
+                "file": "plans/wfc-completion-plan/property-and-performance-tests.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for wfc-completion-plan"
+              "title": "Backlinks for property-and-performance-tests"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "plans/wfc-completion-plan.md",
+                "file": "plans/wfc-completion-plan/property-and-performance-tests.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from wfc-completion-plan"
+              "title": "Outgoing links from property-and-performance-tests"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "plans/wfc-completion-plan.md",
+                "file": "plans/wfc-completion-plan/property-and-performance-tests.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of wfc-completion-plan"
+              "title": "Outline of property-and-performance-tests"
             }
           }
         ]
@@ -184,5 +184,11 @@
     }
   },
   "active": "a3a192fd42fe2bd2",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "plans/wfc-completion-plan/plugin-architecture.md",
+    "plans/wfc-completion-plan/library-abstraction.md",
+    "plans/wfc-completion-plan.md",
+    "plans/wfc-completion-plan/property-and-performance-tests.md",
+    "plans/wfc-completion-plan"
+  ]
 }
