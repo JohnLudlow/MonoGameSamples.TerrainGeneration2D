@@ -178,6 +178,26 @@ public class WfcProvider
   /// <returns>True if fully collapsed; false if limits hit or unsatisfiable.</returns>
   public bool Generate(bool enableBacktracking, int maxIterations = 10000, int? maxBacktrackSteps = null, int? maxDepth = null, TimeSpan? timeBudget = null)
   {
+
+    // Pre-collapse any pre-filled output cells and propagate constraints
+    for (int x = 0; x < _width; x++)
+    {
+      for (int y = 0; y < _height; y++)
+      {
+        if (_output[x][y] != -1)
+        {
+          // Collapse domain to the pre-filled value
+          _possibilities[x][y]?.Clear();
+          _possibilities[x][y]?.Add(_output[x][y]);
+          // Propagate constraints from this cell
+          if (!Propagator.PropagateFrom(x, y, _output[x][y]))
+          {
+            return false;
+          }
+        }
+      }
+    }
+
     if (!enableBacktracking)
     {
       return GenerateWithoutBacktracking(maxIterations, timeBudget);
@@ -247,7 +267,6 @@ public class WfcProvider
             TerrainPerformanceEventSource.Log.WfcRollbackEnd(top.Depth);
             stack.Pop();
             TerrainPerformanceEventSource.Log.WfcDecisionPop(top.Depth);
-
             backtracks++;
             break;
           }
@@ -256,12 +275,8 @@ public class WfcProvider
           {
             stack.Pop();
             TerrainPerformanceEventSource.Log.WfcDecisionPop(top.Depth);
-            if (stack.Count == 0)
-            {
-              context.success = false;
-              return false;
-            }
-            continue;
+            // Instead of returning false, allow outer loop to continue
+            break;
           }
 
           var chosen = top.Candidates[top.NextIndex++];

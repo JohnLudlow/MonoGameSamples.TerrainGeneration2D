@@ -108,6 +108,23 @@ flowchart TD
 
 Weighted vs. uniform priors (example probabilities and entropy):
 
+This snippet illustrates how candidate weights and probabilities affect entropy and cell selection:
+
+- **Domain candidates**: The possible tiles for a cell, e.g., `{A, B, C}`.
+- **Weights (contextual)**: How much each candidate is favored by context (e.g., neighbor matches, biome compatibility). Here, `{8, 1, 1}` means tile A is much more likely than B or C.
+- **Probabilities**: Convert weights to probabilities by normalizing: `p(A)=0.8, p(B)=0.1, p(C)=0.1`.
+- **Bars**: Visual representation of relative likelihoods:
+  - A | ######## (high probability)
+  - B | # (low probability)
+  - C | # (low probability)
+- **Entropy (natural log)**: Measures uncertainty. Lower entropy means the cell is easier to decide:
+  - $H \approx - (0.8 \ln 0.8 + 0.1 \ln 0.1 + 0.1 \ln 0.1) \approx 0.639$
+  - **Uniform baseline**: If all candidates are equally likely ($k=3$), $H = \ln 3 \approx 1.099$
+  - **Interpretation**: Weighted priors (contextual information) reduce entropy compared to uniform, making this cell a stronger candidate for collapse.
+
+This demonstrates why context-aware weighting helps the solver prioritize cells with obvious choices, stabilizing propagation and reducing backtracking.
+
+Example:
 ```plain
 Domain candidates: {A, B, C}
 Weights (contextual): {8, 1, 1}
@@ -289,6 +306,16 @@ int ChooseTile(List<(int tile, int weight)> weightedOptions)
 ```
 
 ## WfcProvider Notes
+## How PrecomputedRuleTable Works
+
+The `PrecomputedRuleTable` (see [PrecomputedRuletable.cs](../../../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/PrecomputedRuletable.cs)) is a performance optimization for constraint checking in WFC. Instead of evaluating tile adjacency rules at runtime for every propagation step, it builds a lookup table during initialization:
+
+- For each tile type and direction, it tests every possible neighbor tile using a valid context (e.g., appropriate altitude for terrain tiles).
+- If the adjacency rule passes, the neighbor tile is added to a BitSet for that direction.
+- The result is a dictionary mapping `(tileId, direction)` to a BitSet of allowed neighbor tile IDs.
+- During WFC solving, constraint checks become fast O(1) lookups in this table, eliminating repeated rule evaluation and reducing CPU cost.
+
+This approach ensures that propagation and backtracking are efficient, especially for large maps and complex rule sets. It also guarantees that the allowed neighbor sets match the intended design, as the table is built using the same rule logic as runtime evaluation.
 
 - Entropy selection: lowest domain size; ties resolved via `IRandomProvider`.
 - Non-backtracking collapse: weighted roll using neighbor-match boost; candidate list sorted by tile id to avoid HashSet nondeterminism.

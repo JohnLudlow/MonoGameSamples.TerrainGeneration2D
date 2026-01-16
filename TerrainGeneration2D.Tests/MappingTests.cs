@@ -160,6 +160,8 @@ public class MappingTests
         });
         // Deterministic provider yields consistent choices; non-backtracking fails, backtracking recovers
         var wfcNoBacktrack = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, new DeterministicRandomProvider(), new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+        // Force collapse of first cell to invalid tile (0)
+        wfcNoBacktrack.GetOutput()[0][0] = 0;
         var successNoBack = wfcNoBacktrack.Generate(maxIterations: 1000);
         Assert.False(successNoBack);
 

@@ -59,9 +59,23 @@ public class PrecomputedRuleTable : IRuleTable
     // Convert TileType adjacency rules into efficient BitSet lookups
     var directions = new[] { Direction.North, Direction.East, Direction.South, Direction.West };
 
+    // Helper: pick valid context for each tile type
+    TerrainRuleConfiguration config = new TerrainRuleConfiguration();
     for (int tileId = 0; tileId < registry.TileCount; tileId++)
     {
       var tileType = registry.GetTileType(tileId);
+
+      // Pick valid height sample for this tile type
+      HeightSample validHeight = tileType switch
+      {
+        OceanTileType => new HeightSample { Altitude = config.OceanHeightMax - 0.01f },
+        BeachTileType => new HeightSample { Altitude = config.BeachHeightMin + 0.01f },
+        PlainsTileType => new HeightSample { Altitude = config.PlainsHeightMin + 0.01f },
+        ForestTileType => new HeightSample { Altitude = config.ForestHeightMin + 0.01f },
+        SnowTileType => new HeightSample { Altitude = config.SnowHeightMin + 0.01f },
+        MountainTileType => new HeightSample { Altitude = config.MountainHeightMin + 0.01f, MountainNoise = config.MountainNoiseThreshold + 0.01f },
+        _ => new HeightSample { Altitude = 0.5f }
+      };
 
       foreach (var direction in directions)
       {
@@ -70,24 +84,15 @@ public class PrecomputedRuleTable : IRuleTable
         // Test each potential neighbor tile
         for (var neighborId = 0; neighborId < registry.TileCount; neighborId++)
         {
-          // Create full context with default values for precomputation
-          // This tests basic adjacency rules without runtime-specific data
-          var defaultHeight = new HeightSample
-          {
-            Altitude = 0.5f,
-            MountainNoise = 0.0f,
-            DetailNoise = 0.0f
-          };
-
           var context = new TileRuleContext(
             CandidatePosition: new TilePoint(0, 0),
             CandidateTileId: tileId,
             NeighborPosition: GetNeighborPosition(direction),
             NeighborTileId: neighborId,
             DirectionToNeighbor: direction,
-            Config: new TerrainRuleConfiguration(),
-            CandidateHeight: defaultHeight,
-            NeighborHeight: defaultHeight,
+            Config: config,
+            CandidateHeight: validHeight,
+            NeighborHeight: validHeight,
             MappingService: new MappingInformationService([new int[1]])
           );
 
