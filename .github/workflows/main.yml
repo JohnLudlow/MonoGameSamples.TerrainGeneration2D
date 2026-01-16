@@ -210,6 +210,10 @@ jobs:
       security-events: write
     steps:
     - uses: actions/checkout@v5
+      with:
+        lfs: true
+        fetch-depth: 0
+
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
