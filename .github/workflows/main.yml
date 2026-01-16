@@ -29,15 +29,9 @@ jobs:
 
     - uses: ./.github/actions/build
 
-    - name: Tag Commit
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      shell: pwsh
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        $tag = "v${{ steps.version_step.outputs.semVer }}"
-        git tag $tag
-        git push origin $tag
+    - uses: christophebedard/tag-version-commit@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
 
   test:
     needs: build
@@ -95,7 +89,7 @@ jobs:
       with:
         lfs: true
         fetch-depth: 0
-              
+
     - uses: ./.github/actions/codeql
 
   docs-links:
