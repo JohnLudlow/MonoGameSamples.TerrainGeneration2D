@@ -40,17 +40,6 @@ jobs:
         "AssemblyVersion=${{ steps.version_step.outputs.assemblySemVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
         "AssemblyFileVersion=${{ steps.version_step.outputs.assemblySemFileVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-    - name: Update Run Name
-      shell: pwsh
-      run: |
-        $newTitle = "Build and Test v${{ steps.version_step.outputs.semVer }}"
-        $headers = @{
-          "Authorization" = "token ${{ secrets.GITHUB_TOKEN }}"
-          "Accept" = "application/vnd.github.v3+json"
-        }
-        $body = @{ display_title = $newTitle } | ConvertTo-Json
-        Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}" -Method Patch -Headers $headers -Body $body
-
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -98,6 +87,7 @@ jobs:
         reports: '**/coverage.cobertura.xml'
         targetdir: 'coverage'
         reporttypes: 'MarkdownSummaryGithub;MarkdownDeltaSummary'
+        title: ${{ steps.version_step.outputs.assemblySemVer }}
 
     - name: Upload coverage report artifact
       uses: actions/upload-artifact@v4
@@ -126,3 +116,13 @@ jobs:
     - name: Publish performance report in build summary
       if: github.event_name == 'pull_request'      
       run: cat BenchmarkDotNet.Artifacts/results/*.md >> $env:GITHUB_STEP_SUMMARY # Adjust path and filename if necessary
+
+    - name: Tag Commit
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      shell: pwsh
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        $tag = "v${{ steps.version_step.outputs.semVer }}"
+        git tag $tag
+        git push origin $tag
