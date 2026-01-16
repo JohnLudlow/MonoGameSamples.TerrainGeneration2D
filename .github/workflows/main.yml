@@ -14,6 +14,8 @@ jobs:
     runs-on: ${{matrix.os}}
     env:
       CONFIGURATION: Release
+    permissions:
+      contents: write      
     outputs:
       assemblySemVer: ${{ steps.version_step.outputs.assemblySemVer }}
       GitVersion_FullSemVer: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}
