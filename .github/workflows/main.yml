@@ -30,14 +30,14 @@ jobs:
     - uses: ./.github/actions/build
 
     - name: Tag Commit
-      # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       shell: pwsh
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         $tag = "v${{ steps.version_step.outputs.GitHub_FullSemVer }}"
         git tag $tag
-        git push origin $tag
+        git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git $tag
 
   test:
     needs: build
