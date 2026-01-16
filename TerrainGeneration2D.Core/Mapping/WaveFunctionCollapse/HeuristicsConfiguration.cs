@@ -1,4 +1,4 @@
-namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
+﻿namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 
 /// <summary>
 /// Configures cell-selection heuristics for WFC.

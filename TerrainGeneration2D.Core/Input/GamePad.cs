@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -30,7 +30,7 @@ public class GamePadInfo
   public void Update(GameTime gameTime)
   {
     ArgumentNullException.ThrowIfNull(gameTime);
-    
+
     PreviousState = CurrentState;
     CurrentState = GamePad.GetState(PlayerIndex);
 
@@ -51,8 +51,8 @@ public class GamePadInfo
   /// <param name="time">The amount of time the vibration should occur.</param>
   public void SetVibration(float strength, TimeSpan time)
   {
-      _vibrationTimeRemaining = time;
-      GamePad.SetVibration(PlayerIndex, strength, strength);
+    _vibrationTimeRemaining = time;
+    GamePad.SetVibration(PlayerIndex, strength, strength);
   }
 
   /// <summary>
@@ -60,7 +60,7 @@ public class GamePadInfo
   /// </summary>
   public void StopVibration()
   {
-      GamePad.SetVibration(PlayerIndex, 0.0f, 0.0f);
+    GamePad.SetVibration(PlayerIndex, 0.0f, 0.0f);
   }
 
 
@@ -71,7 +71,7 @@ public class GamePadInfo
   /// <returns>true if the specified gamepad button is currently down; otherwise, false.</returns>
   public bool IsButtonDown(Buttons button)
   {
-      return CurrentState.IsButtonDown(button);
+    return CurrentState.IsButtonDown(button);
   }
 
   /// <summary>
@@ -81,7 +81,7 @@ public class GamePadInfo
   /// <returns>true if the specified gamepad button is currently up; otherwise, false.</returns>
   public bool IsButtonUp(Buttons button)
   {
-      return CurrentState.IsButtonUp(button);
+    return CurrentState.IsButtonUp(button);
   }
 
   /// <summary>
@@ -91,7 +91,7 @@ public class GamePadInfo
   /// <returns>true if the specified gamepad button was just pressed on the current frame; otherwise, false.</returns>
   public bool WasButtonJustPressed(Buttons button)
   {
-      return CurrentState.IsButtonDown(button) && PreviousState.IsButtonUp(button);
+    return CurrentState.IsButtonDown(button) && PreviousState.IsButtonUp(button);
   }
 
   /// <summary>
@@ -101,7 +101,7 @@ public class GamePadInfo
   /// <returns>true if the specified gamepad button was just released on the current frame; otherwise, false.</returns>
   public bool WasButtonJustReleased(Buttons button)
   {
-      return CurrentState.IsButtonUp(button) && PreviousState.IsButtonDown(button);
+    return CurrentState.IsButtonUp(button) && PreviousState.IsButtonDown(button);
   }
 
 

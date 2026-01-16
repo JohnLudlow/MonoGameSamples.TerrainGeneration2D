@@ -1,4 +1,4 @@
-/// <summary>
+﻿/// <summary>
 /// Entry point for the Content Builder project, 
 /// which when executed will build content according to the "Content Collection Strategy" defined in the Builder class.
 /// </summary>
@@ -34,7 +34,7 @@ internal sealed class TerrainGeneration2DContentBuilder : ContentBuilder
     contentCollection.Include<WildcardRule>("fonts/04B_30.spritefont");
     contentCollection.Include<WildcardRule>("fonts/04B_30_5x.spritefont");
     contentCollection.IncludeCopy<WildcardRule>("fonts/04b_30.fnt");
-    
+
     contentCollection.Include<WildcardRule>("effects/grayscaleEffect.fx");
 
     // By default, all content will be imported from the Assets folder using the default importer for their file type.

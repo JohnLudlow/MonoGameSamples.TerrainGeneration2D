@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
@@ -41,7 +41,7 @@ public sealed class MappingInformationService
     {
       visited[x] = new bool[_height];
     }
-    
+
     var queue = new Queue<TilePoint>();
     queue.Enqueue(point);
     visited[point.X][point.Y] = true;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Gum.DataTypes;
 using Gum.DataTypes.Variables;
 using Gum.Forms.Controls;
@@ -14,7 +14,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UI;
 /// A custom button implementation that inherits from Gum's Button class to provide
 /// animated visual feedback when focused.
 /// </summary>
-internal class AnimatedButton : Button
+internal sealed class AnimatedButton : Button
 {
   /// <summary>
   /// Creates a new AnimatedButton instance using graphics from the specified texture atlas.

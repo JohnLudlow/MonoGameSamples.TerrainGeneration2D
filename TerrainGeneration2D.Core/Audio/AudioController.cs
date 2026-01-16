@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Media;
@@ -73,7 +73,9 @@ public class AudioController : IDisposable
     return soundEffectInstance;
   }
 
+#pragma warning disable CA1822 // Mark members as static
   public void PlaySong(Song song, bool isRepeating = true)
+#pragma warning restore CA1822 // Mark members as static
   {
     if (MediaPlayer.State == MediaState.Playing)
     {
@@ -154,7 +156,7 @@ public class AudioController : IDisposable
           soundEffectInstance.Dispose();
         }
         _activeSoundEffects.Clear();
-      }      
+      }
 
       IsDisposed = true;
     }

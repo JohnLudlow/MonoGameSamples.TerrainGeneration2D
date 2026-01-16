@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "features/mapping/map-generation/wfc/05-heuristics.md",
+                "file": "plans/github-actions-improvements-plan.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "05-heuristics"
+              "title": "github-actions-improvements-plan"
             }
           },
           {
@@ -199,6 +199,8 @@
   },
   "active": "a3a192fd42fe2bd2",
   "lastOpenFiles": [
+    "plans/resolve-build-warnings-plan.md",
+    "features/mapping/map-generation/wfc/05-heuristics.md",
     "features/mapping/map-generation/wfc/03-propagation.md",
     "features/mapping/map-generation/wfc/04-backtracking.md",
     "plans/wfc-completion-plan/plugin-architecture.md",

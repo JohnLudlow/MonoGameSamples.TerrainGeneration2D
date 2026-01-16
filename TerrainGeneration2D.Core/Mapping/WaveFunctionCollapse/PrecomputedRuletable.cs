@@ -1,4 +1,4 @@
-// Rule table implementation that converts TileTypeRegistry to AC3 format
+﻿// Rule table implementation that converts TileTypeRegistry to AC3 format
 using System;
 using System.Linq;
 using System.Collections.Generic;

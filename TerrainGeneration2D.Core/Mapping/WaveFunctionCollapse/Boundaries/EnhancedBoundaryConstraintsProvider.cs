@@ -1,4 +1,4 @@
-// Integration with boundary constraints for chunk seaming
+﻿// Integration with boundary constraints for chunk seaming
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -152,48 +152,48 @@ public class EnhancedWfcProvider : WfcProvider
 
   private void ApplyBoundaryConstraints(Dictionary<Point, Chunk> neighbors, Point coords)
   {
-        var neighborOffsets = new[]
-        {
+    var neighborOffsets = new[]
+    {
             (new Point(0, -1), Direction.North),
             (new Point(1, 0), Direction.East),
             (new Point(0, 1), Direction.South),
             (new Point(-1, 0), Direction.West)
         };
 
-        foreach (var (offset, direction) in neighborOffsets)
-        {
-            var neighborPos = coords + offset;
-            if (neighbors.TryGetValue(neighborPos, out var chunk))
-            {
-                var constraints = _boundaryProvider.ExtractConstraints(chunk, direction);
-                _boundaryProvider.ApplyConstraints(this.GetPossibilities(), constraints);
-            }
-        }
-
-        // Important: Run initial propagation after applying boundary constraints
-        // This ensures constraint consistency before starting main generation
-        PropagateInitialConstraints();
-    }
-
-    private void PropagateInitialConstraints()
+    foreach (var (offset, direction) in neighborOffsets)
     {
-        // Propagate from all boundary cells that have been constrained
-        for (int x = 0; x < this.Width; x++)
-        {
-            for (int y = 0; y < this.Height; y++)
-            {
-                var cellPoss = this.GetPossibilities()[x][y];
-                if (cellPoss != null && cellPoss.Count == 1)
-                {
-                  // Single-domain cell acts as initial constraint
-                  var constrainedTile = cellPoss.First();
-                  if (!this.Propagator.PropagateFrom(x, y, constrainedTile))
-                  {
-                    throw new InvalidOperationException(
-                      $"Boundary constraints created contradiction at ({x},{y})");
-                  }
-                }
-            }
-        }
+      var neighborPos = coords + offset;
+      if (neighbors.TryGetValue(neighborPos, out var chunk))
+      {
+        var constraints = _boundaryProvider.ExtractConstraints(chunk, direction);
+        _boundaryProvider.ApplyConstraints(this.GetPossibilities(), constraints);
+      }
     }
+
+    // Important: Run initial propagation after applying boundary constraints
+    // This ensures constraint consistency before starting main generation
+    PropagateInitialConstraints();
+  }
+
+  private void PropagateInitialConstraints()
+  {
+    // Propagate from all boundary cells that have been constrained
+    for (int x = 0; x < this.Width; x++)
+    {
+      for (int y = 0; y < this.Height; y++)
+      {
+        var cellPoss = this.GetPossibilities()[x][y];
+        if (cellPoss != null && cellPoss.Count == 1)
+        {
+          // Single-domain cell acts as initial constraint
+          var constrainedTile = cellPoss.First();
+          if (!this.Propagator.PropagateFrom(x, y, constrainedTile))
+          {
+            throw new InvalidOperationException(
+              $"Boundary constraints created contradiction at ({x},{y})");
+          }
+        }
+      }
+    }
+  }
 }

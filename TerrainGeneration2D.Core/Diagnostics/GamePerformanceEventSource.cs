@@ -1,4 +1,4 @@
-using System.Diagnostics.Tracing;
+﻿using System.Diagnostics.Tracing;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 
@@ -7,8 +7,9 @@ public sealed class GamePerformanceEventSource : EventSource
 {
   public static readonly GamePerformanceEventSource Log = new();
 
+#pragma warning disable CA2213
   private readonly EventCounter _fps;
-
+#pragma warning restore CA2213
   private GamePerformanceEventSource()
   {
     _fps = new EventCounter("fps", this)

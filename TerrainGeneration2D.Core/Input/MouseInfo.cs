@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Input;
@@ -17,10 +17,10 @@ public class MouseInfo
   public MouseState PreviousState { get; set; }
   public MouseState CurrentState { get; set; }
 
-  public Point Position 
+  public Point Position
   {
-    get => CurrentState.Position  ; 
-    set => Mouse.SetPosition(value.X, value.Y); 
+    get => CurrentState.Position;
+    set => Mouse.SetPosition(value.X, value.Y);
   }
 
   public int X

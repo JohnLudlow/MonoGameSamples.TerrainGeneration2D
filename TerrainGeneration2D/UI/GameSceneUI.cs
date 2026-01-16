@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Globalization;
 using Gum.DataTypes;
 using Gum.Forms.Controls;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
@@ -9,12 +10,15 @@ using MonoGameGum.GueDeriving;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UI;
 
-public class GameSceneUI : ContainerRuntime
+internal sealed class GameSceneUI : ContainerRuntime
 {
   // The string format to use when updating the text for the score display.
-  private static readonly string _scoreFormat = "SCORE: {0:D6}";
+#pragma warning disable CA1852
+  private const string _scoreFormat = "SCORE: {0:D6}";
+#pragma warning restore CA1852
 
   // The sound effect to play for auditory feedback of the user interface.
+#pragma warning disable CS8618
   private SoundEffect _uiSoundEffect;
 
   // The pause panel
@@ -33,8 +37,9 @@ public class GameSceneUI : ContainerRuntime
 
   // The text runtime used to display the players score on the game screen.
   private TextRuntime _scoreText;
-    // The on-screen hint for controls.
-    private TextRuntime _hintText;
+  // The on-screen hint for controls.
+  private TextRuntime _hintText;
+#pragma warning restore CS8618
 
   /// <summary>
   /// Event invoked when the Resume button on the Pause panel is clicked.
@@ -54,7 +59,17 @@ public class GameSceneUI : ContainerRuntime
 
 
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
   public GameSceneUI()
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
   {
     // The game scene UI inherits from ContainerRuntime, so we set its
     // doc to fill so it fills the entire screen.
@@ -65,7 +80,9 @@ public class GameSceneUI : ContainerRuntime
 
     // Get a reference to the content manager that was registered with the
     // GumService when it was original initialized.
+#pragma warning disable CS8602
     var content = GumService.Default.ContentLoader.XnaContentManager;
+#pragma warning restore CS8602
 
     // Use that content manager to load the sound effect and atlas for the
     // user interface elements
@@ -90,22 +107,24 @@ public class GameSceneUI : ContainerRuntime
     // and add it as a child to this container
     _gameOverPanel = CreateGameOverPanel(atlas);
     AddChild(_gameOverPanel.Visual);
-}
+  }
 
-/// <summary>
-/// Updates the text on the score display.
-/// </summary>
-/// <param name="score">The score to display.</param>
-public void UpdateScoreText(int score)
-{
-    _scoreText.Text = string.Format(_scoreFormat, score);
-}
+  /// <summary>
+  /// Updates the text on the score display.
+  /// </summary>
+  /// <param name="score">The score to display.</param>
+  public void UpdateScoreText(int score)
+  {
+#pragma warning disable CA1863
+    _scoreText.Text = string.Format(CultureInfo.InvariantCulture, _scoreFormat, score);
+#pragma warning restore CA1863
+  }
 
-/// <summary>
-/// Tells the game scene ui to show the pause panel.
-/// </summary>
-public void ShowPausePanel()
-{
+  /// <summary>
+  /// Tells the game scene ui to show the pause panel.
+  /// </summary>
+  public void ShowPausePanel()
+  {
     _pausePanel.IsVisible = true;
 
     // Give the resume button focus for keyboard/gamepad input.
@@ -113,60 +132,66 @@ public void ShowPausePanel()
 
     // Ensure the game over panel isn't visible.
     _gameOverPanel.IsVisible = false;
-}
+  }
 
-/// <summary>
-/// Tells the game scene ui to hide the pause panel.
-/// </summary>
-public void HidePausePanel()
-{
+  /// <summary>
+  /// Tells the game scene ui to hide the pause panel.
+  /// </summary>
+  public void HidePausePanel()
+  {
     _pausePanel.IsVisible = false;
-}
+  }
 
-/// <summary>
-/// Tells the game scene ui to show the game over panel.
-/// </summary>
-public void ShowGameOverPanel()
-{
+  /// <summary>
+  /// Tells the game scene ui to show the game over panel.
+  /// </summary>
+  public void ShowGameOverPanel()
+  {
     _gameOverPanel.IsVisible = true;
 
     // Give the retry button focus for keyboard/gamepad input.
-    _retryButton.IsFocused =true;
+    _retryButton.IsFocused = true;
 
     // Ensure the pause panel isn't visible.
     _pausePanel.IsVisible = false;
-}
+  }
 
-/// <summary>
-/// Tells the game scene ui to hide the game over panel.
-/// </summary>
-public void HideGameOverPanel()
-{
+  /// <summary>
+  /// Tells the game scene ui to hide the game over panel.
+  /// </summary>
+#pragma warning disable CA1822
+  public void HideGameOverPanel()
+  {
     _gameOverPanel.IsVisible = false;
-}
+  }
+#pragma warning restore CA1822
 
-/// <summary>
-/// Updates the game scene ui.
-/// </summary>
-/// <param name="gameTime">A snapshot of the timing values for the current update cycle.</param>
-public void Update(GameTime gameTime)
-{
+  /// <summary>
+  /// Updates the game scene ui.
+  /// </summary>
+  /// <param name="gameTime">A snapshot of the timing values for the current update cycle.</param>
+#pragma warning disable CA1822
+  public void Update(GameTime gameTime)
+  {
     GumService.Default.Update(gameTime);
-}
+  }
+#pragma warning restore CA1822
 
-/// <summary>
-/// Draws the game scene ui.
-/// </summary>
-public void Draw()
-{
+  /// <summary>
+  /// Draws the game scene ui.
+  /// </summary>
+#pragma warning disable CA1822
+  public void Draw()
+  {
     GumService.Default.Draw();
-}
+  }
+#pragma warning restore CA1822
 
 
-private void OnResumeButtonClicked(object sender, EventArgs args)
-{
+  private void OnResumeButtonClicked(object sender, EventArgs args)
+  {
     // Button was clicked, play the ui sound effect for auditory feedback.
-    JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.Audio.PlaySoundEffect(_uiSoundEffect);
+    JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.Audio.PlaySoundEffect(_uiSoundEffect);
 
     // Since the resume button was clicked, we need to hide the pause panel.
     HidePausePanel();
@@ -175,10 +200,10 @@ private void OnResumeButtonClicked(object sender, EventArgs args)
     ResumeButtonClick?.Invoke(sender, args);
   }
 
-private void OnRetryButtonClicked(object sender, EventArgs args)
-{
+  private void OnRetryButtonClicked(object sender, EventArgs args)
+  {
     // Button was clicked, play the ui sound effect for auditory feedback.
-    JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.Audio.PlaySoundEffect(_uiSoundEffect);
+    JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.Audio.PlaySoundEffect(_uiSoundEffect);
 
     // Since the retry button was clicked, we need to hide the game over panel.
     HideGameOverPanel();
@@ -187,45 +212,51 @@ private void OnRetryButtonClicked(object sender, EventArgs args)
     RetryButtonClick?.Invoke(sender, args);
   }
 
-private void OnQuitButtonClicked(object sender, EventArgs args)
-{
+  private void OnQuitButtonClicked(object sender, EventArgs args)
+  {
     // Button was clicked, play the ui sound effect for auditory feedback.
-    JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.Audio.PlaySoundEffect(_uiSoundEffect);
+    JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.Audio.PlaySoundEffect(_uiSoundEffect);
 
     // Both panels have a quit button, so hide both panels
     HidePausePanel();
     HideGameOverPanel();
 
     // Invoke the QuitButtonClick event.
-    if(QuitButtonClick != null)
+#pragma warning disable CA1822
+    if (QuitButtonClick != null)
     {
-        QuitButtonClick(sender, args);
+      QuitButtonClick(sender, args);
     }
-}
+#pragma warning restore CA1822
+  }
 
-private void OnElementGotFocus(object sender, EventArgs args)
-{
+  private void OnElementGotFocus(object sender, EventArgs args)
+  {
     // A ui element that can receive focus has received focus, play the
     // ui sound effect for auditory feedback.
-    JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.Audio.PlaySoundEffect(_uiSoundEffect);
-}
+    JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.Audio.PlaySoundEffect(_uiSoundEffect);
+  }
 
 
-private TextRuntime CreateScoreText()
-{
+#pragma warning disable CA1822 // Mark members as static
+  private TextRuntime CreateScoreText()
+#pragma warning restore CA1822 // Mark members as static
+  {
     var text = new TextRuntime();
     text.Anchor(Gum.Wireframe.Anchor.TopLeft);
-    text.WidthUnits = DimensionUnitType.RelativeToChildren;    
+    text.WidthUnits = DimensionUnitType.RelativeToChildren;
     text.X = 20.0f;
     text.Y = 5.0f;
     text.FontScale = 0.25f;
-    text.Text = string.Format(_scoreFormat, 0);
+#pragma warning disable CA1863
+    text.Text = string.Format(CultureInfo.InvariantCulture, _scoreFormat, 0);
+#pragma warning restore CA1863
 
     return text;
-}
+  }
 
-private Panel CreatePausePanel(TextureAtlas atlas)
-{
+  private Panel CreatePausePanel(TextureAtlas atlas)
+  {
     var panel = new Panel();
     panel.Anchor(Gum.Wireframe.Anchor.Center);
     panel.WidthUnits = DimensionUnitType.Absolute;
@@ -256,6 +287,7 @@ private Panel CreatePausePanel(TextureAtlas atlas)
     panel.AddChild(text);
 
     _resumeButton = new AnimatedButton(atlas);
+#pragma warning disable CS8622
     _resumeButton.Text = "RESUME";
     _resumeButton.Anchor(Gum.Wireframe.Anchor.BottomLeft);
     _resumeButton.X = 9.0f;
@@ -263,10 +295,12 @@ private Panel CreatePausePanel(TextureAtlas atlas)
 
     _resumeButton.Click += OnResumeButtonClicked;
     _resumeButton.GotFocus += OnElementGotFocus;
+#pragma warning restore CS8622
 
     panel.AddChild(_resumeButton);
 
     var quitButton = new AnimatedButton(atlas);
+#pragma warning disable CS8622
     quitButton.Text = "QUIT";
     quitButton.Anchor(Gum.Wireframe.Anchor.BottomRight);
     quitButton.X = -9.0f;
@@ -274,14 +308,15 @@ private Panel CreatePausePanel(TextureAtlas atlas)
 
     quitButton.Click += OnQuitButtonClicked;
     quitButton.GotFocus += OnElementGotFocus;
+#pragma warning restore CS8622
 
     panel.AddChild(quitButton);
 
     return panel;
-}
+  }
 
-private Panel CreateGameOverPanel(TextureAtlas atlas)
-{
+  private Panel CreateGameOverPanel(TextureAtlas atlas)
+  {
     var panel = new Panel();
     panel.Anchor(Gum.Wireframe.Anchor.Center);
     panel.WidthUnits = DimensionUnitType.Absolute;
@@ -313,6 +348,7 @@ private Panel CreateGameOverPanel(TextureAtlas atlas)
     panel.AddChild(text);
 
     _retryButton = new AnimatedButton(atlas);
+#pragma warning disable CS8622
     _retryButton.Text = "RETRY";
     _retryButton.Anchor(Gum.Wireframe.Anchor.BottomLeft);
     _retryButton.X = 9.0f;
@@ -320,10 +356,12 @@ private Panel CreateGameOverPanel(TextureAtlas atlas)
 
     _retryButton.Click += OnRetryButtonClicked;
     _retryButton.GotFocus += OnElementGotFocus;
+#pragma warning restore CS8622
 
     panel.AddChild(_retryButton);
 
     var quitButton = new AnimatedButton(atlas);
+#pragma warning disable CS8622
     quitButton.Text = "QUIT";
     quitButton.Anchor(Gum.Wireframe.Anchor.BottomRight);
     quitButton.X = -9.0f;
@@ -331,14 +369,17 @@ private Panel CreateGameOverPanel(TextureAtlas atlas)
 
     quitButton.Click += OnQuitButtonClicked;
     quitButton.GotFocus += OnElementGotFocus;
+#pragma warning restore CS8622
 
     panel.AddChild(quitButton);
 
     return panel;
-}
+  }
 
-private TextRuntime CreateHintText()
-{
+#pragma warning disable CA1822 // Mark members as static
+  private TextRuntime CreateHintText()
+#pragma warning restore CA1822 // Mark members as static
+  {
     var text = new TextRuntime();
     // Bottom-left with small padding
     text.Anchor(Gum.Wireframe.Anchor.BottomLeft);
@@ -354,7 +395,7 @@ private TextRuntime CreateHintText()
     text.Text = "F10: Settings • F11: Fullscreen • F12: Debug";
     text.WidthUnits = DimensionUnitType.RelativeToChildren;
     return text;
-}
+  }
 
 
 }

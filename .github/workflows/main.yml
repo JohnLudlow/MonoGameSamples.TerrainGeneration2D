@@ -5,6 +5,7 @@ name: Build and Test
 
 on: [push, pull_request]
 
+
 jobs:
   build:
     strategy:
@@ -13,38 +14,113 @@ jobs:
     runs-on: ${{matrix.os}}
     env:
       CONFIGURATION: Release
-      REV_PREFIX: 1.0
+    outputs:
+      assemblySemVer: ${{ steps.version_step.outputs.assemblySemVer }}
+      GitVersion_FullSemVer: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}
+      semVer: ${{ steps.version_step.outputs.semVer }}
 
     steps:
     - uses: actions/checkout@v5
       with:
-        lfs: true        
+        lfs: true
+        fetch-depth: 0
     
     - name: Docs Link Lint
       shell: pwsh
       run: |
         pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/check-doc-links.ps1
-        
-    - name: Generate Workfloew revsion
-      shell: pwsh
-      id: get_buildrev
-      run: |
-        # Count the runs for the current workflow that were queued today
-        $date = get-date 
-        
-        $rev_suffix=$(gh run list --limit 100 --workflow '${{ github.workflow }}' --json createdAt |  jq -r --arg DATE "$($date.ToString('yyyy-MM-d'))" '[.[] | select(.createdAt | startswith($DATE))] | length ')
-        $rev = "$env:REV_PREFIX.$($date.ToString('yyyyMMdd')).$rev_suffix"
 
-        write-host "Revision: $rev"
-        "AssemblyVersion=$env:REV_PREFIX" >> $env:GITHUB_ENV
-        "AssemblyFileVersion=$rev"        >> $env:GITHUB_ENV
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v4.2.0
+      with:
+        versionSpec: '6.4.x'
+
+    - name: Determine Version
+      id: version_step # step id used as a reference for output values
+      uses: gittools/actions/gitversion/execute@v4.2.0
+
+    - name: Set Version Environment Variables
+      shell: pwsh
+      run: |
+        "AssemblyVersion=${{ steps.version_step.outputs.assemblySemVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
+        "AssemblyFileVersion=${{ steps.version_step.outputs.assemblySemFileVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.0.x
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      shell: pwsh
+      run: |
+        $dotnetParams = @(
+          "--no-restore",
+          "/m:1",
+          "--configuration", "$env:CONFIGURATION"
+        )
+
+        dotnet build @dotnetParams
+
+    - name: Tag Commit
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      shell: pwsh
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        $tag = "v${{ steps.version_step.outputs.semVer }}"
+        git tag $tag
+        git push origin $tag
+
+  test:
+    needs: build
+    runs-on: windows-latest
+    env:
+      CONFIGURATION: Release
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true
+        fetch-depth: 0
+    
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v4.2.0
+      with:
+        versionSpec: '6.4.x'
+
+    - name: Determine Version
+      id: version_step # step id used as a reference for output values
+      uses: gittools/actions/gitversion/execute@v4.2.0
+
+    - name: Set Version Environment Variables
+      shell: pwsh
+      run: |
+        "AssemblyVersion=${{ needs.build.outputs.assemblySemVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
+        "AssemblyFileVersion=${{ steps.version_step.outputs.assemblySemFileVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
 
     - name: Restore dependencies
       run: dotnet restore
@@ -82,21 +158,119 @@ jobs:
         path: TestResults/**/*.trx        
         reporter: dotnet-trx        # Format of test results
 
+    - name: Download Coverage Baseline
+      if: github.event_name == 'pull_request'
+      shell: pwsh
+      env: 
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        $artifacts = gh api /repos/${{ github.repository }}/actions/artifacts | ConvertFrom-Json
+        $baseline = $artifacts.artifacts | Where-Object { $_.name -eq 'coverage-baseline' } | Sort-Object created_at -Descending | Select-Object -First 1
+        if ($baseline) {
+          $url = "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$($baseline.id)/zip"
+          Invoke-WebRequest -Uri $url -OutFile baseline.zip -Headers @{ "Authorization" = "token ${{ secrets.GITHUB_TOKEN }}"; "Accept" = "application/vnd.github.v3+json" }
+          Expand-Archive baseline.zip baseline
+          "HISTORY_DIR=baseline" | Out-File -FilePath $env:GITHUB_ENV -Append
+        }
+
     - name: ReportGenerator
       uses: danielpalme/ReportGenerator-GitHub-Action@5.5.1
       with:        
         reports: '**/coverage.cobertura.xml'
         targetdir: 'coverage'
         reporttypes: 'MarkdownSummaryGithub;MarkdownDeltaSummary'
+        historydir: ${{ env.HISTORY_DIR }}
+        title: ${{ needs.build.outputs.assemblySemVer }}
 
     - name: Upload coverage report artifact
       uses: actions/upload-artifact@v4
       with:
-        name: CoverageReport # Artifact name        
+        name: CoverageReport-${{ needs.build.outputs.GitVersion_FullSemVer }} # Artifact name        
         path: coverage 
         
     - name: Publish coverage in build summary
       run: cat coverage/SummaryGithub.md >> $env:GITHUB_STEP_SUMMARY # Adjust path and filename if necessary
+
+    - name: Upload Coverage Baseline
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-baseline
+        path: '**/coverage.cobertura.xml'
+
+  benchmark:
+    needs: build
+    runs-on: windows-latest
+    env:
+      CONFIGURATION: Release
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      shell: pwsh
+      run: |
+        $dotnetParams = @(
+          "--no-restore",
+          "/m:1",
+          "--configuration", "$env:CONFIGURATION"
+        )
+
+        dotnet build @dotnetParams
+
+    - name: Run Benchmarks Baseline
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      shell: pwsh
+      run: |
+        $dotnetParams = @(
+          "--configuration", "$env:CONFIGURATION",
+          "--project", "TerrainGeneration2D.Benchmarks/TerrainGeneration2D.Benchmarks.csproj",
+          "--",
+          "--filter", "*",
+          "--artifacts", "BenchmarkDotNet.Artifacts",
+          "--memory", "--allCategories=Job"
+        )
+        dotnet run @dotnetParams
+
+    - name: Upload Benchmark Baseline
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-baseline
+        path: BenchmarkDotNet.Artifacts
+
+    - name: Download Benchmark Baseline
+      if: github.event_name == 'pull_request'
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        $artifacts = gh api /repos/${{ github.repository }}/actions/artifacts | ConvertFrom-Json
+        $baseline = $artifacts.artifacts | Where-Object { $_.name -eq 'benchmark-baseline' } | Sort-Object created_at -Descending | Select-Object -First 1
+        if ($baseline) {
+          $url = "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$($baseline.id)/zip"
+          Invoke-WebRequest -Uri $url -OutFile benchmark-baseline.zip -Headers @{ "Authorization" = "token ${{ secrets.GITHUB_TOKEN }}"; "Accept" = "application/vnd.github.v3+json" }
+          Expand-Archive benchmark-baseline.zip BenchmarkBaseline
+        }
 
     - name: Benchmark
       if: github.event_name == 'pull_request'
@@ -109,6 +283,7 @@ jobs:
           "--filter", "*",
           "--verbosity", "normal",
           "--", 
+          "--baseline", "BenchmarkBaseline",
           "--fast"
         )
         dotnet run @dotnetParams
@@ -116,3 +291,93 @@ jobs:
     - name: Publish performance report in build summary
       if: github.event_name == 'pull_request'      
       run: cat BenchmarkDotNet.Artifacts/results/*.md >> $env:GITHUB_STEP_SUMMARY # Adjust path and filename if necessary
+
+  lint-cs:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v5
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Check Code Formatting
+      run: dotnet format --verify-no-changes --verbosity diagnostic
+
+  codeql:
+    env:
+      CONFIGURATION: Release
+
+    runs-on: windows-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true
+        fetch-depth: 0
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: csharp
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      shell: pwsh
+      run: |
+        $dotnetParams = @(
+          "--no-restore",
+          "/m:1",
+          "--configuration", "$env:CONFIGURATION"
+        )
+
+        dotnet build @dotnetParams
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+
+  pr-size:
+    if: github.event_name == 'pull_request'
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v5
+    - name: Check PR Size
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        $pr = gh pr view ${{ github.event.number }} --json additions,deletions,files
+        $data = $pr | ConvertFrom-Json
+        $additions = $data.additions
+        $deletions = $data.deletions
+        $files = $data.files.Count
+        if ($additions + $deletions -gt 10000 -or $files -gt 500) {
+          Write-Host "::error::PR is too large: $files files, $($additions + $deletions) lines changed. Please split into smaller PRs."
+          exit 1
+        }

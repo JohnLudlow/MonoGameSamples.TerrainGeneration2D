@@ -2,7 +2,7 @@
 description: Generate an implementation plan for new features or refactoring existing code.
 name: FeaturePlanner
 tools: ['vscode/runCommand', 'execute/runInTerminal', 'read', 'edit', 'search', 'web', 'agent', 'todo']
-model: Claude Sonnet 4
+model: Grok Code Fast 1 (copilot)
 handoffs:
   - label: Implement Plan
     agent: FeatureImplementer

@@ -1,20 +1,20 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 
-public class Animation
+public class GameAnimation
 {
   public Collection<TextureRegion> Frames { get; } = [];
   public TimeSpan Delay { get; set; }
-  public Animation()
+  public GameAnimation()
   {
     Frames = [];
     Delay = TimeSpan.FromMilliseconds(100);
   }
 
-  public Animation(IEnumerable<TextureRegion> frames, TimeSpan delay)
+  public GameAnimation(IEnumerable<TextureRegion> frames, TimeSpan delay)
   {
     Frames = new Collection<TextureRegion>(new List<TextureRegion>(frames));
     Delay = delay;

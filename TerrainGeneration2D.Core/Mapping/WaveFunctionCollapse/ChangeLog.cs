@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
@@ -33,7 +33,7 @@ public sealed class ChangeLog
         case ChangeKind.OutputSet:
           output[c.X][c.Y] = c.PrevOutput;
           break;
-          
+
         case ChangeKind.CellCollapsed:
           domains?[c.X][c.Y] = new HashSet<int>(c.PrevDomainSnapshot ?? Array.Empty<int>());
           break;
@@ -41,7 +41,7 @@ public sealed class ChangeLog
         case ChangeKind.DomainRemoved:
           var d = domains?[c.X][c.Y];
           d?.Add(c.RemovedTileId);
-          
+
           break;
       }
     }
