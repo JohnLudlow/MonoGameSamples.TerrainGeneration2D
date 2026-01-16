@@ -87,6 +87,7 @@ jobs:
       env: 
         GH_TOKEN: ${{ github.token }}
       run: |
+        $env:GH_TOKEN=${{ github.token }}
         $artifacts = gh api /repos/${{ github.repository }}/actions/artifacts | ConvertFrom-Json
         $baseline = $artifacts.artifacts | Where-Object { $_.name -eq 'coverage-baseline' } | Sort-Object created_at -Descending | Select-Object -First 1
         if ($baseline) {
