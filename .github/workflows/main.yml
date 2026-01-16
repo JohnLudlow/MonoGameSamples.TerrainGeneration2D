@@ -14,6 +14,10 @@ jobs:
     runs-on: ${{matrix.os}}
     env:
       CONFIGURATION: Release
+    outputs:
+      assemblySemVer: ${{ steps.version_step.outputs.assemblySemVer }}
+      GitVersion_FullSemVer: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}
+      semVer: ${{ steps.version_step.outputs.semVer }}
 
     steps:
     - uses: actions/checkout@v5
@@ -45,6 +49,78 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.0.x
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      shell: pwsh
+      run: |
+        $dotnetParams = @(
+          "--no-restore",
+          "/m:1",
+          "--configuration", "$env:CONFIGURATION"
+        )
+
+        dotnet build @dotnetParams
+
+    - name: Tag Commit
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      shell: pwsh
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        $tag = "v${{ steps.version_step.outputs.semVer }}"
+        git tag $tag
+        git push origin $tag
+
+  test:
+    needs: build
+    runs-on: windows-latest
+    env:
+      CONFIGURATION: Release
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true
+        fetch-depth: 0
+    
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v4.2.0
+      with:
+        versionSpec: '6.4.x'
+
+    - name: Determine Version
+      id: version_step # step id used as a reference for output values
+      uses: gittools/actions/gitversion/execute@v4.2.0
+
+    - name: Set Version Environment Variables
+      shell: pwsh
+      run: |
+        "AssemblyVersion=${{ needs.build.outputs.assemblySemVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
+        "AssemblyFileVersion=${{ steps.version_step.outputs.assemblySemFileVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
 
     - name: Restore dependencies
       run: dotnet restore
@@ -104,12 +180,12 @@ jobs:
         targetdir: 'coverage'
         reporttypes: 'MarkdownSummaryGithub;MarkdownDeltaSummary'
         historydir: ${{ env.HISTORY_DIR }}
-        title: ${{ steps.version_step.outputs.assemblySemVer }}
+        title: ${{ needs.build.outputs.assemblySemVer }}
 
     - name: Upload coverage report artifact
       uses: actions/upload-artifact@v4
       with:
-        name: CoverageReport-${{ steps.version_step.outputs.GitVersion_FullSemVer }} # Artifact name        
+        name: CoverageReport-${{ needs.build.outputs.GitVersion_FullSemVer }} # Artifact name        
         path: coverage 
         
     - name: Publish coverage in build summary
@@ -121,6 +197,45 @@ jobs:
       with:
         name: coverage-baseline
         path: '**/coverage.cobertura.xml'
+
+  benchmark:
+    needs: build
+    runs-on: windows-latest
+    env:
+      CONFIGURATION: Release
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      shell: pwsh
+      run: |
+        $dotnetParams = @(
+          "--no-restore",
+          "/m:1",
+          "--configuration", "$env:CONFIGURATION"
+        )
+
+        dotnet build @dotnetParams
 
     - name: Run Benchmarks Baseline
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -177,16 +292,6 @@ jobs:
       if: github.event_name == 'pull_request'      
       run: cat BenchmarkDotNet.Artifacts/results/*.md >> $env:GITHUB_STEP_SUMMARY # Adjust path and filename if necessary
 
-    - name: Tag Commit
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      shell: pwsh
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        $tag = "v${{ steps.version_step.outputs.semVer }}"
-        git tag $tag
-        git push origin $tag
-
   lint-cs:
     runs-on: windows-latest
     steps:
@@ -195,6 +300,14 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.0.x
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
 
     - name: Check Code Formatting
       run: dotnet format --verify-no-changes --verbosity diagnostic
@@ -218,6 +331,19 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: csharp
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
 
     - name: Restore dependencies
       run: dotnet restore
