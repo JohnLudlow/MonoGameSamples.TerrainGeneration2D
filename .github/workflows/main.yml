@@ -194,7 +194,7 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.0.x
-                
+
     - name: Check Code Formatting
       run: dotnet format --verify-no-changes --verbosity diagnostic
 
@@ -222,6 +222,8 @@ jobs:
     - uses: actions/checkout@v5
     - name: Check PR Size
       shell: pwsh
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: |
         $pr = gh pr view ${{ github.event.number }} --json additions,deletions,files
         $data = $pr | ConvertFrom-Json
