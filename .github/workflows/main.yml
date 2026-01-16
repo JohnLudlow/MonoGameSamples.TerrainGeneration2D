@@ -97,7 +97,7 @@ jobs:
       shell: pwsh
       run: |
         if (Test-Path baseline/coverage.cobertura.xml) {
-          "BASELINE_FILE=baseline/coverage.cobertura.xml" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "HISTORY_DIR=baseline" | Out-File -FilePath $env:GITHUB_ENV -Append
         }
 
     - name: ReportGenerator
@@ -106,7 +106,7 @@ jobs:
         reports: '**/coverage.cobertura.xml'
         targetdir: 'coverage'
         reporttypes: 'MarkdownSummaryGithub;MarkdownDeltaSummary'
-        baselinefile: ${{ env.BASELINE_FILE }}
+        historydir: ${{ env.HISTORY_DIR }}
         title: ${{ steps.version_step.outputs.assemblySemVer }}
 
     - name: Upload coverage report artifact
@@ -123,7 +123,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: coverage-baseline
-        path: **/coverage.cobertura.xml
+        path: '**/coverage.cobertura.xml'
 
     - name: Run Benchmarks Baseline
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
