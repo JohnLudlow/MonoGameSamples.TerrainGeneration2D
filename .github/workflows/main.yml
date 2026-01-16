@@ -18,59 +18,16 @@ jobs:
       assemblySemVer: ${{ steps.version_step.outputs.assemblySemVer }}
       GitVersion_FullSemVer: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}
       semVer: ${{ steps.version_step.outputs.semVer }}
-
+      
     steps:
     - uses: actions/checkout@v5
       with:
         lfs: true
         fetch-depth: 0
-    
-    - name: Docs Link Lint
-      shell: pwsh
-      run: |
-        pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/check-doc-links.ps1
 
-    - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v4.2.0
-      with:
-        versionSpec: '6.4.x'
+    - uses: ./.github/actions/setup
 
-    - name: Determine Version
-      id: version_step # step id used as a reference for output values
-      uses: gittools/actions/gitversion/execute@v4.2.0
-
-    - name: Set Version Environment Variables
-      shell: pwsh
-      run: |
-        "AssemblyVersion=${{ steps.version_step.outputs.assemblySemVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
-        "AssemblyFileVersion=${{ steps.version_step.outputs.assemblySemFileVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
-
-    - name: Cache NuGet packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      shell: pwsh
-      run: |
-        $dotnetParams = @(
-          "--no-restore",
-          "/m:1",
-          "--configuration", "$env:CONFIGURATION"
-        )
-
-        dotnet build @dotnetParams
+    - uses: ./.github/actions/build
 
     - name: Tag Commit
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -93,110 +50,13 @@ jobs:
       with:
         lfs: true
         fetch-depth: 0
-    
-    - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v4.2.0
+
+    - uses: ./.github/actions/setup
+
+    - uses: ./.github/actions/test
       with:
-        versionSpec: '6.4.x'
-
-    - name: Determine Version
-      id: version_step # step id used as a reference for output values
-      uses: gittools/actions/gitversion/execute@v4.2.0
-
-    - name: Set Version Environment Variables
-      shell: pwsh
-      run: |
-        "AssemblyVersion=${{ needs.build.outputs.assemblySemVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
-        "AssemblyFileVersion=${{ steps.version_step.outputs.assemblySemFileVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
-
-    - name: Cache NuGet packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      shell: pwsh
-      run: |
-        $dotnetParams = @(
-          "--no-restore",
-          "/m:1",
-          "--configuration", "$env:CONFIGURATION"
-        )
-
-        dotnet build @dotnetParams
-
-    - name: Test
-      shell: pwsh
-      run: |
-        $dotnetParams = @(
-          "--no-build",
-          "--configuration", "$env:CONFIGURATION",
-          "--verbosity", "normal",
-          "--collect:XPlat Code Coverage",
-          "--logger", "trx",
-          "--results-directory", "TestResults"
-        )
-
-        dotnet test @dotnetParams
-
-    - name: Test Report
-      uses: dorny/test-reporter@v2
-      if: ${{ !cancelled() }}       # run this step even if previous step failed
-      with:
-        name: Unit Tests            # Name of the check run which will be created
-        path: TestResults/**/*.trx        
-        reporter: dotnet-trx        # Format of test results
-
-    - name: Download Coverage Baseline
-      if: github.event_name == 'pull_request'
-      shell: pwsh
-      env: 
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        $artifacts = gh api /repos/${{ github.repository }}/actions/artifacts | ConvertFrom-Json
-        $baseline = $artifacts.artifacts | Where-Object { $_.name -eq 'coverage-baseline' } | Sort-Object created_at -Descending | Select-Object -First 1
-        if ($baseline) {
-          $url = "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$($baseline.id)/zip"
-          Invoke-WebRequest -Uri $url -OutFile baseline.zip -Headers @{ "Authorization" = "token ${{ secrets.GITHUB_TOKEN }}"; "Accept" = "application/vnd.github.v3+json" }
-          Expand-Archive baseline.zip baseline
-          "HISTORY_DIR=baseline" | Out-File -FilePath $env:GITHUB_ENV -Append
-        }
-
-    - name: ReportGenerator
-      uses: danielpalme/ReportGenerator-GitHub-Action@5.5.1
-      with:        
-        reports: '**/coverage.cobertura.xml'
-        targetdir: 'coverage'
-        reporttypes: 'MarkdownSummaryGithub;MarkdownDeltaSummary'
-        historydir: ${{ env.HISTORY_DIR }}
-        title: ${{ needs.build.outputs.assemblySemVer }}
-
-    - name: Upload coverage report artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: CoverageReport-${{ needs.build.outputs.GitVersion_FullSemVer }} # Artifact name        
-        path: coverage 
-        
-    - name: Publish coverage in build summary
-      run: cat coverage/SummaryGithub.md >> $env:GITHUB_STEP_SUMMARY # Adjust path and filename if necessary
-
-    - name: Upload Coverage Baseline
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-baseline
-        path: '**/coverage.cobertura.xml'
+        assembly-semver: ${{ needs.build.outputs.assemblySemVer }}
+        gitversion-full-semver: ${{ needs.build.outputs.GitVersion_FullSemVer }}
 
   benchmark:
     needs: build
@@ -210,112 +70,21 @@ jobs:
         lfs: true
         fetch-depth: 0
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
-
-    - name: Cache NuGet packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      shell: pwsh
-      run: |
-        $dotnetParams = @(
-          "--no-restore",
-          "/m:1",
-          "--configuration", "$env:CONFIGURATION"
-        )
-
-        dotnet build @dotnetParams
-
-    - name: Run Benchmarks Baseline
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      shell: pwsh
-      run: |
-        $dotnetParams = @(
-          "--configuration", "$env:CONFIGURATION",
-          "--project", "TerrainGeneration2D.Benchmarks/TerrainGeneration2D.Benchmarks.csproj",
-          "--",
-          "--filter", "*",
-          "--artifacts", "BenchmarkDotNet.Artifacts",
-          "--memory", "--allCategories=Job"
-        )
-        dotnet run @dotnetParams
-
-    - name: Upload Benchmark Baseline
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: actions/upload-artifact@v4
-      with:
-        name: benchmark-baseline
-        path: BenchmarkDotNet.Artifacts
-
-    - name: Download Benchmark Baseline
-      if: github.event_name == 'pull_request'
-      shell: pwsh
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        $artifacts = gh api /repos/${{ github.repository }}/actions/artifacts | ConvertFrom-Json
-        $baseline = $artifacts.artifacts | Where-Object { $_.name -eq 'benchmark-baseline' } | Sort-Object created_at -Descending | Select-Object -First 1
-        if ($baseline) {
-          $url = "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$($baseline.id)/zip"
-          Invoke-WebRequest -Uri $url -OutFile benchmark-baseline.zip -Headers @{ "Authorization" = "token ${{ secrets.GITHUB_TOKEN }}"; "Accept" = "application/vnd.github.v3+json" }
-          Expand-Archive benchmark-baseline.zip BenchmarkBaseline
-        }
-
-    - name: Benchmark
-      if: github.event_name == 'pull_request'
-      shell: pwsh
-      run: |
-        $dotnetParams = @(
-          "--no-build",
-          "--configuration", "$env:CONFIGURATION",
-          "--project", "TerrainGeneration2D.Benchmarks/TerrainGeneration2D.Benchmarks.csproj",
-          "--filter", "*",
-          "--verbosity", "normal",
-          "--", 
-          "--baseline", "BenchmarkBaseline",
-          "--fast"
-        )
-        dotnet run @dotnetParams
-
-    - name: Publish performance report in build summary
-      if: github.event_name == 'pull_request'      
-      run: cat BenchmarkDotNet.Artifacts/results/*.md >> $env:GITHUB_STEP_SUMMARY # Adjust path and filename if necessary
+    - uses: ./.github/actions/benchmark
 
   lint-cs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v5
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 10.0.x
+        lfs: true
+        fetch-depth: 0
 
-    - name: Cache NuGet packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
-
-    - name: Check Code Formatting
-      run: dotnet format --verify-no-changes --verbosity diagnostic
+    - uses: ./.github/actions/lint
 
   codeql:
     env:
       CONFIGURATION: Release
-
     runs-on: windows-latest
     permissions:
       actions: read
@@ -326,58 +95,37 @@ jobs:
       with:
         lfs: true
         fetch-depth: 0
+              
+    - uses: ./.github/actions/codeql
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: csharp
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
-
-    - name: Cache NuGet packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
+  docs-links:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v5
+    - name: Run link checker
       shell: pwsh
-      run: |
-        $dotnetParams = @(
-          "--no-restore",
-          "/m:1",
-          "--configuration", "$env:CONFIGURATION"
-        )
+      run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/check-doc-links.ps1
 
-        dotnet build @dotnetParams
-
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+  markdownlint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - name: Install markdownlint-cli
+      run: npm install -g markdownlint-cli
+    - name: Run markdownlint
+      run: markdownlint "**/*.md" --ignore "**/bin/**" --ignore "**/obj/**"
 
   pr-size:
     if: github.event_name == 'pull_request'
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v5
-    - name: Check PR Size
-      shell: pwsh
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        $pr = gh pr view ${{ github.event.number }} --json additions,deletions,files
-        $data = $pr | ConvertFrom-Json
-        $additions = $data.additions
-        $deletions = $data.deletions
-        $files = $data.files.Count
-        if ($additions + $deletions -gt 10000 -or $files -gt 500) {
-          Write-Host "::error::PR is too large: $files files, $($additions + $deletions) lines changed. Please split into smaller PRs."
-          exit 1
-        }
+      with:
+        lfs: true
+        fetch-depth: 0
+
+    - uses: ./.github/actions/pr-size
