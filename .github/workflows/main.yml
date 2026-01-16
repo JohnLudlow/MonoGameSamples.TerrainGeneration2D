@@ -42,7 +42,9 @@ jobs:
 
     - name: Update Run Name
       shell: pwsh
-      run: gh run rename ${{ github.run_id }} "Build and Test v${{ steps.version_step.outputs.semVer }}"
+      run: |
+        $newTitle = "Build and Test v${{ steps.version_step.outputs.semVer }}"
+        gh api -X PATCH /repos/${{ github.repository }}/actions/runs/${{ github.run_id }} -f display_title="$newTitle"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
