@@ -185,3 +185,50 @@ jobs:
         $tag = "v${{ steps.version_step.outputs.semVer }}"
         git tag $tag
         git push origin $tag
+
+  lint-cs:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v5
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+                
+    - name: Check Code Formatting
+      run: dotnet format --verify-no-changes --verbosity diagnostic
+
+  codeql:
+    runs-on: windows-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+    - uses: actions/checkout@v5
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: csharp
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+
+  pr-size:
+    if: github.event_name == 'pull_request'
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v5
+    - name: Check PR Size
+      shell: pwsh
+      run: |
+        $pr = gh pr view ${{ github.event.number }} --json additions,deletions,files
+        $data = $pr | ConvertFrom-Json
+        $additions = $data.additions
+        $deletions = $data.deletions
+        $files = $data.files.Count
+        if ($additions + $deletions -gt 1000 -or $files -gt 50) {
+          Write-Host "::error::PR is too large: $files files, $($additions + $deletions) lines changed. Please split into smaller PRs."
+          exit 1
+        }
