@@ -9,7 +9,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFuncti
 /// occur, and <see cref="RollbackTo"/> to restore domains and output to the
 /// state at a given checkpoint.
 /// </summary>
-internal sealed class ChangeLog
+public sealed class ChangeLog
 {
   private readonly List<Change> _changes = new();
   /// <summary>Create a checkpoint representing the current tail of the log.</summary>
@@ -23,6 +23,8 @@ internal sealed class ChangeLog
   /// <summary>Undo all mutations recorded after <paramref name="mark"/>.</summary>
   public void RollbackTo(int mark, HashSet<int>?[][] domains, int[][] output)
   {
+    ArgumentNullException.ThrowIfNull(output);
+
     for (var i = _changes.Count - 1; i >= mark; i--)
     {
       var c = _changes[i];
@@ -33,11 +35,11 @@ internal sealed class ChangeLog
           break;
           
         case ChangeKind.CellCollapsed:
-          domains[c.X][c.Y] = new HashSet<int>(c.PrevDomainSnapshot ?? Array.Empty<int>());
+          domains?[c.X][c.Y] = new HashSet<int>(c.PrevDomainSnapshot ?? Array.Empty<int>());
           break;
 
         case ChangeKind.DomainRemoved:
-          var d = domains[c.X][c.Y];
+          var d = domains?[c.X][c.Y];
           d?.Add(c.RemovedTileId);
           
           break;

@@ -178,6 +178,7 @@ public static class TestArrayHelpers
 - Performance impact from repeated array allocations in test methods
 
 **Technical Implementation**:
+
 ```csharp
 // Before: Constant arrays in method calls
 Assert.Equal(expected, provider.GetScore(0, 0, possibilities, output, 
@@ -245,6 +246,7 @@ public void JaggedArrayConversion_PreservesData()
 **Solution**: Use helper methods to maintain test readability while gaining performance benefits.
 
 **Example**:
+
 ```csharp
 // Maintains readability with helper method
 var testGrid = TestArrayHelpers.ToJagged(new int[,] {
@@ -269,7 +271,7 @@ var testGrid = TestArrayHelpers.ToJagged(new int[,] {
 
 **Consideration**: Test performance should improve with jagged arrays, but initialization complexity increases.
 
-**Mitigation**: 
+**Mitigation**:
 
 - Use shared test data where possible
 - Implement lazy initialization for expensive test fixtures

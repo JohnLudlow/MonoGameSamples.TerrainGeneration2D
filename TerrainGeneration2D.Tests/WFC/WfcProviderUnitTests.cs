@@ -27,14 +27,14 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
       // Assert: All domains initialized (not null)
       for (var x = 0; x < 2; x++)
         for (var y = 0; y < 2; y++)
-          Assert.NotNull(provider.Possibilities[x][y]);
+          Assert.NotNull(provider.GetPossibilities()[x][y]);
 
       // Collapse cell (0,0) to tile 1 by setting domain
-      provider.Possibilities[0][0] = new HashSet<int> { 1 };
+      provider.GetPossibilities()[0][0] = new HashSet<int> { 1 };
       provider.CollapseCell(0, 0);
 
       // Assert: Domain is null or empty after collapse
-      Assert.True(provider.Possibilities[0][0] == null || provider.Possibilities[0][0]?.Count == 0);
+      Assert.True(provider.GetPossibilities()[0][0] == null || provider.GetPossibilities()[0][0]?.Count == 0);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
 
 
       // Collapse (0,0) to tile 1 by setting domain
-      provider.Possibilities[0][0] = [1];
+      provider.GetPossibilities()[0][0] = [1];
       provider.CollapseCell(0, 0);
 
       // Act: Find lowest entropy cell

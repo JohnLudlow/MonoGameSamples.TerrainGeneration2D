@@ -189,7 +189,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFuncti
         if (neighbors.TryGetValue(neighborPos, out var chunk))
         {
           var constraints = _boundaryProvider.ExtractConstraints(chunk, direction);
-          _boundaryProvider.ApplyConstraints(this._possibilities, constraints);
+          _boundaryProvider.ApplyConstraints(GetPossibilities(), constraints);
         }
       }
 
@@ -205,12 +205,12 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFuncti
       {
         for (var y = 0; y < this.Height; y++)
         {
-          var cellPoss = this._possibilities[x][y];
+          var cellPoss = GetPossibilities()[x][y];
           if (cellPoss != null && cellPoss.Count == 1)
           {
             // Single-domain cell acts as initial constraint
             var constrainedTile = cellPoss.First();
-            if (!this._propagator.PropagateFrom(x, y, constrainedTile))
+            if (!this.Propagator.PropagateFrom(x, y, constrainedTile))
             {
               throw new InvalidOperationException(
                   $"Boundary constraints created contradiction at ({x},{y})");

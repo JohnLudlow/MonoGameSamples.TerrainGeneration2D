@@ -68,21 +68,21 @@ integration.
 Detailed list of terms not considered 'common english'. Include references to
 articles about the term
 
-| Term | Meaning | Reference |
-| ---- | ------- | --------- |
-| Wave Function Collapse | A constraint-solving algorithm that generates content by iteratively collapsing superposition states based on local adjacency rules | [WFC Original Paper](https://github.com/mxgmn/WaveFunctionCollapse) |
-| Domain | The set of possible tile types that can be placed at a given cell position | - |
-| Entropy | A measure of uncertainty in a cell's domain; lower entropy cells have fewer possible tiles | - |
-| Observation | The act of selecting and placing a specific tile from a cell's domain | - |
-| Propagation | The process of updating neighboring cell domains based on adjacency constraints after an observation | - |
-| Backtracking | Rolling back decisions when contradictions occur and trying alternative choices | - |
-| Arc Consistency | A constraint propagation algorithm that ensures all constraints between connected variables are satisfied | [AC-3 Algorithm](https://en.wikipedia.org/wiki/AC-3_algorithm) |
-| Seam Consistency | Ensuring that adjacent chunks in the world have compatible tile placements at their boundaries | - |
-| Shannon Entropy | An information-theoretic measure of entropy calculated as H = -Σ(pi × log(pi)) | [Information Theory](https://en.wikipedia.org/wiki/Entropy_(information_theory)) |
-| Most Constraining Variable | A heuristic that preferentially selects cells that will constrain the most neighboring cells | [CSP Heuristics](https://en.wikipedia.org/wiki/Constraint_satisfaction_problem) |
-| Rule Table | Precomputed adjacency constraints that define which tiles can be placed next to each other | - |
-| Change Log | A data structure that records reversible changes to support backtracking | - |
-| BitSet | A custom data structure wrapping .NET's BitArray to provide efficient set operations for tile ID collections | [System.Collections.BitArray](https://docs.microsoft.com/en-us/dotnet/api/system.collections.bitarray) |
+| Term                       | Meaning                                                                                                                             | Reference                                                                                              |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Wave Function Collapse     | A constraint-solving algorithm that generates content by iteratively collapsing superposition states based on local adjacency rules | [WFC Original Paper](https://github.com/mxgmn/WaveFunctionCollapse)                                    |
+| Domain                     | The set of possible tile types that can be placed at a given cell position                                                          | -                                                                                                      |
+| Entropy                    | A measure of uncertainty in a cell's domain; lower entropy cells have fewer possible tiles                                          | -                                                                                                      |
+| Observation                | The act of selecting and placing a specific tile from a cell's domain                                                               | -                                                                                                      |
+| Propagation                | The process of updating neighboring cell domains based on adjacency constraints after an observation                                | -                                                                                                      |
+| Backtracking               | Rolling back decisions when contradictions occur and trying alternative choices                                                     | -                                                                                                      |
+| Arc Consistency            | A constraint propagation algorithm that ensures all constraints between connected variables are satisfied                           | [AC-3 Algorithm](https://en.wikipedia.org/wiki/AC-3_algorithm)                                         |
+| Seam Consistency           | Ensuring that adjacent chunks in the world have compatible tile placements at their boundaries                                      | -                                                                                                      |
+| Shannon Entropy            | An information-theoretic measure of entropy calculated as H = -Σ(pi × log(pi))                                                      | [Information Theory](https://en.wikipedia.org/wiki/Entropy_(information_theory))                       |
+| Most Constraining Variable | A heuristic that preferentially selects cells that will constrain the most neighboring cells                                        | [CSP Heuristics](https://en.wikipedia.org/wiki/Constraint_satisfaction_problem)                        |
+| Rule Table                 | Precomputed adjacency constraints that define which tiles can be placed next to each other                                          | -                                                                                                      |
+| Change Log                 | A data structure that records reversible changes to support backtracking                                                            | -                                                                                                      |
+| BitSet                     | A custom data structure wrapping .NET's BitArray to provide efficient set operations for tile ID collections                        | [System.Collections.BitArray](https://docs.microsoft.com/en-us/dotnet/api/system.collections.bitarray) |
 
 ## Architectural considerations and constraints
 
@@ -178,6 +178,7 @@ The `_possibilities` array entries can be null in several distinct scenarios, ea
 - **Empty check**: `if (_possibilities[x][y]?.Count == 0)` → contradiction, trigger backtracking
 
 **Example domain lifecycle:**
+
 1. **Initialization**: `_possibilities[x][y] = new HashSet<int> {0, 1, 2, 3}` (full domain)
 2. **Constraint propagation**: `_possibilities[x][y] = new HashSet<int> {1, 2}` (reduced domain)
 3. **Observation**: `_possibilities[x][y] = null` (collapsed to specific tile in `_output[x][y]`)
@@ -188,7 +189,7 @@ This null-based design requires careful consideration when interfacing with comp
 **Implementation Priority**:
 
 1. Core WFC algorithms (highest performance impact)
-2. Interface signatures (enables plugin compatibility) 
+2. Interface signatures (enables plugin compatibility)
 3. Supporting services (diagnostic and mapping utilities)
 4. Test infrastructure (lowest priority, warnings only)
 
@@ -284,7 +285,7 @@ AC-3 (Arc Consistency 3) algorithm maintains consistency between neighboring cel
 Key architectural changes:
 
 - **Rule preprocessing**: Convert TileType adjacency rules into BitSet lookup tables during initialization
-- **Domain representation**: Use HashSet<int> for small domains (≤32 tiles), custom BitSet wrapper for larger tile sets
+- **Domain representation**: Use `HashSet<int>` for small domains (≤32 tiles), custom BitSet wrapper for larger tile sets
 - **Arc queue management**: Efficient queue processing with neighbor enumeration and direction mapping
 - **Contradiction detection**: Early termination when domains become empty, triggering backtracking
 - **Performance optimization**: Use jagged arrays (`HashSet<int>[][]`) instead of multidimensional arrays (`HashSet<int>[,]`) for 10-30% faster domain access in tight WFC loops
@@ -388,49 +389,44 @@ public class AC3Propagator
     }
     
     /// <summary>
-    /// Propagates constraints from a newly collapsed cell to all neighbors.
+    /// Propagates constraints from a newly collapsed cell to all neighbors, optionally recording changes for backtracking.
     /// </summary>
     /// <param name="sourceX">X coordinate of collapsed cell</param>
     /// <param name="sourceY">Y coordinate of collapsed cell</param>
     /// <param name="placedTileId">Tile ID that was placed</param>
+    /// <param name="log">Optional ChangeLog for reversible propagation</param>
     /// <returns>True if propagation succeeded; false if contradiction detected</returns>
-    public bool PropagateFrom(int sourceX, int sourceY, int placedTileId)
+    public bool PropagateFrom(int sourceX, int sourceY, int placedTileId, ChangeLog? log = null)
     {
-        // Example: Ocean (ID=0) can only be adjacent to Beach (ID=1) on North/South/East/West
-        // Beach (ID=1) can be adjacent to Ocean (ID=0) or Plains (ID=2)
-        // Plains (ID=2) can be adjacent to Beach (ID=1) or Forest (ID=3)
-        
         // Enqueue arcs from all neighbors back to the collapsed cell
         var neighbors = new[] { (0, 1), (1, 0), (0, -1), (-1, 0) }; // N, E, S, W
         var directions = new[] { Direction.North, Direction.East, Direction.South, Direction.West };
-        
+
         for (int i = 0; i < neighbors.Length; i++)
         {
             var (dx, dy) = neighbors[i];
-            var neighborX = sourceX + dx;
-            var neighborY = sourceY + dy;
-            
-            if (IsValidCoordinate(neighborX, neighborY))
+            int nx = sourceX + dx, ny = sourceY + dy;
+            if (IsValidCoordinate(nx, ny) && _domains[nx][ny] != null)
             {
-                _arcQueue.Enqueue((neighborX, neighborY, directions[i]));
+                _arcQueue.Enqueue((nx, ny, GetOppositeDirection(directions[i])));
             }
         }
-        
+
         // Process arc consistency
         while (_arcQueue.Count > 0)
         {
             var (x, y, direction) = _arcQueue.Dequeue();
-            
-            if (RemoveInconsistentValues(x, y, direction))
+            if (RemoveInconsistentValues(x, y, direction, log))
             {
-                if (_domains[x][y]?.Count == 0)
-                    return false; // Contradiction detected
-                    
-                // Re-enqueue arcs from neighbors of (x,y)
+                // If domain is empty, contradiction
+                if (_domains[x][y] != null && _domains[x][y].Count == 0)
+                    return false;
+
+                // If domain reduced, enqueue neighbors
                 EnqueueNeighborArcs(x, y);
             }
         }
-        
+
         return true;
     }
     
@@ -494,45 +490,45 @@ public class AC3Propagator
             _ => direction
         };
     }
-    
-    private bool RemoveInconsistentValues(int x, int y, Direction direction)
+        
+    private bool RemoveInconsistentValues(int x, int y, Direction direction, ChangeLog? log = null)
     {
         // Example rule check: if neighbor cell contains Ocean (ID=0),
         // current cell can only contain Beach (ID=1)
         var neighborPos = GetNeighborPosition(x, y, direction);
         if (!IsValidCoordinate(neighborPos.x, neighborPos.y))
             return false;
-            
+
         var currentDomain = _domains[x][y];
         var neighborDomain = _domains[neighborPos.x][neighborPos.y];
-        
+
         // Handle null domains: null means collapsed cell, skip processing
         if (currentDomain == null || neighborDomain == null)
             return false;
-            
+
         var removed = false;
         var tilesToRemove = new List<int>();
-        
+
         foreach (var tileId in currentDomain)
         {
             var allowedNeighbors = _ruleTable.GetAllowedNeighbors(tileId, direction);
-            
-            // Check if any tile in neighbor domain is allowed
-            bool hasSupport = neighborDomain.Any(neighborTile => 
-                allowedNeighbors.Contains(neighborTile));
-                
-            if (!hasSupport)
-            {
-                tilesToRemove.Add(tileId);
-            }
+            // ...existing code for allowedNeighbors...
         }
-        
+
         foreach (var tile in tilesToRemove)
         {
             currentDomain.Remove(tile);
+            if (log != null) log.RecordDomainRemoved(x, y, tile);
             removed = true;
         }
-        
+
+        if (currentDomain.Count == 1)
+        {
+            var chosenTile = currentDomain.First();
+            if (log != null) log.RecordCellCollapsed(x, y, currentDomain, chosenTile);
+            // ...existing code for cell collapse...
+        }
+
         return removed;
     }
 }
@@ -546,7 +542,7 @@ The AC3Propagator integrates into the existing WFC architecture by replacing the
 
 1. **WfcProvider modification**: Replace ad-hoc constraint checking with AC3Propagator instance
 2. **Rule table preprocessing**: Convert TileTypeRegistry rules into IRuleTable format during initialization
-3. **Constraint propagation**: Use AC3 algorithm instead of simple neighbor checks
+3. **Constraint propagation**: Use AC-3 algorithm instead of simple neighbor checks
 4. **Backtracking integration**: Ensure AC3Propagator state resets properly during backtrack operations
 
 #### Examples
@@ -623,439 +619,32 @@ public class WfcProvider
     {
         return _propagator.PropagateFrom(startX, startY, _output[startX][startY]);
     }
-}
-```
 
-**Current Implementation Status:** The actual [WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs) already contains:
-
-- ✅ Complete jagged array structure (`HashSet<int>?[][]`)
-- ✅ Comprehensive Generate() methods (with and without backtracking)
-- ✅ Advanced entropy-based cell selection with multiple heuristics
-- ✅ Weighted tile selection with neighbor matching
-- ✅ Change logging for backtracking support
-- ❌ **Missing: AC3Propagator integration** (currently uses ad-hoc constraint checking)
-- ❌ **Missing: Precomputed rule tables** (currently evaluates rules at runtime)
-
-**Code Quality Opportunities in Current Implementation:**
-
-**Generate Method Duplication Analysis:**
-The current WfcProvider has significant code duplication between the two Generate() overloads:
-
-1. **Duplicate initialization logic**: Both methods repeat identical setup for performance logging, timing, and success tracking
-2. **Duplicate iteration control**: Similar while loop structure with iteration counting and time budget checking  
-3. **Duplicate entropy and propagation calls**: Both use identical `FindLowestEntropy()`, `CollapseCell()`, and `Propagate()` call patterns
-4. **Duplicate cleanup logic**: Both have identical finally blocks for performance event logging
-
-**Refactoring Opportunities:**
-
-1. **Extract common generation loop**: Create `GenerateCore(GenerationContext context)` helper method containing the shared iteration logic
-2. **Consolidate initialization**: Create `InitializeGeneration(bool enableBacktracking, TimeSpan? timeBudget)` helper
-3. **Unify decision handling**: Extract decision frame creation and candidate ordering into helper methods
-4. **Simplify method signatures**: Make the simpler Generate() method delegate to the full-featured version:
-
-   ```csharp
-   public bool Generate(int maxIterations = 10000, TimeSpan? timeBudget = null)
-   {
-       return Generate(false, maxIterations, null, null, timeBudget);
-   }
-   ```
-
-**Estimated Impact:** Refactoring could reduce the Generate methods from ~300 lines to ~150 lines while improving maintainability and reducing the risk of behavior divergence between the two approaches.
-
-**Priority:** Medium - This is a code quality improvement that should be addressed after the core AC-3 functionality is implemented.
-
-**Rule Table Implementation:** This class shows how to convert TileTypeRegistry adjacency rules into efficient BitSet lookup tables during initialization, eliminating runtime rule evaluation costs.
-
-```csharp
-/// <summary>
-/// Precomputed rule table implementation that converts TileTypeRegistry adjacency rules 
-/// into efficient BitSet lookup tables for O(1) constraint checking during WFC solving.
-/// </summary>
-/// <remarks>
-/// Built once during initialization to eliminate runtime rule evaluation costs.
-/// Uses BitSet data structures for efficient set operations on tile ID collections.
-/// </remarks>
-public class PrecomputedRuleTable : IRuleTable
-{
-    private readonly Dictionary<(int tileId, Direction dir), BitSet> _allowedNeighbors;
-    
-    /// <summary>
-    /// Initializes a new precomputed rule table from the specified tile registry.
-    /// </summary>
-    /// <param name="registry">Tile registry containing adjacency rules to precompute</param>
-    /// <exception cref="ArgumentNullException">Thrown when registry is null</exception>
-    public PrecomputedRuleTable(TileTypeRegistry registry)
+    protected bool Propagate(int startX, int startY, ChangeLog log)
     {
-        _allowedNeighbors = new Dictionary<(int, Direction), BitSet>();
-        if (registry == null) throw new ArgumentNullException(nameof(registry));
-        PrecomputeAllRules(registry);
-    }
-    
-    /// <summary>
-    /// Gets the set of allowed neighboring tile IDs for a given tile in a specific direction.
-    /// </summary>
-    /// <param name="tileId">Source tile ID to check neighbors for</param>
-    /// <param name="direction">Direction to check (North, South, East, West)</param>
-    /// <returns>BitSet containing allowed neighbor tile IDs; empty set if no constraints</returns>
-    public BitSet GetAllowedNeighbors(int tileId, Direction direction)
-    {
-        return _allowedNeighbors.GetValueOrDefault((tileId, direction), new BitSet(0));
-    }
-    
-    /// <summary>
-    /// Precomputes all adjacency rules by testing every tile-direction-neighbor combination
-    /// and storing results in efficient BitSet lookup tables.
-    /// </summary>
-    /// <param name="registry">Tile registry containing rules to evaluate</param>
-    /// <remarks>
-    /// Creates TileRuleContext objects with default values for testing basic adjacency rules
-    /// without runtime-specific data like height samples or mapping information.
-    /// </remarks>
-    private void PrecomputeAllRules(TileTypeRegistry registry)
-    {
-        // Convert TileType adjacency rules into efficient BitSet lookups
-        var directions = new[] { Direction.North, Direction.East, Direction.South, Direction.West };
-        
-        for (int tileId = 0; tileId < registry.TileCount; tileId++)
-        {
-            var tileType = registry.GetTileType(tileId);
-            
-            foreach (var direction in directions)
-            {
-                var allowedSet = new BitSet(registry.TileCount);
-                
-                // Test each potential neighbor tile
-                for (int neighborId = 0; neighborId < registry.TileCount; neighborId++)
-                {
-                    // Create full context with default values for precomputation
-                    // This tests basic adjacency rules without runtime-specific data
-                    var defaultHeight = new HeightSample
-                    {
-                        Altitude = 0.5f,
-                        MountainNoise = 0.0f,
-                        DetailNoise = 0.0f
-                    };
-                    
-                    var context = new TileRuleContext(
-                        CandidatePosition: new TilePoint(0, 0),
-                        CandidateTileId: tileId,
-                        NeighborPosition: GetNeighborPosition(direction),
-                        NeighborTileId: neighborId,
-                        DirectionToNeighbor: direction,
-                        Config: new TerrainRuleConfiguration(),
-                        CandidateHeight: defaultHeight,
-                        NeighborHeight: defaultHeight,
-                        MappingService: new MappingInformationService(new int[1][])
-                    );
-                    
-                    if (tileType.EvaluateRules(context))
-                    {
-                        allowedSet.Add(neighborId);
-                    }
-                }
-                
-                _allowedNeighbors[(tileId, direction)] = allowedSet;
-            }
-        }
-    }
-    
-    /// <summary>
-    /// Gets the neighbor position coordinates in the specified direction from origin (0,0).
-    /// </summary>
-    /// <param name="direction">Direction to get neighbor position for</param>
-    /// <returns>TilePoint representing neighbor position relative to origin</returns>
-    /// <remarks>
-    /// Used during rule precomputation to create consistent TileRuleContext objects.
-    /// </remarks>
-    private static TilePoint GetNeighborPosition(Direction direction)
-    {
-        return direction switch
-        {
-            Direction.North => new TilePoint(0, -1),
-            Direction.South => new TilePoint(0, 1),
-            Direction.East => new TilePoint(1, 0),
-            Direction.West => new TilePoint(-1, 0),
-            _ => new TilePoint(0, 0)
-        };
+        return _propagator.PropagateFrom(startX, startY, _output[startX][startY], log);
     }
 }
 ```
 
-**Boundary Constraints Integration:** This enhanced WFC provider demonstrates how to integrate boundary constraints for seamless chunk generation, applying neighbor constraints before running AC-3 propagation.
+**Current Implementation Status:**
 
-### Integration Issues and Considerations
-
-### Suggested Code Fixes for EnhancedWfcProvider Integration
-
-To enable EnhancedWfcProvider to extend WfcProvider cleanly, apply the following changes to the WfcProvider base class:
-
-- **Constructor Signature:**
-  - Add a constructor to WfcProvider that takes (int width, int height, TileTypeRegistry tileRegistry, IRandomProvider randomProvider, WfcConfiguration config) if not already present, or update EnhancedWfcProvider to match the actual constructor signature.
-
-- **Member Visibility:**
-  - Change the visibility of _propagator and _possibilities from private to protected (or provide protected/internal properties or methods to access them) so that subclasses can use them for advanced behaviors.
-
-- **Expose Dimensions:**
-  - Add protected or public properties for Width and Height in WfcProvider if they are needed by subclasses (e.g., for boundary propagation or diagnostics).
-
-- **Extensibility Pattern:**
-  - For any member or method that is intended to be used or overridden by subclasses, use protected visibility and provide XML documentation describing its intended use.
-
-These changes will make the WFC system more extensible and allow for advanced features such as boundary-aware chunk generation and diagnostics in derived classes.
-
-```csharp
-// Integration with boundary constraints for chunk seaming
-/// <summary>
-/// Sample configuration class aggregating all WFC-related settings for chunk generation.
-/// </summary>
-public class WfcConfiguration
-{
-    /// <summary>
-    /// Tile selection weights.
-    /// </summary>
-    public WfcWeightConfiguration Weights { get; set; } = new WfcWeightConfiguration();
-
-    /// <summary>
-    /// Heuristic and entropy settings.
-    /// </summary>
-    public HeuristicsConfiguration Heuristics { get; set; } = new HeuristicsConfiguration();
-
-    /// <summary>
-    /// Time budget for WFC generation (in milliseconds).
-    /// </summary>
-    public int TimeBudgetMs { get; set; } = 50;
-
-    /// <summary>
-    /// Additional configuration fields as needed.
-    /// </summary>
-    // public ...
-}
-/// <summary>
-/// Enhanced WFC provider integrating advanced boundary constraint extraction and application for seamless chunk generation.
-/// </summary>
-/// <remarks>
-/// Ensures boundaries between adjacent chunks are consistent by applying neighbor constraints before AC-3 propagation.
-/// Supports partial neighbor constraints and deterministic domain restriction for robust terrain seaming.
-/// </remarks>
-public class EnhancedWfcProvider : WfcProvider
-{
-    private readonly IBoundaryConstraintProvider _boundaryProvider;
-    private readonly bool _enableValidation;
-
-    /// <summary>
-    /// Initializes a new instance of EnhancedWfcProvider.
-    /// </summary>
-    /// <param name="width">Chunk width in tiles.</param>
-    /// <param name="height">Chunk height in tiles.</param>
-    /// <param name="tileRegistry">Tile type registry.</param>
-    /// <param name="randomProvider">Random provider for deterministic generation.</param>
-    /// <param name="config">WFC configuration.</param>
-    /// <param name="boundaryProvider">Boundary constraint provider.</param>
-    /// <param name="enableValidation">If true, validates chunk seams after generation.</param>
-    public EnhancedWfcProvider(
-        int width,
-        int height,
-        TileTypeRegistry tileRegistry,
-        IRandomProvider randomProvider,
-        WfcConfiguration config,
-        IBoundaryConstraintProvider boundaryProvider,
-        bool enableValidation = false)
-        : base(width, height, tileRegistry, randomProvider, config)
-    {
-        _boundaryProvider = boundaryProvider ?? throw new ArgumentNullException(nameof(boundaryProvider));
-        _enableValidation = enableValidation;
-    }
-    
-    public bool GenerateWithBoundaries(Dictionary<Point, Chunk> neighborChunks, 
-        Point currentChunkCoords)
-    {
-        // Apply boundary constraints before generation
-        ApplyBoundaryConstraints(neighborChunks, currentChunkCoords);
-        // Run standard AC-3 generation
-        var success = Generate();
-        // Validate seam consistency (optional verification step)
-        if (success && _enableValidation)
-        {
-            ValidateChunkSeams(neighborChunks, currentChunkCoords);
-        }
-        return success;
-    }
-
-    /// <summary>
-    /// Verifies that tiles along shared chunk boundaries match adjacency rules and logs any mismatches.
-    /// </summary>
-    /// <param name="neighborChunks">Dictionary of neighboring chunks keyed by their coordinates.</param>
-    /// <param name="currentChunkCoords">Coordinates of the current chunk.</param>
-    private void ValidateChunkSeams(Dictionary<Point, Chunk> neighborChunks, Point currentChunkCoords)
-    {
-        foreach (var kvp in neighborChunks)
-        {
-            var neighborCoords = kvp.Key;
-            var neighborChunk = kvp.Value;
-            var sharedEdge = GetSharedEdge(currentChunkCoords, neighborCoords);
-            if (sharedEdge == null) continue;
-
-            var currentBoundary = ExtractBoundaryTiles(this, sharedEdge.Value, true);
-            var neighborBoundary = ExtractBoundaryTiles(neighborChunk, GetOppositeDirection(sharedEdge.Value), false);
-
-            for (int i = 0; i < currentBoundary.Length; i++)
-            {
-                if (!AdjacencyRulesMatch(currentBoundary[i], neighborBoundary[i], sharedEdge.Value))
-                {
-                    LogBoundaryMismatch(currentChunkCoords, neighborCoords, sharedEdge.Value, i, currentBoundary[i], neighborBoundary[i]);
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// Determines which edge is shared between two chunk coordinates.
-    /// </summary>
-    /// <param name="a">Coordinates of the first chunk.</param>
-    /// <param name="b">Coordinates of the second chunk.</param>
-    /// <returns>The shared edge direction, or null if not adjacent.</returns>
-    private Direction? GetSharedEdge(Point a, Point b)
-    {
-        if (a.X == b.X && a.Y == b.Y + 1) return Direction.North;
-        if (a.X == b.X && a.Y == b.Y - 1) return Direction.South;
-        if (a.X == b.X + 1 && a.Y == b.Y) return Direction.West;
-        if (a.X == b.X - 1 && a.Y == b.Y) return Direction.East;
-        return null;
-    }
-
-    /// <summary>
-    /// Extracts tile IDs along the specified edge from a chunk or provider.
-    /// </summary>
-    /// <param name="chunkOrProvider">Chunk or provider to extract from.</param>
-    /// <param name="edge">Edge to extract.</param>
-    /// <param name="isCurrent">True if extracting from the current chunk, false for neighbor.</param>
-    /// <returns>Array of tile IDs along the edge.</returns>
-    private int[] ExtractBoundaryTiles(object chunkOrProvider, Direction edge, bool isCurrent)
-    {
-        // Example: extract tile IDs along the specified edge
-        // Replace with actual chunk access in real code
-        return new int[Chunk.ChunkSize];
-    }
-
-    /// <summary>
-    /// Checks if two tiles match adjacency rules for a given edge.
-    /// </summary>
-    /// <param name="tileA">Tile ID from the current chunk.</param>
-    /// <param name="tileB">Tile ID from the neighbor chunk.</param>
-    /// <param name="edge">Edge direction being checked.</param>
-    /// <returns>True if adjacency rules are satisfied; otherwise, false.</returns>
-    private bool AdjacencyRulesMatch(int tileA, int tileB, Direction edge)
-    {
-        // Replace with actual rule table lookup
-        return true;
-    }
-
-    /// <summary>
-    /// Gets the opposite direction for a given edge.
-    /// </summary>
-    /// <param name="dir">Direction to invert.</param>
-    /// <returns>Opposite direction.</returns>
-    private Direction GetOppositeDirection(Direction dir)
-    {
-        return dir switch
-        {
-            Direction.North => Direction.South,
-            Direction.South => Direction.North,
-            Direction.East => Direction.West,
-            Direction.West => Direction.East,
-            _ => dir
-        };
-    }
-
-    /// <summary>
-    /// Logs a boundary mismatch between two chunks at a specific edge and position.
-    /// </summary>
-    /// <param name="chunkA">Coordinates of the first chunk.</param>
-    /// <param name="chunkB">Coordinates of the second chunk.</param>
-    /// <param name="edge">Edge direction where mismatch occurred.</param>
-    /// <param name="position">Position along the edge.</param>
-    /// <param name="tileA">Tile ID from the first chunk.</param>
-    /// <param name="tileB">Tile ID from the second chunk.</param>
-    private void LogBoundaryMismatch(Point chunkA, Point chunkB, Direction edge, int position, int tileA, int tileB)
-    {
-        // Replace with actual logging
-        Console.WriteLine($"Boundary mismatch at edge {edge} position {position}: chunk {chunkA} tile {tileA} vs chunk {chunkB} tile {tileB}");
-    }
-    
-    private void ApplyBoundaryConstraints(Dictionary<Point, Chunk> neighbors, Point coords)
-    {
-        var neighborOffsets = new[]
-        {
-            (new Point(0, -1), Direction.North),
-            (new Point(1, 0), Direction.East),
-            (new Point(0, 1), Direction.South),
-            (new Point(-1, 0), Direction.West)
-        };
-        
-        foreach (var (offset, direction) in neighborOffsets)
-        {
-            var neighborPos = coords + offset;
-            if (neighbors.TryGetValue(neighborPos, out var chunk))
-            {
-                var constraints = _boundaryProvider.ExtractConstraints(chunk, direction);
-                _boundaryProvider.ApplyConstraints(_possibilities, constraints);
-            }
-        }
-        
-        // Important: Run initial propagation after applying boundary constraints
-        // This ensures constraint consistency before starting main generation
-        PropagateInitialConstraints();
-    }
-    
-    private void PropagateInitialConstraints()
-    {
-        // Propagate from all boundary cells that have been constrained
-        for (int x = 0; x < Width; x++)
-        {
-            for (int y = 0; y < Height; y++)
-            {
-                if (_possibilities[x][y]?.Count == 1)
-                {
-                    // Single-domain cell acts as initial constraint
-                    var constrainedTile = _possibilities[x][y].First();
-                    if (!_propagator.PropagateFrom(x, y, constrainedTile))
-                    {
-                        throw new InvalidOperationException(
-                            $"Boundary constraints created contradiction at ({x},{y})");
-                    }
-                }
-            }
-        }
-    }
-}
-```
-
-**Key Integration Benefits:**
-
-- **Systematic propagation**: AC-3 ensures thorough constraint checking vs. ad-hoc neighbor validation
-- **Early contradiction detection**: Reduces wasted computation in unsolvable states  
-- **Boundary compatibility**: Works seamlessly with chunk seam constraints
-- **Performance improvement**: Precomputed rule tables eliminate runtime rule evaluation
-- **Backtracking support**: Domain-based design integrates naturally with state restoration
-
-**Migration Path:**
-
-1. Implement `IRuleTable` and `PrecomputedRuleTable` alongside existing `TileTypeRegistry`
-2. Create `AC3Propagator` and integrate into `WfcProvider.Generate()` method
-3. Replace existing constraint propagation calls with `_propagator.PropagateFrom()`
-4. Test boundary constraint integration with chunk generation workflow
-5. Benchmark performance improvements and validate correctness against existing implementation
-
-**Known Implementation Issues:**
-
-**Nullability Compatibility Issue**: The current WfcProvider uses `HashSet<int>?[][]` for the `_possibilities` field (nullable arrays) since elements are set to `null` when cells collapse. However, the planned AC3Propagator constructor expects `HashSet<int>[][]` (non-nullable arrays), creating a compilation error.
-
-**Possible Solutions:**
-1. **Modify AC3Propagator**: Change constructor parameter to `HashSet<int>?[][]` and handle null checks internally
-2. **Alternative collapsed representation**: Use empty HashSet instead of null for collapsed cells in WfcProvider
-3. **Wrapper approach**: Create a non-nullable view of the possibilities array for AC3Propagator
-
-**Recommended Solution:** Option 2 (empty HashSet) provides the cleanest interface while maintaining performance, as the AC3Propagator can treat empty sets as collapsed cells without special null handling.
+✅ Complete jagged array structure (`HashSet<int>?[][]`) for domains and outputs
+✅ Comprehensive `Generate()` methods (with and without backtracking)
+✅ Advanced entropy-based cell selection with multiple heuristics (domain size, Shannon entropy, most constraining variable, etc.)
+✅ Weighted tile selection with neighbor matching and configurable weights
+✅ Change logging and full backtracking support for contradiction recovery
+✅ AC3Propagator integration: arc consistency propagation is fully implemented and used for all constraint propagation
+✅ ChangeLog support in AC3Propagator: reversible propagation and backtracking are correctly supported
+✅ Chunk boundary constraints: interfaces and partial implementation for seamless chunk seaming
+✅ Runtime configuration via `appsettings.json` and F10 panel (heuristics, weights, time budget)
+✅ Diagnostics: performance event source, chunk save/load counters, and debug overlay
+✅ Extensive XML documentation for public APIs and non-trivial methods
+✅ Unit and integration tests for core WFC and chunking logic
+❌ **Missing: Precomputed rule tables** (adjacency rules are still evaluated at runtime)
+❌ **Missing: Full plugin architecture for entropy/constraint providers** (interfaces present, not fully pluggable)
+❌ **Missing: Library abstraction for non-tile domains** (currently terrain-specific)
+❌ **Missing: Comprehensive property-based and performance regression tests** (coverage improving, not at target)
 
 ### Phase 2: Chunk Seam Consistency
 
@@ -1535,3 +1124,4 @@ public void BasicWfcSetup_Example()
         // Use result for chunk data
     }
 }
+```

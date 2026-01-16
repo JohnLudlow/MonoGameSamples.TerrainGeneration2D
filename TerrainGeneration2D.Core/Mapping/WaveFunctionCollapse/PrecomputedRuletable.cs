@@ -1,5 +1,6 @@
 // Rule table implementation that converts TileTypeRegistry to AC3 format
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;

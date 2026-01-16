@@ -4,7 +4,6 @@ using System.Collections.Generic;
 /// Exposes the current domain grid for testing and diagnostics.
 /// </summary>
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
@@ -26,8 +25,8 @@ public class WfcProvider
   private readonly IRandomProvider _random;
   private readonly WfcWeightConfiguration _weightConfig;
   private readonly HeuristicsConfiguration _heuristicsConfig;
-  private readonly ICellEntropyProvider _domainEntropy;
-  private readonly ICellEntropyProvider _shannonEntropy;
+  private readonly DomainEntropyProvider _domainEntropy;
+  private readonly ShannonEntropyProvider _shannonEntropy;
   private readonly int _width;
   private readonly int _height;
 
@@ -40,13 +39,12 @@ public class WfcProvider
   /// Gets the height of the WFC grid.
   /// </summary>
   public int Height => _height;
-  protected readonly HashSet<int>?[][] _possibilities;
+  private readonly HashSet<int>?[][] _possibilities;
   private readonly int[][] _output;
   private readonly MappingInformationService _mappingService;
   private readonly TerrainRuleConfiguration _config;
   private readonly IHeightProvider _heightProvider;
   private readonly Point _chunkOrigin;
-  protected readonly AC3Propagator _propagator;
   private readonly IRuleTable _ruleTable;
   private bool _collapsed;
 
@@ -105,7 +103,7 @@ public class WfcProvider
     }
     _collapsed = false;
     
-    _propagator = new AC3Propagator(_ruleTable, _possibilities);
+    Propagator = new AC3Propagator(_ruleTable, _possibilities);
 
     _domainEntropy = new DomainEntropyProvider();
     _shannonEntropy = new ShannonEntropyProvider();    
@@ -150,7 +148,12 @@ public class WfcProvider
   }
 
 
-  public HashSet<int>?[][] Possibilities => _possibilities;
+  public HashSet<int>?[][] GetPossibilities()
+  {
+    return _possibilities;
+  }
+
+  protected AC3Propagator Propagator { get; }
 
 
   /// <summary>
@@ -601,44 +604,11 @@ public class WfcProvider
     return true;
   }
 
-  private bool Propagate(int startX, int startY)
-  {
-    Queue<(int x, int y)> queue = new();
-    queue.Enqueue((startX, startY));
-
-    while (queue.Count > 0)
-    {
-      var (x, y) = queue.Dequeue();
-      var currentTile = _output[x][y];
-
-      if (currentTile == -1)
-        continue;
-
-      var currentPoint = new TilePoint(x, y);
-      if (y > 0 && !ConstrainNeighbor(x, y - 1, Direction.South, currentTile, currentPoint))
-        return false;
-
-      if (y < _height - 1 && !ConstrainNeighbor(x, y + 1, Direction.North, currentTile, currentPoint))
-        return false;
-
-      if (x < _width - 1 && !ConstrainNeighbor(x + 1, y, Direction.West, currentTile, currentPoint))
-        return false;
-
-      if (x > 0 && !ConstrainNeighbor(x - 1, y, Direction.East, currentTile, currentPoint))
-        return false;
-
-      if (y > 0 && _possibilities[x][y - 1] != null) queue.Enqueue((x, y - 1));
-      if (y < _height - 1 && _possibilities[x][y + 1] != null) queue.Enqueue((x, y + 1));
-      if (x < _width - 1 && _possibilities[x + 1][y] != null) queue.Enqueue((x + 1, y));
-      if (x > 0 && _possibilities[x - 1][y] != null) queue.Enqueue((x - 1, y));
-    }
-
-    return true;
-  }
+  private bool Propagate(int startX, int startY) => Propagator.PropagateFrom(startX, startY, _output[startX][startY]);
 
   private bool Propagate(int startX, int startY, ChangeLog log)
   {
-    Queue<(int x, int y)> queue = new();
+    var queue = new Queue<(int x, int y)>();
     queue.Enqueue((startX, startY));
 
     while (queue.Count > 0)
@@ -695,7 +665,17 @@ public class WfcProvider
           neighborSample,
           _mappingService);
 
-      if (tileType.EvaluateRules(context))
+      var allowedNeighborsNorth = _ruleTable.GetAllowedNeighbors(tileId, Direction.North);
+      var allowedNeighborsSouth = _ruleTable.GetAllowedNeighbors(tileId, Direction.South);
+      var allowedNeighborsEast = _ruleTable.GetAllowedNeighbors(tileId, Direction.East);
+      var allowedNeighborsWest = _ruleTable.GetAllowedNeighbors(tileId, Direction.West);
+
+      if (
+           allowedNeighborsNorth.Contains(neighborTileId) 
+        || allowedNeighborsSouth.Contains(neighborTileId) 
+        || allowedNeighborsEast.Contains(neighborTileId)
+        || allowedNeighborsWest.Contains(neighborTileId)
+      )
       {
         allowed.Add(tileId);
       }
