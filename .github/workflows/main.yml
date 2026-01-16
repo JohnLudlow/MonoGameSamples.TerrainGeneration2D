@@ -17,9 +17,9 @@ jobs:
     permissions:
       contents: write      
     outputs:
-      assemblySemVer: ${{ steps.version_step.outputs.assemblySemVer }}
-      GitVersion_FullSemVer: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}
-      semVer: ${{ steps.version_step.outputs.semVer }}
+      assemblySemVer: ${{ steps.setup.outputs.assemblySemVer }}
+      GitVersion_FullSemVer: ${{ steps.setup.outputs.GitVersion_FullSemVer }}
+      semVer: ${{ steps.setup.outputs.semVer }}
       
     steps:
     - uses: actions/checkout@v5
@@ -27,7 +27,8 @@ jobs:
         lfs: true
         fetch-depth: 0
 
-    - uses: ./.github/actions/setup
+    - id: setup
+      uses: ./.github/actions/setup
 
     - uses: ./.github/actions/build
 
@@ -37,7 +38,7 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        $tag = "v${{ steps.version_step.outputs.GitHub_FullSemVer }}"
+        $tag = "v${{ steps.setup.outputs.GitVersion_FullSemVer }}"
         git tag $tag
         git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git $tag
 
