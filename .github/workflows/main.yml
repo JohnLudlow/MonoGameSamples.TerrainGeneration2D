@@ -29,9 +29,15 @@ jobs:
 
     - uses: ./.github/actions/build
 
-    - uses: christophebedard/tag-version-commit@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Tag Commit
+      # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      shell: pwsh
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        $tag = "v${{ steps.version_step.outputs.GitHub_FullSemVer }}"
+        git tag $tag
+        git push origin $tag
 
   test:
     needs: build
