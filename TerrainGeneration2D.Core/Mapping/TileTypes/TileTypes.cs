@@ -67,7 +67,7 @@ public sealed class TileTypeRegistry
   public TileTypeRegistry(IEnumerable<TileType> tileTypes)
   {
     _tileTypes = tileTypes.ToDictionary(t => t.TileId);
-    _tileOrder = tileTypes.Select(t => t.TileId).ToList();
+    _tileOrder = [.. tileTypes.Select(t => t.TileId)];
     _validTileIds = _tileOrder.Where(id => id != TerrainTileIds.Void).ToList();
   }
 

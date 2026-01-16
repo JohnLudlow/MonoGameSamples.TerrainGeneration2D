@@ -7,7 +7,6 @@ using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.EntropyProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -130,7 +129,7 @@ public class ChunkedTilemap
                 {
                     for (var localX = 0; localX < Chunk.ChunkSize; localX++)
                     {
-                        chunk[localX, localY] = output[localX, localY];
+                        chunk[localX, localY] = output[localX][localY];
                     }
                 }
                 if (_logger != null) GameLoggerMessages.MapGenerateEnd(_logger, true);

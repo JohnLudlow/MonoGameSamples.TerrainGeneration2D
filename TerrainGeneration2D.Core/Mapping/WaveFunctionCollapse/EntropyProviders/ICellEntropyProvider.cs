@@ -14,7 +14,7 @@ public interface ICellEntropyProvider
   /// Return double.PositiveInfinity for settled cells (no selection).
   /// </summary>
   double GetScore(int x, int y,
-    HashSet<int>?[,] possibilities,
-    int[,] output,
+    HashSet<int>?[][] possibilities,
+    int[][] output,
     WfcWeightConfiguration weightConfig);
 }

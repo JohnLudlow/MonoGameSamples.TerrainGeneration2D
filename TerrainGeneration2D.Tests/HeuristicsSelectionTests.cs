@@ -1,9 +1,7 @@
-using System.Collections.Generic;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 using Microsoft.Xna.Framework;
-using Xunit;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests;
 
@@ -41,8 +39,8 @@ public sealed class HeuristicsSelectionTests
       new WfcWeightConfiguration(),
       heuristics);
 
-    var poss = TestHelpers.GetPrivateField<HashSet<int>?[,]>(wfc, "_possibilities");
-    var output = TestHelpers.GetPrivateField<int[,]>(wfc, "_output");
+    var poss = TestHelpers.GetPrivateField<HashSet<int>?[][]>(wfc, "_possibilities");
+    var output = TestHelpers.GetPrivateField<int[][]>(wfc, "_output");
     Assert.NotNull(poss);
     Assert.NotNull(output);
 
@@ -51,20 +49,20 @@ public sealed class HeuristicsSelectionTests
     {
       for (var x = 0; x < 3; x++)
       {
-        poss![x, y] = null;
-        output![x, y] = -1;
+        poss![x][y] = null;
+        output![x][y] = -1;
       }
     }
 
     // Two candidate cells with equal domain size: corner (0,0) and center (1,1)
-    poss![0, 0] = new HashSet<int>(new[] { 1, 2 }); // influence will be 0 (neighbors are null)
-    poss[1, 1] = new HashSet<int>(new[] { 1, 2 }); // we will give it 4 undecided neighbors
+    poss![0][0] = [1, 2]; // influence will be 0 (neighbors are null)
+    poss[1][1] = [1, 2]; // we will give it 4 undecided neighbors
 
     // Make center's neighbors undecided to raise influence
-    poss[1, 0] = new HashSet<int>(new[] { 1 });
-    poss[1, 2] = new HashSet<int>(new[] { 1 });
-    poss[0, 1] = new HashSet<int>(new[] { 1 });
-    poss[2, 1] = new HashSet<int>(new[] { 1 });
+    poss[1][0] = [1];
+    poss[1][2] = [1];
+    poss[0][1] = [1];
+    poss[2][1] = [1];
 
     // Invoke private FindLowestEntropy and assert it selects the center (1,1)
     var result = (ValueTuple<int, int>)TestHelpers.InvokePrivateMethod(wfc, "FindLowestEntropy")!;
@@ -95,8 +93,8 @@ public sealed class HeuristicsSelectionTests
       new WfcWeightConfiguration(),
       heuristics);
 
-    var poss = TestHelpers.GetPrivateField<HashSet<int>?[,]>(wfc, "_possibilities");
-    var output = TestHelpers.GetPrivateField<int[,]>(wfc, "_output");
+    var poss = TestHelpers.GetPrivateField<HashSet<int>?[][]>(wfc, "_possibilities");
+    var output = TestHelpers.GetPrivateField<int[][]>(wfc, "_output");
     Assert.NotNull(poss);
     Assert.NotNull(output);
 
@@ -105,22 +103,22 @@ public sealed class HeuristicsSelectionTests
     {
       for (var x = 0; x < 3; x++)
       {
-        poss![x, y] = null;
-        output![x, y] = -1;
+        poss![x][y] = null;
+        output![x][y] = -1;
       }
     }
 
     // Two candidates with equal domain and equal influence: corner (0,0) and center (1,1)
-    poss![0, 0] = new HashSet<int>(new[] { 1, 2 });
-    poss[1, 1] = new HashSet<int>(new[] { 1, 2 });
+    poss![0][0] = [1, 2];
+    poss[1][1] = [1, 2];
 
     // Give the corner exactly 2 undecided neighbors (max possible for a corner)
-    poss[1, 0] = new HashSet<int>(new[] { 1 });
-    poss[0, 1] = new HashSet<int>(new[] { 1 });
+    poss[1][0] = [1];
+    poss[0][1] = [1];
 
     // Give the center also exactly 2 undecided neighbors to tie influence
-    poss[1, 0] = new HashSet<int>(new[] { 1 }); // already set, shared neighbor
-    poss[1, 2] = new HashSet<int>(new[] { 1 });
+    poss[1][0] = [1]; // already set, shared neighbor
+    poss[1][2] = [1];
     // Note: left/right of center remain decided (null) to keep influence equal to 2
 
     var result = (ValueTuple<int, int>)TestHelpers.InvokePrivateMethod(wfc, "FindLowestEntropy")!;

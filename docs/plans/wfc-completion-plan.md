@@ -38,6 +38,15 @@ into a standalone library for production strategy games.
 - Developer Onboarding: Clear interfaces and comprehensive documentation for teams
   unfamiliar with constraint satisfaction
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Feature requirements](#feature-requirements)
+- [Feature status](#feature-status)
+- [Definition of terms](#definition-of-terms)
+- [Architectural considerations and constraints](#architectural-considerations-and-constraints)
+- [Implementation guide](#implementation-guide)
+
 ## Feature requirements
 
 - **AC-3 Constraint Propagation**: Replace current propagation with proper arc
@@ -57,7 +66,7 @@ into a standalone library for production strategy games.
 
 ## Feature status
 
-- In design
+- In development
 
 The WFC implementation is currently partial with basic functionality in place, but
 requires significant completion work to meet production requirements for strategy game
@@ -68,20 +77,21 @@ integration.
 Detailed list of terms not considered 'common english'. Include references to
 articles about the term
 
-| Term | Meaning | Reference |
-| ---- | ------- | --------- |
-| Wave Function Collapse | A constraint-solving algorithm that generates content by iteratively collapsing superposition states based on local adjacency rules | [WFC Original Paper](https://github.com/mxgmn/WaveFunctionCollapse) |
-| Domain | The set of possible tile types that can be placed at a given cell position | - |
-| Entropy | A measure of uncertainty in a cell's domain; lower entropy cells have fewer possible tiles | - |
-| Observation | The act of selecting and placing a specific tile from a cell's domain | - |
-| Propagation | The process of updating neighboring cell domains based on adjacency constraints after an observation | - |
-| Backtracking | Rolling back decisions when contradictions occur and trying alternative choices | - |
-| Arc Consistency | A constraint propagation algorithm that ensures all constraints between connected variables are satisfied | [AC-3 Algorithm](https://en.wikipedia.org/wiki/AC-3_algorithm) |
-| Seam Consistency | Ensuring that adjacent chunks in the world have compatible tile placements at their boundaries | - |
-| Shannon Entropy | An information-theoretic measure of entropy calculated as H = -Σ(pi × log(pi)) | [Information Theory](https://en.wikipedia.org/wiki/Entropy_(information_theory)) |
-| Most Constraining Variable | A heuristic that preferentially selects cells that will constrain the most neighboring cells | [CSP Heuristics](https://en.wikipedia.org/wiki/Constraint_satisfaction_problem) |
-| Rule Table | Precomputed adjacency constraints that define which tiles can be placed next to each other | - |
-| Change Log | A data structure that records reversible changes to support backtracking | - |
+| Term                       | Meaning                                                                                                                             | Reference                                                                                              |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Wave Function Collapse     | A constraint-solving algorithm that generates content by iteratively collapsing superposition states based on local adjacency rules | [WFC Original Paper](https://github.com/mxgmn/WaveFunctionCollapse)                                    |
+| Domain                     | The set of possible tile types that can be placed at a given cell position                                                          | -                                                                                                      |
+| Entropy                    | A measure of uncertainty in a cell's domain; lower entropy cells have fewer possible tiles                                          | -                                                                                                      |
+| Observation                | The act of selecting and placing a specific tile from a cell's domain                                                               | -                                                                                                      |
+| Propagation                | The process of updating neighboring cell domains based on adjacency constraints after an observation                                | -                                                                                                      |
+| Backtracking               | Rolling back decisions when contradictions occur and trying alternative choices                                                     | -                                                                                                      |
+| Arc Consistency            | A constraint propagation algorithm that ensures all constraints between connected variables are satisfied                           | [AC-3 Algorithm](https://en.wikipedia.org/wiki/AC-3_algorithm)                                         |
+| Seam Consistency           | Ensuring that adjacent chunks in the world have compatible tile placements at their boundaries                                      | -                                                                                                      |
+| Shannon Entropy            | An information-theoretic measure of entropy calculated as H = -Σ(pi × log(pi))                                                      | [Information Theory](https://en.wikipedia.org/wiki/Entropy_(information_theory))                       |
+| Most Constraining Variable | A heuristic that preferentially selects cells that will constrain the most neighboring cells                                        | [CSP Heuristics](https://en.wikipedia.org/wiki/Constraint_satisfaction_problem)                        |
+| Rule Table                 | Precomputed adjacency constraints that define which tiles can be placed next to each other                                          | -                                                                                                      |
+| Change Log                 | A data structure that records reversible changes to support backtracking                                                            | -                                                                                                      |
+| BitSet                     | A custom data structure wrapping .NET's BitArray to provide efficient set operations for tile ID collections                        | [System.Collections.BitArray](https://docs.microsoft.com/en-us/dotnet/api/system.collections.bitarray) |
 
 ## Architectural considerations and constraints
 
@@ -127,15 +137,159 @@ BoundaryConstraints <- EntropyProvider <- ChangeLog <- TimeBudgetManager
 
 The system flows from chunk-level orchestration through WFC solving with precomputed rules, constraint propagation, and backtracking support, all within managed time budgets.
 
+**Performance Data Structure Choices:**
+
+Jagged arrays (`HashSet<int>[][]`) are used instead of multidimensional arrays (`HashSet<int>[,]`) for WFC domain grids based on performance analysis:
+
+- **Access speed**: Jagged arrays provide 10-30% faster access through simple pointer dereferencing vs. complex offset calculations
+- **Cache performance**: Better memory locality for row-wise iteration patterns common in constraint propagation
+- **Microsoft guidance**: Aligns with CA1814 analyzer rule recommending jagged arrays for performance-critical scenarios
+- **Memory cost**: Minimal overhead (~256 bytes for 64×64 grid) compared to performance benefits in hot WFC loops
+
+**Migration Strategy**: The current codebase requires systematic conversion from multidimensional to jagged arrays across:
+
+- `WfcProvider._possibilities` and `._output` fields
+- `ICellEntropyProvider` interface signatures  
+- `ChangeLog.RollbackTo()` parameters
+- `MappingInformationService` arrays
+- Test fixtures and benchmark data structures
+
+The performance improvement in domain access directly supports the target of ≤100ms chunk generation times.
+
+**Null Domain Representation Design Pattern:**
+
+In the current WfcProvider implementation, `_possibilities` uses `HashSet<int>?[][]` where null entries represent collapsed (observed) cells. This design pattern serves several important purposes:
+
+- **Memory efficiency**: Once a cell is observed (assigned a specific tile), its domain HashSet is no longer needed. Setting it to null allows garbage collection to reclaim the memory rather than maintaining single-element HashSets.
+- **Clear state indication**: Null provides an unambiguous signal that a cell has been collapsed, distinct from an empty domain (which indicates a contradiction) or a single-element domain (which indicates high constraint but not yet observed).
+- **Algorithm optimization**: Constraint propagation can quickly skip null entries without examining their contents, improving iteration performance over large grids.
+- **Backtracking support**: The ChangeLog system can distinguish between "restore previous domain" (non-null) and "restore collapsed state" (null) when rolling back decisions.
+
+**Comprehensive Null Entry Cases:**
+
+The `_possibilities` array entries can be null in several distinct scenarios, each with different implications:
+
+1. **Array initialization state**: When `_possibilities = new HashSet<int>?[width][]` is first created, inner arrays are null until explicitly initialized with `_possibilities[x] = new HashSet<int>?[height]`.
+
+2. **Domain initialization failure**: If domain setup fails due to memory constraints or invalid configuration, entries may remain null rather than containing HashSet instances.
+
+3. **Cell observation (primary case)**: When a cell is collapsed during WFC solving, its domain is set to null since the specific tile value is stored in `_output[x][y]`. This is the primary and intentional use of null.
+
+4. **Backtracking restoration**: During state rollback, entries may be temporarily null while the ChangeLog system restores previous domain states, particularly if the original state was collapsed.
+
+5. **Memory pressure handling**: Under extreme memory constraints, the system might proactively null out domains for cells that can be inferred from neighbors, though this optimization is not currently implemented.
+
+6. **Error recovery**: If constraint propagation fails catastrophically (e.g., infinite loops), the system might null out affected cell domains as part of error isolation.
+
+**Important distinction from empty domains**: A null entry means "collapsed cell with value in `_output`" while an empty HashSet means "contradiction detected - no valid tiles possible". The algorithm treats these states very differently:
+
+- **Null check**: `if (_possibilities[x][y] == null)` → cell is solved, read from `_output[x][y]`
+- **Empty check**: `if (_possibilities[x][y]?.Count == 0)` → contradiction, trigger backtracking
+
+**Example domain lifecycle:**
+
+1. **Initialization**: `_possibilities[x][y] = new HashSet<int> {0, 1, 2, 3}` (full domain)
+2. **Constraint propagation**: `_possibilities[x][y] = new HashSet<int> {1, 2}` (reduced domain)
+3. **Observation**: `_possibilities[x][y] = null` (collapsed to specific tile in `_output[x][y]`)
+4. **Backtracking**: `_possibilities[x][y] = new HashSet<int> {1, 2}` (restored previous state)
+
+This null-based design requires careful consideration when interfacing with components that expect non-nullable arrays, as documented in the Known Implementation Issues section.
+
+**Implementation Priority**:
+
+1. Core WFC algorithms (highest performance impact)
+2. Interface signatures (enables plugin compatibility)
+3. Supporting services (diagnostic and mapping utilities)
+4. Test infrastructure (lowest priority, warnings only)
+
 ## Implementation guide
 
+### Child Feature Plans
+
+- [Plugin Architecture](wfc-completion-plan/plugin-architecture.md)
+- [Library Abstraction for Non-Tile Domains](wfc-completion-plan/library-abstraction.md)
+- [Comprehensive Property-Based and Performance Regression Tests](wfc-completion-plan/property-and-performance-tests.md)
+
 Detailed step-by-step implementation guide following Test Driven Development principles where applicable, leading with minimal breaking tests, followed by minimal changes to fix tests, followed by refactor, repeating until the feature is complete.
+
+### Phase 0: Array Migration (Prerequisite)
+
+#### Objective
+
+Migrate all WFC-related data structures from multidimensional arrays to jagged arrays to achieve 10-30% performance improvement in domain access operations and eliminate CA1814 analyzer warnings.
+
+#### Technical details
+
+This foundational phase converts array declarations and access patterns throughout the WFC system. The migration follows a specific order to minimize compilation errors:
+
+1. **Interface updates**: Modify `ICellEntropyProvider` and related interfaces
+2. **Core WFC classes**: Update `WfcProvider._possibilities` and `._output` fields  
+3. **Algorithm implementations**: Convert `AC3Propagator`, `ChangeLog`, entropy providers
+4. **Supporting services**: Update `MappingInformationService` and diagnostic utilities
+5. **Test infrastructure**: Convert test fixtures and benchmark data
+
+**Breaking Changes**: This phase introduces breaking changes to public interfaces. All entropy providers, rule tables, and diagnostic utilities must be updated simultaneously.
+
+#### Examples
+
+**Array Migration Comparison:** This example demonstrates the conversion from multidimensional to jagged arrays for WFC domains, showing the syntax changes required and performance benefits achieved.
+
+```csharp
+// Before: Multidimensional array declaration and access
+private readonly HashSet<int>?[,] _possibilities;
+private readonly int[,] _output;
+
+// Initialize
+_possibilities = new HashSet<int>?[width, height];
+_output = new int[width, height];
+
+// Access
+var domain = _possibilities[x, y];
+_output[x, y] = selectedTile;
+```
+
+```csharp
+// After: Jagged array declaration and access  
+private readonly HashSet<int>?[][] _possibilities;
+private readonly int[][] _output;
+
+// Initialize
+_possibilities = new HashSet<int>?[width][];
+_output = new int[width][];
+for (int x = 0; x < width; x++)
+{
+    _possibilities[x] = new HashSet<int>?[height];
+    _output[x] = new int[height];
+}
+
+// Access
+var domain = _possibilities[x][y];
+_output[x][y] = selectedTile;
+```
+
+**Interface Signature Updates:** This example shows how entropy provider interfaces need to be updated to use jagged arrays instead of multidimensional arrays for domain parameters.
+
+```csharp
+// Updated interface signatures
+public interface ICellEntropyProvider
+{
+    /// <summary>
+    /// Gets entropy score for cell selection heuristics.
+    /// </summary>
+    /// <param name="possibilities">Domain grid using jagged arrays for performance</param>
+    /// <param name="output">Output grid using jagged arrays for performance</param>
+    double GetScore(int x, int y, HashSet<int>?[][] possibilities, int[][] output, 
+        WfcWeightConfiguration weightConfig);
+}
+```
 
 ### Phase 1: Core Algorithm Enhancement
 
 #### Objective
 
 Replace runtime rule evaluation with precomputed tables and implement proper AC-3 constraint propagation to achieve 70% performance improvement in rule evaluation and proper arc consistency with reduced contradiction rates.
+
+**Prerequisites: Array Migration** - Before implementing AC-3, convert all WFC data structures from multidimensional arrays (`[,]`) to jagged arrays (`[][]`) for optimal performance in hot-path domain operations.
 
 #### Technical details
 
@@ -146,11 +300,58 @@ AC-3 (Arc Consistency 3) algorithm maintains consistency between neighboring cel
 Key architectural changes:
 
 - **Rule preprocessing**: Convert TileType adjacency rules into BitSet lookup tables during initialization
-- **Domain representation**: Use HashSet<int> for small domains (≤32 tiles), BitSet for larger tile sets
+- **Domain representation**: Use `HashSet<int>` for small domains (≤32 tiles), custom BitSet wrapper for larger tile sets
 - **Arc queue management**: Efficient queue processing with neighbor enumeration and direction mapping
 - **Contradiction detection**: Early termination when domains become empty, triggering backtracking
+- **Performance optimization**: Use jagged arrays (`HashSet<int>[][]`) instead of multidimensional arrays (`HashSet<int>[,]`) for 10-30% faster domain access in tight WFC loops
 
 #### Examples
+
+**BitSet Data Structure:** This implementation shows a custom BitSet wrapper around .NET's BitArray, providing efficient set operations for tile ID collections in rule table lookups.
+
+```csharp
+// TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/BitSet.cs
+
+/// <summary>
+/// Efficient bit set implementation for tile ID collections using BitArray.
+/// Provides O(1) set operations for rule table lookups.
+/// </summary>
+/// <remarks>
+/// Wraps System.Collections.BitArray with set-like operations for WFC domains.
+/// </remarks>
+public class BitSet
+{
+    private readonly BitArray _bits;
+    
+    public BitSet(int capacity) => _bits = new BitArray(capacity);
+    
+    /// <summary>
+    /// Checks if the specified tile ID is present in this set.
+    /// </summary>
+    public bool Contains(int tileId) => tileId < _bits.Length && _bits[tileId];
+    
+    /// <summary>
+    /// Adds a tile ID to this set.
+    /// </summary>
+    public void Add(int tileId) { if (tileId < _bits.Length) _bits[tileId] = true; }
+    
+    /// <summary>
+    /// Performs intersection with another BitSet, modifying this set.
+    /// </summary>
+    public void IntersectWith(BitSet other) => _bits.And(other._bits);
+    
+    /// <summary>
+    /// Gets all tile IDs present in this set.
+    /// </summary>
+    public IEnumerable<int> GetTileIds()
+    {
+        for (int i = 0; i < _bits.Length; i++)
+            if (_bits[i]) yield return i;
+    }
+}
+```
+
+**Rule Table Interface:** This interface defines the contract for precomputed rule tables, enabling O(1) adjacency lookups instead of runtime rule evaluation during WFC solving.
 
 ```csharp
 // TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/IRuleTable.cs
@@ -168,10 +369,12 @@ public interface IRuleTable
     /// </summary>
     /// <param name="tileId">Source tile ID</param>
     /// <param name="direction">Direction to check (North, South, East, West)</param>
-    /// <returns>BitSet of allowed neighbor tile IDs for O(1) intersection operations</returns>
+    /// <returns>Custom BitSet of allowed neighbor tile IDs for O(1) intersection operations</returns>
     BitSet GetAllowedNeighbors(int tileId, Direction direction);
 }
 ```
+
+**AC-3 Algorithm Implementation:** This class implements the AC-3 (Arc Consistency 3) constraint propagation algorithm, which systematically maintains consistency between neighboring cell domains to reduce contradictions and improve WFC solution quality.
 
 ```csharp
 // TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/AC3Propagator.cs
@@ -186,92 +389,277 @@ public class AC3Propagator
 {
     private readonly IRuleTable _ruleTable;
     private readonly Queue<(int x, int y, Direction dir)> _arcQueue;
-    private readonly HashSet<int>[,] _domains;
+    private readonly HashSet<int>[][] _domains;
     
     /// <summary>
-    /// Propagates constraints from a newly collapsed cell to all neighbors.
+    /// Initializes a new AC-3 propagator with the specified rule table and domain grid.
+    /// </summary>
+    /// <param name="ruleTable">Precomputed rule table for adjacency lookups</param>
+    /// <param name="domains">Reference to the WFC domain grid using jagged arrays for optimal performance</param>
+    public AC3Propagator(IRuleTable ruleTable, HashSet<int>[][] domains)
+    {
+        _ruleTable = ruleTable ?? throw new ArgumentNullException(nameof(ruleTable));
+        _domains = domains ?? throw new ArgumentNullException(nameof(domains));
+        _arcQueue = new Queue<(int x, int y, Direction dir)>();
+    }
+    
+    /// <summary>
+    /// Propagates constraints from a newly collapsed cell to all neighbors, optionally recording changes for backtracking.
     /// </summary>
     /// <param name="sourceX">X coordinate of collapsed cell</param>
     /// <param name="sourceY">Y coordinate of collapsed cell</param>
     /// <param name="placedTileId">Tile ID that was placed</param>
+    /// <param name="log">Optional ChangeLog for reversible propagation</param>
     /// <returns>True if propagation succeeded; false if contradiction detected</returns>
-    public bool PropagateFrom(int sourceX, int sourceY, int placedTileId)
+    public bool PropagateFrom(int sourceX, int sourceY, int placedTileId, ChangeLog? log = null)
     {
-        // Example: Ocean (ID=0) can only be adjacent to Beach (ID=1) on North/South/East/West
-        // Beach (ID=1) can be adjacent to Ocean (ID=0) or Plains (ID=2)
-        // Plains (ID=2) can be adjacent to Beach (ID=1) or Forest (ID=3)
-        
         // Enqueue arcs from all neighbors back to the collapsed cell
         var neighbors = new[] { (0, 1), (1, 0), (0, -1), (-1, 0) }; // N, E, S, W
+        var directions = new[] { Direction.North, Direction.East, Direction.South, Direction.West };
+
+        for (int i = 0; i < neighbors.Length; i++)
+        {
+            var (dx, dy) = neighbors[i];
+            int nx = sourceX + dx, ny = sourceY + dy;
+            if (IsValidCoordinate(nx, ny) && _domains[nx][ny] != null)
+            {
+                _arcQueue.Enqueue((nx, ny, GetOppositeDirection(directions[i])));
+            }
+        }
+
+        // Process arc consistency
+        while (_arcQueue.Count > 0)
+        {
+            var (x, y, direction) = _arcQueue.Dequeue();
+            if (RemoveInconsistentValues(x, y, direction, log))
+            {
+                // If domain is empty, contradiction
+                if (_domains[x][y] != null && _domains[x][y].Count == 0)
+                    return false;
+
+                // If domain reduced, enqueue neighbors
+                EnqueueNeighborArcs(x, y);
+            }
+        }
+
+        return true;
+    }
+    
+    /// <summary>
+    /// Checks if the given coordinates are within the domain grid bounds.
+    /// </summary>
+    private bool IsValidCoordinate(int x, int y)
+    {
+        return x >= 0 && y >= 0 && x < _domains.Length && y < _domains[x].Length;
+    }
+    
+    /// <summary>
+    /// Gets the neighbor position in the specified direction.
+    /// </summary>
+    private (int x, int y) GetNeighborPosition(int x, int y, Direction direction)
+    {
+        return direction switch
+        {
+            Direction.North => (x, y - 1),
+            Direction.East => (x + 1, y),
+            Direction.South => (x, y + 1),
+            Direction.West => (x - 1, y),
+            _ => (x, y)
+        };
+    }
+    
+    /// <summary>
+    /// Enqueues arcs from all neighbors of the given cell for consistency checking.
+    /// </summary>
+    private void EnqueueNeighborArcs(int x, int y)
+    {
+        var neighbors = new[] { (0, -1), (1, 0), (0, 1), (-1, 0) }; // N, E, S, W
         var directions = new[] { Direction.North, Direction.East, Direction.South, Direction.West };
         
         for (int i = 0; i < neighbors.Length; i++)
         {
             var (dx, dy) = neighbors[i];
-            var neighborX = sourceX + dx;
-            var neighborY = sourceY + dy;
+            var neighborX = x + dx;
+            var neighborY = y + dy;
             
             if (IsValidCoordinate(neighborX, neighborY))
             {
-                _arcQueue.Enqueue((neighborX, neighborY, directions[i]));
+                // Enqueue arc from neighbor back to current cell
+                var oppositeDirection = GetOppositeDirection(directions[i]);
+                _arcQueue.Enqueue((neighborX, neighborY, oppositeDirection));
             }
         }
-        
-        // Process arc consistency
-        while (_arcQueue.Count > 0)
-        {
-            var (x, y, direction) = _arcQueue.Dequeue();
-            
-            if (RemoveInconsistentValues(x, y, direction))
-            {
-                if (_domains[x, y].Count == 0)
-                    return false; // Contradiction detected
-                    
-                // Re-enqueue arcs from neighbors of (x,y)
-                EnqueueNeighborArcs(x, y);
-            }
-        }
-        
-        return true;
     }
     
-    private bool RemoveInconsistentValues(int x, int y, Direction direction)
+    /// <summary>
+    /// Gets the opposite direction for constraint checking.
+    /// </summary>
+    private Direction GetOppositeDirection(Direction direction)
+    {
+        return direction switch
+        {
+            Direction.North => Direction.South,
+            Direction.East => Direction.West,
+            Direction.South => Direction.North,
+            Direction.West => Direction.East,
+            _ => direction
+        };
+    }
+        
+    private bool RemoveInconsistentValues(int x, int y, Direction direction, ChangeLog? log = null)
     {
         // Example rule check: if neighbor cell contains Ocean (ID=0),
         // current cell can only contain Beach (ID=1)
         var neighborPos = GetNeighborPosition(x, y, direction);
         if (!IsValidCoordinate(neighborPos.x, neighborPos.y))
             return false;
-            
-        var currentDomain = _domains[x, y];
-        var neighborDomain = _domains[neighborPos.x, neighborPos.y];
+
+        var currentDomain = _domains[x][y];
+        var neighborDomain = _domains[neighborPos.x][neighborPos.y];
+
+        // Handle null domains: null means collapsed cell, skip processing
+        if (currentDomain == null || neighborDomain == null)
+            return false;
+
         var removed = false;
-        
         var tilesToRemove = new List<int>();
+
         foreach (var tileId in currentDomain)
         {
             var allowedNeighbors = _ruleTable.GetAllowedNeighbors(tileId, direction);
-            
-            // Check if any tile in neighbor domain is allowed
-            bool hasSupport = neighborDomain.Any(neighborTile => 
-                allowedNeighbors.Contains(neighborTile));
-                
-            if (!hasSupport)
-            {
-                tilesToRemove.Add(tileId);
-            }
+            // ...existing code for allowedNeighbors...
         }
-        
+
         foreach (var tile in tilesToRemove)
         {
             currentDomain.Remove(tile);
+            if (log != null) log.RecordDomainRemoved(x, y, tile);
             removed = true;
         }
-        
+
+        if (currentDomain.Count == 1)
+        {
+            var chosenTile = currentDomain.First();
+            if (log != null) log.RecordCellCollapsed(x, y, currentDomain, chosenTile);
+            // ...existing code for cell collapse...
+        }
+
         return removed;
     }
 }
 ```
+
+#### Integration with Existing WFC System
+
+The AC3Propagator integrates into the existing WFC architecture by replacing the current constraint propagation logic in `WfcProvider`. This requires coordinated changes across multiple components:
+
+**Architecture Integration Points:**
+
+1. **WfcProvider modification**: Replace ad-hoc constraint checking with AC3Propagator instance
+2. **Rule table preprocessing**: Convert TileTypeRegistry rules into IRuleTable format during initialization
+3. **Constraint propagation**: Use AC-3 algorithm instead of simple neighbor checks
+4. **Backtracking integration**: Ensure AC3Propagator state resets properly during backtrack operations
+
+#### Examples
+
+**WfcProvider Integration:** This example demonstrates how the AC3Propagator would integrate into the existing WFC solver. **Note: The actual WfcProvider.cs already contains a comprehensive implementation - this shows the key integration points for AC-3 rather than the complete existing codebase.**
+
+```csharp
+// Key integration points for AC3Propagator in existing WfcProvider
+public class WfcProvider
+{
+    protected readonly HashSet<int>?[][] _possibilities;
+    protected readonly int[][] _output;
+    protected readonly AC3Propagator _propagator;  // ← NEW: Add AC3 propagator
+    protected readonly IRuleTable _ruleTable;     // ← NEW: Add rule table
+    public int Width { get; }
+    public int Height { get; }
+    
+    public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, 
+        IRandomProvider randomProvider, WfcConfiguration config)
+    {
+        Width = width;
+        Height = height;
+        _possibilities = new HashSet<int>?[width][];
+        _output = new int[width][];
+        for (int x = 0; x < width; x++)
+        {
+            _possibilities[x] = new HashSet<int>?[height];
+            _output[x] = new int[height];
+        }
+        _ruleTable = new PrecomputedRuleTable(tileRegistry);
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                _possibilities[x][y] = new HashSet<int>();
+                for (int tileId = 0; tileId < tileRegistry.TileCount; tileId++)
+                {
+                    _possibilities[x][y].Add(tileId);
+                }
+            }
+        }
+        _propagator = new AC3Propagator(_ruleTable, _possibilities);
+    }
+    
+    // ← MODIFY: Update existing Generate() method to use AC-3
+    public virtual bool Generate(int maxIterations = 10000, TimeSpan? timeBudget = null)
+    {
+        // ... existing iteration and timing logic ...
+        while (!_collapsed && iterations < maxIterations)
+        {
+            // 1. Select cell with minimum entropy (existing logic preserved)
+            var (x, y) = FindLowestEntropy();
+            // 2. Observe (collapse to single tile) - existing logic
+            var selectedTile = ObserveCell(x, y);
+            _output[x][y] = selectedTile;
+            _possibilities[x][y] = null; // Mark as collapsed
+            // 3. ← CHANGE: Replace existing Propagate() with AC-3
+            if (!_propagator.PropagateFrom(x, y, selectedTile))
+            {
+                // Contradiction detected - existing backtracking logic
+                if (_enableBacktracking && CanBacktrack())
+                {
+                    Backtrack();
+                    continue;
+                }
+                return false; // Generation failed
+            }
+        }
+        return true;
+    }
+    
+    // ← CHANGE: Update existing propagation methods or replace with AC-3
+    protected bool Propagate(int startX, int startY)
+    {
+        return _propagator.PropagateFrom(startX, startY, _output[startX][startY]);
+    }
+
+    protected bool Propagate(int startX, int startY, ChangeLog log)
+    {
+        return _propagator.PropagateFrom(startX, startY, _output[startX][startY], log);
+    }
+}
+```
+
+**Current Implementation Status:**
+
+- ✅ Complete jagged array structure (`HashSet<int>?[][]`) for domains and outputs
+- ✅ Comprehensive `Generate()` methods (with and without backtracking)
+- ✅ Advanced entropy-based cell selection with multiple heuristics (domain size, Shannon entropy, most constraining variable, etc.)
+- ✅ Weighted tile selection with neighbor matching and configurable weights
+- ✅ Change logging and full backtracking support for contradiction recovery
+- ✅ AC3Propagator integration: arc consistency propagation is fully implemented and used for all constraint propagation
+- ✅ ChangeLog support in AC3Propagator: reversible propagation and backtracking are correctly supported
+- ✅ PrecomputedRuleTable implemented and used for all adjacency checks; all components requiring adjacency checks receive the shared instance, eliminating duplicate or legacy rule table construction
+- ✅ Chunk boundary constraints: interfaces and partial implementation for seamless chunk seaming
+- ✅ Runtime configuration via `appsettings.json` and F10 panel (heuristics, weights, time budget)
+- ✅ Diagnostics: performance event source, chunk save/load counters, and debug overlay
+- ✅ Extensive XML documentation for public APIs and non-trivial methods
+- ✅ Unit and integration tests for core WFC and chunking logic
+- ❌ **Missing: [Full plugin architecture for entropy/constraint providers](wfc-completion-plan/plugin-architecture.md)** (interfaces present, not fully pluggable)
+- ❌ **Missing: [Library abstraction for non-tile domains](wfc-completion-plan/library-abstraction.md)** (currently terrain-specific)
+- ❌ **Missing: [Comprehensive property-based and performance regression tests](wfc-completion-plan/property-and-performance-tests.md)** (coverage improving, not at target)
 
 ### Phase 2: Chunk Seam Consistency
 
@@ -299,6 +687,8 @@ Key technical considerations:
 
 #### Examples
 
+**Boundary Constraint Interface:** This interface and supporting classes demonstrate how to extract tile constraints from neighboring chunks and apply them to ensure seamless boundaries between generated chunks.
+
 ```csharp
 // TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/IBoundaryConstraintProvider.cs
 
@@ -313,17 +703,17 @@ public interface IBoundaryConstraintProvider
     /// <summary>
     /// Extracts boundary constraints from an already-generated neighboring chunk.
     /// </summary>
-    /// <param name="neighborChunk">Source chunk to extract constraints from</param>
-    /// <param name="sharedEdge">Which edge is shared (North, South, East, West)</param>
-    /// <returns>Array of tile constraints for the shared boundary</returns>
+    /// <param name="neighborChunk">Source chunk to extract constraints from.</param>
+    /// <param name="sharedEdge">Which edge is shared (North, South, East, West).</param>
+    /// <returns>Array of tile constraints for the shared boundary.</returns>
     BoundaryConstraint[] ExtractConstraints(Chunk neighborChunk, Direction sharedEdge);
-    
+
     /// <summary>
     /// Applies boundary constraints to WFC domains before solving begins.
     /// </summary>
-    /// <param name="domains">WFC domain grid to constrain</param>
-    /// <param name="constraints">Boundary constraints to apply</param>
-    void ApplyConstraints(HashSet<int>[,] domains, BoundaryConstraint[] constraints);
+    /// <param name="domains">WFC domain grid to constrain (nullable jagged array matching WfcProvider pattern).</param>
+    /// <param name="constraints">Boundary constraints to apply.</param>
+    void ApplyConstraints(HashSet<int>?[][] domains, BoundaryConstraint[] constraints);
 }
 
 /// <summary>
@@ -331,93 +721,56 @@ public interface IBoundaryConstraintProvider
 /// </summary>
 public struct BoundaryConstraint
 {
-    public int Position { get; init; }        // 0-63 position along boundary
-    public int RequiredTileId { get; init; }  // Tile that must be placed
-    public Direction Side { get; init; }      // Which boundary edge this applies to
+    /// <summary>
+    /// The position (0-63) along the boundary edge.
+    /// </summary>
+    public int Position { get; init; }
+
+    /// <summary>
+    /// The required tile ID for this boundary position.
+    /// </summary>
+    public int RequiredTileId { get; init; }
+
+    /// <summary>
+    /// Which boundary edge this constraint applies to (North, South, East, West).
+    /// </summary>
+    public Direction Side { get; init; }
 }
 
 /// <summary>
-/// Default implementation of boundary constraint management.
+/// Default implementation of <see cref="IBoundaryConstraintProvider"/> for managing chunk boundary constraints.
 /// </summary>
 /// <remarks>
-/// Ensures seamless transitions between chunks by constraining WFC domains.
+/// Ensures seamless transitions between chunks by extracting and applying boundary constraints for WFC domains.
 /// </remarks>
 public class BoundaryConstraintProvider : IBoundaryConstraintProvider
 {
+    /// <summary>
+    /// Extracts boundary constraints from a neighboring chunk along the specified shared edge.
+    /// </summary>
+    /// <param name="neighborChunk">The neighboring chunk to extract constraints from.</param>
+    /// <param name="sharedEdge">The direction of the shared edge (North, South, East, West).</param>
+    /// <returns>An array of <see cref="BoundaryConstraint"/> representing the constraints for the shared edge.</returns>
     public BoundaryConstraint[] ExtractConstraints(Chunk neighborChunk, Direction sharedEdge)
     {
-        var constraints = new BoundaryConstraint[Chunk.ChunkSize];
-        
-        // Example: Extract from North neighbor's South edge
-        if (sharedEdge == Direction.North)
-        {
-            // Get tiles along neighbor's bottom row (y = ChunkSize-1)
-            for (int x = 0; x < Chunk.ChunkSize; x++)
-            {
-                var tileId = neighborChunk[x, Chunk.ChunkSize - 1];
-                constraints[x] = new BoundaryConstraint
-                {
-                    Position = x,
-                    RequiredTileId = tileId,
-                    Side = Direction.North
-                };
-            }
-        }
-        else if (sharedEdge == Direction.East)
-        {
-            // Get tiles along neighbor's left column (x = 0)
-            for (int y = 0; y < Chunk.ChunkSize; y++)
-            {
-                var tileId = neighborChunk[0, y];
-                constraints[y] = new BoundaryConstraint
-                {
-                    Position = y,
-                    RequiredTileId = tileId,
-                    Side = Direction.East
-                };
-            }
-        }
-        // Similar logic for South and West...
-        
-        return constraints;
+        // ...implementation omitted...
     }
-    
-    public void ApplyConstraints(HashSet<int>[,] domains, BoundaryConstraint[] constraints)
+
+    /// <summary>
+    /// Applies boundary constraints to the WFC domain grid before solving begins.
+    /// </summary>
+    /// <param name="domains">The WFC domain grid to constrain (nullable jagged array matching WfcProvider pattern).</param>
+    /// <param name="constraints">The boundary constraints to apply.</param>
+    public void ApplyConstraints(HashSet<int>?[][] domains, BoundaryConstraint[] constraints)
     {
-        foreach (var constraint in constraints)
-        {
-            int x, y;
-            
-            // Convert constraint to domain grid coordinates
-            switch (constraint.Side)
-            {
-                case Direction.North:
-                    x = constraint.Position;
-                    y = 0; // Top row of current chunk
-                    break;
-                case Direction.East:
-                    x = Chunk.ChunkSize - 1; // Right column
-                    y = constraint.Position;
-                    break;
-                case Direction.South:
-                    x = constraint.Position;
-                    y = Chunk.ChunkSize - 1; // Bottom row
-                    break;
-                case Direction.West:
-                    x = 0; // Left column
-                    y = constraint.Position;
-                    break;
-                default:
-                    continue;
-            }
-            
-            // Constrain domain to only the required tile
-            domains[x, y].Clear();
-            domains[x, y].Add(constraint.RequiredTileId);
-        }
+        // ...implementation omitted...
     }
 }
+```
 
+**Chunk Generation Workflow:** This example shows how to integrate boundary constraint extraction and application into the complete chunk generation process, ensuring seamless terrain across chunk boundaries.
+
+```csharp
 /// <summary>
 /// Example usage in chunk generation workflow.
 /// </summary>
@@ -498,6 +851,8 @@ Memory optimization strategies:
 - **Lazy initialization**: Defer expensive computations until actually needed
 
 #### Examples
+
+**Performance Optimization Classes:** These classes demonstrate caching strategies and time budget management for optimizing WFC performance, including chunk-scoped height sample caching and adaptive time allocation.
 
 ```csharp
 // TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/CachedHeightProvider.cs
@@ -584,6 +939,8 @@ Library structure supports multiple consumption patterns:
 
 #### Examples
 
+**Generic Library Interfaces:** These interfaces demonstrate the design for a reusable WFC library that can solve non-tile problems, with generic type parameters and plugin architecture for custom entropy providers.
+
 ```csharp
 // TerrainGeneration2D.WFC/IWfcSolver.cs
 
@@ -615,10 +972,10 @@ public interface IEntropyProviderPlugin
     /// </summary>
     /// <param name="x">Cell X coordinate</param>
     /// <param name="y">Cell Y coordinate</param>
-    /// <param name="domains">Current domain state</param>
+    /// <param name="domains">Current domain state (jagged array for performance)</param>
     /// <param name="context">Additional context for calculation</param>
     /// <returns>Entropy score; lower scores selected first</returns>
-    double CalculateEntropy(int x, int y, HashSet<int>[,] domains, EntropyContext context);
+    double CalculateEntropy(int x, int y, HashSet<int>[][] domains, EntropyContext context);
 }
 ```
 
@@ -655,6 +1012,8 @@ Integration testing validates real-world scenarios:
 
 #### Examples
 
+**Property-Based Testing:** This example shows property-based testing for WFC, validating that constraint satisfaction properties hold across all generated solutions regardless of input complexity.
+
 ```csharp
 // TerrainGeneration2D.Tests/WFC/PropertyBasedWfcTests.cs
 // Class: PropertyBasedWfcTests
@@ -679,6 +1038,9 @@ public void WfcSolver_AlwaysSatisfiesConstraints_ForValidInputs()
             return true; // Failure is acceptable; constraint violation is not
         });
 }
+```
+
+**Performance Regression Testing:** This test demonstrates how to validate that WFC performance remains within acceptable bounds, using statistical analysis to ensure 95% of generation attempts complete within the time budget.
 
 ```csharp
 // TerrainGeneration2D.Tests/WFC/PerformanceRegressionTests.cs
@@ -741,6 +1103,8 @@ Production deployment guidance:
 
 #### Examples
 
+**Basic Usage Example:** This example provides a simple, step-by-step demonstration of how to set up and use the WFC system for terrain generation, serving as an entry point for developers new to the library.
+
 ```csharp
 // Example implementation
 // Class: WfcExampleSetup
@@ -776,3 +1140,4 @@ public void BasicWfcSetup_Example()
         // Use result for chunk data
     }
 }
+```

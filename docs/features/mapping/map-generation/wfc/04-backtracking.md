@@ -130,31 +130,47 @@ private sealed class ChangeLog
 
 ## Generate() Flow With Backtracking
 
-ASCII sequence of the main loop inside `Generate(enableBacktracking: true, ...)`:
+Mermaid sequence diagram of the main loop inside `Generate(enableBacktracking: true, ...)`:
 
-```plain
-Solver                       DecisionStack                ChangeLog                   Domains/Output
-|                            |                            |                           |                         |
-| -> DS: FindLowestEntropy() |                            |                           |                         |
-| <- DS: (x,y) or none       |                            |                           |                         |
-| if none: SUCCESS           |                            |                           |                         |
-| -> CL: Mark()              |                            | Mark() -> [mark]          |                         |
-| -> DS: Push frame          | push (X,Y,NextIndex=0,     |                           |                         |
-|                            |       ChangesMark=mark)    |                           |                         |
-| Try next candidate         |                            |                           |                         |
-| choose next from list      |                            |                           |                         |
-| -> CL: CollapseCell(...)   |                            | record CellCollapsed      | apply collapse          |
-| -> CL: Propagate(...)      |                            | record DomainRemoved      | apply removals          |
-| <- CL: ok?                 |                            |                           |                         |
-| yes: next cell             |                            |                           |                         |
-| no: CONTRADICTION          |                            |                           |                         |
-| -> CL: RollbackTo(mark)    |                            | undo in reverse           | state restored          |
-| more candidates?           |                            |                           |                         |
-| yes: try next              |                            |                           |                         |
-| no -> DS: Pop frame        | pop                        |                           |                         |
-| stack empty?               |                            |                           |                         |
-| yes: FAIL                  |                            |                           |                         |
-| no: resume prev frame      |                            |                           |                         |
+```mermaid
+sequenceDiagram
+   participant Solver
+   participant DecisionStack
+   participant ChangeLog
+   participant DomainsOutput
+
+   Solver->>DecisionStack: FindLowestEntropy()
+   DecisionStack-->>Solver: (x, y) or none
+   alt No cell left
+      Solver->>Solver: SUCCESS
+   else Cell found
+      Solver->>ChangeLog: Mark()
+      ChangeLog-->>Solver: [mark]
+      Solver->>DecisionStack: Push frame (X,Y,NextIndex=0, ChangesMark=mark)
+      loop Try candidates
+         Solver->>DecisionStack: Choose next from list
+         Solver->>ChangeLog: CollapseCell(...)
+         ChangeLog->>DomainsOutput: record CellCollapsed, apply collapse
+         Solver->>ChangeLog: Propagate(...)
+         ChangeLog->>DomainsOutput: record DomainRemoved, apply removals
+         alt Propagation OK
+            Solver->>Solver: Next cell
+         else Contradiction
+            Solver->>ChangeLog: RollbackTo(mark)
+            ChangeLog->>DomainsOutput: undo in reverse, state restored
+            alt More candidates
+               Solver->>Solver: Try next
+            else No more candidates
+               Solver->>DecisionStack: Pop frame
+               alt Stack empty
+                  Solver->>Solver: FAIL
+               else Resume previous frame
+                  Solver->>Solver: Resume prev frame
+               end
+            end
+         end
+      end
+   end
 ```
 
 Success criteria: all domains are `null` (collapsed) and `Generate()` returns `true`.

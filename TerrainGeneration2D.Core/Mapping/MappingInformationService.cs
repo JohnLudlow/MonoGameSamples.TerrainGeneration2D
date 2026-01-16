@@ -8,15 +8,15 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
 /// </summary>
 public sealed class MappingInformationService
 {
-  private readonly int[,] _output;
+  private readonly int[][] _output;
   private readonly int _width;
   private readonly int _height;
 
-  public MappingInformationService(int[,] output)
+  public MappingInformationService(int[][] output)
   {
     _output = output ?? throw new ArgumentNullException(nameof(output));
-    _width = output.GetLength(0);
-    _height = output.GetLength(1);
+    _width = output.Length;
+    _height = output.Length > 0 ? output[0].Length : 0;
   }
 
   /// <summary>
@@ -29,16 +29,22 @@ public sealed class MappingInformationService
       return GroupMetrics.Empty;
     }
 
-    var tileId = assumeTileId ?? _output[point.X, point.Y];
+    var tileId = assumeTileId ?? _output[point.X][point.Y];
     if (tileId == -1)
     {
       return GroupMetrics.Empty;
     }
 
-    var visited = new bool[_width, _height];
+    var visited = new bool[_width][];
+    // Initialize inner arrays
+    for (var x = 0; x < _width; x++)
+    {
+      visited[x] = new bool[_height];
+    }
+    
     var queue = new Queue<TilePoint>();
     queue.Enqueue(point);
-    visited[point.X, point.Y] = true;
+    visited[point.X][point.Y] = true;
 
     var minX = point.X;
     var maxX = point.X;
@@ -63,7 +69,7 @@ public sealed class MappingInformationService
 
       foreach (var neighbor in GetNeighbors(current))
       {
-        if (visited[neighbor.X, neighbor.Y])
+        if (visited[neighbor.X][neighbor.Y])
         {
           continue;
         }
@@ -71,7 +77,7 @@ public sealed class MappingInformationService
         var neighborTileId = GetTileId(neighbor, point, assumeTileId);
         if (neighborTileId == tileId)
         {
-          visited[neighbor.X, neighbor.Y] = true;
+          visited[neighbor.X][neighbor.Y] = true;
           queue.Enqueue(neighbor);
         }
       }
@@ -100,7 +106,7 @@ public sealed class MappingInformationService
       return assumeTileId.Value;
     }
 
-    return _output[current.X, current.Y];
+    return _output[current.X][current.Y];
   }
 
   private IEnumerable<TilePoint> GetNeighbors(TilePoint point)

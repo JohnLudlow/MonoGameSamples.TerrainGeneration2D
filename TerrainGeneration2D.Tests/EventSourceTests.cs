@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics.Tracing;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 
-namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests;
+namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D;
 
-public class EventSourceTests : IDisposable
+public sealed class EventSourceTests : IDisposable
 {
     private readonly TestEventListener _listener;
 
@@ -98,7 +98,7 @@ public class EventSourceTests : IDisposable
         Assert.Equal(20, evt.Payload[1]);
     }
 
-    private class TestEventListener : EventListener
+    private sealed class TestEventListener : EventListener
     {
         public List<EventWrittenEventArgs> Events { get; } = new();
         private readonly object _sync = new();

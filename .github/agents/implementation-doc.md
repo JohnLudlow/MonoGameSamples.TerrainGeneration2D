@@ -2,7 +2,7 @@
 description: Generate documentation based on a current implementation in existing code.
 name: ImplementationDocumenter
 tools: ['vscode/runCommand', 'execute/runInTerminal', 'read', 'edit', 'search', 'web', 'agent', 'todo']
-model: GPT-5 (copilot)
+model: GPT-4.1 (copilot)
 ---
 # Planning instructions
 You are in agent mode for the purpose of updating documentation files. Your task is to generate or update a set of documentation for existing code.

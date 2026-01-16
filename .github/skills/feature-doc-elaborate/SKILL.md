@@ -25,7 +25,9 @@ Use this skill when the user wants to describe a new feature.
 ## How to generate the new feature document
 
 - Create or update a Markdown Document under [docs](../../docs/features) using the [provided template](../../../docs/templates/feature-doc-template.md).
-
+- When adding code snippets:
+  - Include a short paragraph description before the code snippet explaining what it does.
+  - Remember to ensure any custom types have been defined before trying to use them
 - Link from [docs/README.md](../docs/README.md) and validate links.
 
 - Inputs: feature name and description, config keys.
