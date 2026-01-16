@@ -38,6 +38,15 @@ into a standalone library for production strategy games.
 - Developer Onboarding: Clear interfaces and comprehensive documentation for teams
   unfamiliar with constraint satisfaction
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Feature requirements](#feature-requirements)
+- [Feature status](#feature-status)
+- [Definition of terms](#definition-of-terms)
+- [Architectural considerations and constraints](#architectural-considerations-and-constraints)
+- [Implementation guide](#implementation-guide)
+
 ## Feature requirements
 
 - **AC-3 Constraint Propagation**: Replace current propagation with proper arc
@@ -194,6 +203,13 @@ This null-based design requires careful consideration when interfacing with comp
 4. Test infrastructure (lowest priority, warnings only)
 
 ## Implementation guide
+
+
+### Child Feature Plans
+
+- [Plugin Architecture](plugin-architecture.md)
+- [Library Abstraction for Non-Tile Domains](library-abstraction.md)
+- [Comprehensive Property-Based and Performance Regression Tests](property-and-performance-tests.md)
 
 Detailed step-by-step implementation guide following Test Driven Development principles where applicable, leading with minimal breaking tests, followed by minimal changes to fix tests, followed by refactor, repeating until the feature is complete.
 
@@ -642,9 +658,9 @@ public class WfcProvider
 - ✅ Diagnostics: performance event source, chunk save/load counters, and debug overlay
 - ✅ Extensive XML documentation for public APIs and non-trivial methods
 - ✅ Unit and integration tests for core WFC and chunking logic
-- ❌ **Missing: Full plugin architecture for entropy/constraint providers** (interfaces present, not fully pluggable)
-- ❌ **Missing: Library abstraction for non-tile domains** (currently terrain-specific)
-- ❌ **Missing: Comprehensive property-based and performance regression tests** (coverage improving, not at target)
+- ❌ **Missing: [Full plugin architecture for entropy/constraint providers](plugin-architecture.md)** (interfaces present, not fully pluggable)
+- ❌ **Missing: [Library abstraction for non-tile domains](library-abstraction.md)** (currently terrain-specific)
+- ❌ **Missing: [Comprehensive property-based and performance regression tests](property-and-performance-tests.md)** (coverage improving, not at target)
 
 ### Phase 2: Chunk Seam Consistency
 
@@ -1023,6 +1039,7 @@ public void WfcSolver_AlwaysSatisfiesConstraints_ForValidInputs()
             return true; // Failure is acceptable; constraint violation is not
         });
 }
+```
 
 **Performance Regression Testing:** This test demonstrates how to validate that WFC performance remains within acceptable bounds, using statistical analysis to ensure 95% of generation attempts complete within the time budget.
 
