@@ -5,6 +5,7 @@ name: Build and Test
 
 on: [push, pull_request]
 
+
 jobs:
   build:
     strategy:
@@ -199,6 +200,9 @@ jobs:
       run: dotnet format --verify-no-changes --verbosity diagnostic
 
   codeql:
+    env:
+      CONFIGURATION: Release
+
     runs-on: windows-latest
     permissions:
       actions: read
