@@ -38,7 +38,6 @@ runs:
       path: BenchmarkDotNet.Artifacts
 
   - name: Download Benchmark Baseline
-    if: github.event_name == 'pull_request'
     shell: pwsh
     env:
       GH_TOKEN: ${{ github.token }}
@@ -52,7 +51,6 @@ runs:
       }
 
   - name: Benchmark
-    if: github.event_name == 'pull_request'
     shell: pwsh
     run: |
       $dotnetParams = @(
@@ -68,6 +66,5 @@ runs:
       dotnet run @dotnetParams
 
   - name: Publish performance report in build summary
-    if: github.event_name == 'pull_request'
     shell: pwsh
     run: cat BenchmarkDotNet.Artifacts/results/*.md >> $env:GITHUB_STEP_SUMMARY
