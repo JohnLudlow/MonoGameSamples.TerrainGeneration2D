@@ -7,13 +7,13 @@ on: [push, pull_request]
 
 jobs:
   build:
+    name: Build and Test v${{ steps.version_step.outputs.semVer }}
     strategy:
       matrix:
         os: [windows-latest]
     runs-on: ${{matrix.os}}
     env:
       CONFIGURATION: Release
-      REV_PREFIX: 1.0
 
     steps:
     - uses: actions/checkout@v5
@@ -34,6 +34,12 @@ jobs:
     - name: Determine Version
       id: version_step # step id used as a reference for output values
       uses: gittools/actions/gitversion/execute@v4.2.0
+
+    - name: Set Version Environment Variables
+      shell: pwsh
+      run: |
+        "AssemblyVersion=${{ steps.version_step.outputs.assemblySemVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
+        "AssemblyFileVersion=${{ steps.version_step.outputs.assemblySemFileVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -86,7 +92,7 @@ jobs:
     - name: Upload coverage report artifact
       uses: actions/upload-artifact@v4
       with:
-        name: CoverageReport # Artifact name        
+        name: CoverageReport-${{ steps.version_step.outputs.semVer }} # Artifact name        
         path: coverage 
         
     - name: Publish coverage in build summary
