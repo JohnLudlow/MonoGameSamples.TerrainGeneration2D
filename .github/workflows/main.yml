@@ -18,7 +18,7 @@ jobs:
       assemblySemVer: ${{ steps.version_step.outputs.assemblySemVer }}
       GitVersion_FullSemVer: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}
       semVer: ${{ steps.version_step.outputs.semVer }}
-
+    permissions: write-all      
     steps:
     - uses: actions/checkout@v5
       with:
