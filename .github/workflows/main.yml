@@ -81,12 +81,32 @@ jobs:
         path: TestResults/**/*.trx        
         reporter: dotnet-trx        # Format of test results
 
+    - name: Download Coverage Baseline
+      if: github.event_name == 'pull_request'
+      shell: pwsh
+      run: |
+        $artifacts = gh api /repos/${{ github.repository }}/actions/artifacts | ConvertFrom-Json
+        $baseline = $artifacts.artifacts | Where-Object { $_.name -eq 'coverage-baseline' } | Sort-Object created_at -Descending | Select-Object -First 1
+        if ($baseline) {
+          $url = "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$($baseline.id)/zip"
+          Invoke-WebRequest -Uri $url -OutFile baseline.zip -Headers @{ "Authorization" = "token ${{ secrets.GITHUB_TOKEN }}"; "Accept" = "application/vnd.github.v3+json" }
+          Expand-Archive baseline.zip baseline
+        }
+
+    - name: Set Baseline File
+      shell: pwsh
+      run: |
+        if (Test-Path baseline/coverage.cobertura.xml) {
+          "BASELINE_FILE=baseline/coverage.cobertura.xml" | Out-File -FilePath $env:GITHUB_ENV -Append
+        }
+
     - name: ReportGenerator
       uses: danielpalme/ReportGenerator-GitHub-Action@5.5.1
       with:        
         reports: '**/coverage.cobertura.xml'
         targetdir: 'coverage'
         reporttypes: 'MarkdownSummaryGithub;MarkdownDeltaSummary'
+        baselinefile: ${{ env.BASELINE_FILE }}
         title: ${{ steps.version_step.outputs.assemblySemVer }}
 
     - name: Upload coverage report artifact
@@ -97,6 +117,46 @@ jobs:
         
     - name: Publish coverage in build summary
       run: cat coverage/SummaryGithub.md >> $env:GITHUB_STEP_SUMMARY # Adjust path and filename if necessary
+
+    - name: Upload Coverage Baseline
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-baseline
+        path: **/coverage.cobertura.xml
+
+    - name: Run Benchmarks Baseline
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      shell: pwsh
+      run: |
+        $dotnetParams = @(
+          "--configuration", "$env:CONFIGURATION",
+          "--project", "TerrainGeneration2D.Benchmarks/TerrainGeneration2D.Benchmarks.csproj",
+          "--",
+          "--filter", "*",
+          "--artifacts", "BenchmarkDotNet.Artifacts",
+          "--memory", "--allCategories=Job"
+        )
+        dotnet run @dotnetParams
+
+    - name: Upload Benchmark Baseline
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-baseline
+        path: BenchmarkDotNet.Artifacts
+
+    - name: Download Benchmark Baseline
+      if: github.event_name == 'pull_request'
+      shell: pwsh
+      run: |
+        $artifacts = gh api /repos/${{ github.repository }}/actions/artifacts | ConvertFrom-Json
+        $baseline = $artifacts.artifacts | Where-Object { $_.name -eq 'benchmark-baseline' } | Sort-Object created_at -Descending | Select-Object -First 1
+        if ($baseline) {
+          $url = "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$($baseline.id)/zip"
+          Invoke-WebRequest -Uri $url -OutFile benchmark-baseline.zip -Headers @{ "Authorization" = "token ${{ secrets.GITHUB_TOKEN }}"; "Accept" = "application/vnd.github.v3+json" }
+          Expand-Archive benchmark-baseline.zip BenchmarkBaseline
+        }
 
     - name: Benchmark
       if: github.event_name == 'pull_request'
@@ -109,6 +169,7 @@ jobs:
           "--filter", "*",
           "--verbosity", "normal",
           "--", 
+          "--baseline", "BenchmarkBaseline",
           "--fast"
         )
         dotnet run @dotnetParams
