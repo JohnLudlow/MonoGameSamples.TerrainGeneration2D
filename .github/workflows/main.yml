@@ -75,18 +75,27 @@ jobs:
   lint-cs:
     runs-on: windows-latest
     steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true
+        fetch-depth: 0
+
     - uses: ./.github/actions/lint
 
   codeql:
     env:
       CONFIGURATION: Release
-
     runs-on: windows-latest
     permissions:
       actions: read
       contents: read
       security-events: write
     steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true
+        fetch-depth: 0
+              
     - uses: ./.github/actions/codeql
 
   docs-links:
@@ -118,5 +127,5 @@ jobs:
       with:
         lfs: true
         fetch-depth: 0
-              
+
     - uses: ./.github/actions/pr-size
