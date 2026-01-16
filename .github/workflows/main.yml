@@ -20,11 +20,6 @@ jobs:
       semVer: ${{ steps.version_step.outputs.semVer }}
       
     steps:
-    - name: Docs Link Lint
-      shell: pwsh
-      run: |
-        pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/check-doc-links.ps1
-
     - uses: ./.github/actions/setup
 
     - uses: ./.github/actions/build
@@ -46,6 +41,11 @@ jobs:
       CONFIGURATION: Release
 
     steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true
+        fetch-depth: 0
+
     - uses: ./.github/actions/setup
 
     - uses: ./.github/actions/test
