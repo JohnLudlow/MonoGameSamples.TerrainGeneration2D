@@ -1,4 +1,4 @@
-namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
+﻿namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 
 /// <summary>
 /// Central documentation for logging/event ID ranges to avoid conflicts.

@@ -1,4 +1,4 @@
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
+﻿using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Gum.DataTypes;
 using Gum.Forms.Controls;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
@@ -8,7 +8,7 @@ using MonoGameGum.GueDeriving;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UI;
 
-public sealed class RuntimeSettingsPanel : Panel
+internal sealed class RuntimeSettingsPanel : Panel
 {
   private readonly AnimatedButton _btnDomain;
   private readonly AnimatedButton _btnShannon;

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 /// <summary>
 /// Exposes the current domain grid for testing and diagnostics.
@@ -60,8 +60,8 @@ public class WfcProvider
   /// <param name="chunkOrigin">World-space origin of this chunk, used for sampling.</param>
   /// <param name="weightConfig">WFC weight configuration for tile selection.</param>
   /// <param name="heuristicsConfig">Heuristics configuration for cell selection.</param>
-  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, IRandomProvider randomProvider, 
-    TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin, 
+  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, IRandomProvider randomProvider,
+    TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin,
     WfcWeightConfiguration? weightConfig = null, HeuristicsConfiguration? heuristicsConfig = null)
   {
     _width = width;
@@ -73,7 +73,7 @@ public class WfcProvider
     _chunkOrigin = chunkOrigin;
 
     _weightConfig = weightConfig ?? new WfcWeightConfiguration();
-    _heuristicsConfig =heuristicsConfig ?? new HeuristicsConfiguration();
+    _heuristicsConfig = heuristicsConfig ?? new HeuristicsConfiguration();
 
     _ruleTable = new PrecomputedRuleTable(tileRegistry);
     _possibilities = new HashSet<int>?[_width][];
@@ -81,32 +81,32 @@ public class WfcProvider
     // Initialize domains with all possible tile types
     for (var x = 0; x < width; x++)
     {
-        _possibilities[x] = new HashSet<int>?[height];
-        for (var y = 0; y < height; y++)
+      _possibilities[x] = new HashSet<int>?[height];
+      for (var y = 0; y < height; y++)
+      {
+        _possibilities[x][y] = [];
+        for (var tileId = 0; tileId < tileRegistry.TileCount; tileId++)
         {
-            _possibilities[x][y] = [];
-            for (var tileId = 0; tileId < tileRegistry.TileCount; tileId++)
-            {
-                _possibilities[x][y]?.Add(tileId);
-            }
+          _possibilities[x][y]?.Add(tileId);
         }
+      }
     }
 
     _output = new int[_width][];
     for (var x = 0; x < width; x++)
     {
-        _output[x] = new int[height];
-        for (var y = 0; y < height; y++)
-        {
-            _output[x][y] = -1; // -1 indicates unassigned
-        }
+      _output[x] = new int[height];
+      for (var y = 0; y < height; y++)
+      {
+        _output[x][y] = -1; // -1 indicates unassigned
+      }
     }
     _collapsed = false;
-    
+
     Propagator = new AC3Propagator(_ruleTable, _possibilities);
 
     _domainEntropy = new DomainEntropyProvider();
-    _shannonEntropy = new ShannonEntropyProvider();    
+    _shannonEntropy = new ShannonEntropyProvider();
 
     _mappingService = new MappingInformationService(_output);
   }
@@ -121,7 +121,7 @@ public class WfcProvider
   /// <param name="config">Terrain rule configuration.</param>
   /// <param name="heightProvider">Height/biome sampler for contextual rules.</param>
   /// <param name="chunkOrigin">World-space origin of this chunk, used for sampling.</param>
-  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, Random random, 
+  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, Random random,
     TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin)
     : this(width, height, tileRegistry, new RandomAdapter(random), config, heightProvider, chunkOrigin)
   {
@@ -131,7 +131,7 @@ public class WfcProvider
   /// <summary>
   /// Create a WFC solver using a custom random provider and weight configuration.
   /// </summary>
-  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, IRandomProvider randomProvider, 
+  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, IRandomProvider randomProvider,
     TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin, WfcWeightConfiguration weightConfig)
     : this(width, height, tileRegistry, randomProvider, config, heightProvider, chunkOrigin, weightConfig, null)
   {
@@ -140,7 +140,7 @@ public class WfcProvider
   /// <summary>
   /// Create a WFC solver using System.Random and weight configuration.
   /// </summary>
-  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, Random random, 
+  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, Random random,
     TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin, WfcWeightConfiguration weightConfig)
     : this(width, height, tileRegistry, new RandomAdapter(random), config, heightProvider, chunkOrigin, weightConfig, null)
   {
@@ -686,8 +686,8 @@ public class WfcProvider
       var allowedNeighborsWest = _ruleTable.GetAllowedNeighbors(tileId, Direction.West);
 
       if (
-           allowedNeighborsNorth.Contains(neighborTileId) 
-        || allowedNeighborsSouth.Contains(neighborTileId) 
+           allowedNeighborsNorth.Contains(neighborTileId)
+        || allowedNeighborsSouth.Contains(neighborTileId)
         || allowedNeighborsEast.Contains(neighborTileId)
         || allowedNeighborsWest.Contains(neighborTileId)
       )

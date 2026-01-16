@@ -1,4 +1,4 @@
-// TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/AC3Propagator.cs
+﻿// TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/AC3Propagator.cs
 
 using System;
 using System.Collections.Generic;

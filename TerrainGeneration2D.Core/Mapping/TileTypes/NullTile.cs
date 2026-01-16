@@ -1,4 +1,4 @@
-namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
+﻿namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 
 public sealed class NullTileType : TileType
 {
@@ -7,7 +7,7 @@ public sealed class NullTileType : TileType
   {
   }
 
-  public static NullTileType Instance {get;} = new();
+  public static NullTileType Instance { get; } = new();
 
   public override bool EvaluateRules(TileRuleContext context)
   {

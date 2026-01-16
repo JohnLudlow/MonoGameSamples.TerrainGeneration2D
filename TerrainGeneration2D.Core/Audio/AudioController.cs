@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Media;
@@ -154,7 +154,7 @@ public class AudioController : IDisposable
           soundEffectInstance.Dispose();
         }
         _activeSoundEffects.Clear();
-      }      
+      }
 
       IsDisposed = true;
     }

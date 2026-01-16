@@ -50,7 +50,7 @@ public class Core : Game
 
   public static InputManager Input { get; private set; } = new InputManager();
 
-  public static AudioController Audio {get; private set;}
+  public static AudioController Audio { get; private set; }
 
   public bool EnablePerformanceDiagnostics { get; set; }
 
@@ -125,51 +125,51 @@ public class Core : Game
     base.Dispose(disposing);
   }
 
-    protected override void Draw(GameTime gameTime)
+  protected override void Draw(GameTime gameTime)
+  {
+    // If there is an active scene, draw it.
+    if (_activeScene != null)
     {
-        // If there is an active scene, draw it.
-        if (_activeScene != null)
-        {
-            _activeScene.Draw(gameTime);
-        }
-
-        base.Draw(gameTime);
+      _activeScene.Draw(gameTime);
     }
 
-    public static void ChangeScene(Scene next)
+    base.Draw(gameTime);
+  }
+
+  public static void ChangeScene(Scene next)
+  {
+    // Only set the next scene value if it is not the same
+    // instance as the currently active scene.
+    if (_activeScene != next)
     {
-        // Only set the next scene value if it is not the same
-        // instance as the currently active scene.
-        if (_activeScene != next)
-        {
-            _nextScene = next;
-        }
+      _nextScene = next;
+    }
+  }
+
+  private static void TransitionScene()
+  {
+    // If there is an active scene, dispose of it.
+    if (_activeScene != null)
+    {
+      _activeScene.Dispose();
     }
 
-    private static void TransitionScene()
+    // Force the garbage collector to collect to ensure memory is cleared.
+    GC.Collect();
+
+    // Change the currently active scene to the new scene.
+
+    _activeScene = _nextScene;
+
+    // Null out the next scene value so it does not trigger a change over and over.
+    _nextScene = null;
+
+    // If the active scene now is not null, initialize it.
+    // Remember, just like with Game, the Initialize call also calls the
+    // Scene.LoadContent
+    if (_activeScene != null)
     {
-        // If there is an active scene, dispose of it.
-        if (_activeScene != null)
-        {
-            _activeScene.Dispose();
-        }
-
-        // Force the garbage collector to collect to ensure memory is cleared.
-        GC.Collect();
-
-        // Change the currently active scene to the new scene.
-        
-        _activeScene = _nextScene;
-
-        // Null out the next scene value so it does not trigger a change over and over.
-        _nextScene = null;
-
-        // If the active scene now is not null, initialize it.
-        // Remember, just like with Game, the Initialize call also calls the
-        // Scene.LoadContent
-        if (_activeScene != null)
-        {
-            _activeScene.Initialize();
-        }
-    }  
+      _activeScene.Initialize();
+    }
+  }
 }

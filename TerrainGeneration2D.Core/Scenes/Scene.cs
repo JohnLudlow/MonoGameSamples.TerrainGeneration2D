@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 
@@ -31,12 +31,12 @@ public abstract class Scene : IDisposable
 
   public virtual void Update(GameTime gameTime)
   {
-    
+
   }
 
   public virtual void Draw(GameTime gameTime)
   {
-    
+
   }
 
   public virtual void UnloadContent()
@@ -56,7 +56,7 @@ public abstract class Scene : IDisposable
     {
       return;
     }
-    
+
     if (disposing)
     {
       UnloadContent();

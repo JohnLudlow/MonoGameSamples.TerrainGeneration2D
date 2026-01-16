@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Gum.DataTypes;
 using Gum.DataTypes.Variables;
 using Gum.Forms.Controls;
@@ -12,7 +12,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UI;
 /// <summary>
 /// A custom slider control that inherits from Gum's Slider class.
 /// </summary>
-public class OptionsSlider : Slider
+internal class OptionsSlider : Slider
 {
   // Reference to the text label that displays the slider's title
   private TextRuntime _textInstance;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Gum.DataTypes;
 using Gum.Forms.Controls;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
@@ -9,10 +9,10 @@ using MonoGameGum.GueDeriving;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UI;
 
-public class GameSceneUI : ContainerRuntime
+internal class GameSceneUI : ContainerRuntime
 {
   // The string format to use when updating the text for the score display.
-  private static readonly string _scoreFormat = "SCORE: {0:D6}";
+  private const string _scoreFormat = "SCORE: {0:D6}";
 
   // The sound effect to play for auditory feedback of the user interface.
   private SoundEffect _uiSoundEffect;
@@ -33,8 +33,8 @@ public class GameSceneUI : ContainerRuntime
 
   // The text runtime used to display the players score on the game screen.
   private TextRuntime _scoreText;
-    // The on-screen hint for controls.
-    private TextRuntime _hintText;
+  // The on-screen hint for controls.
+  private TextRuntime _hintText;
 
   /// <summary>
   /// Event invoked when the Resume button on the Pause panel is clicked.
@@ -90,22 +90,22 @@ public class GameSceneUI : ContainerRuntime
     // and add it as a child to this container
     _gameOverPanel = CreateGameOverPanel(atlas);
     AddChild(_gameOverPanel.Visual);
-}
+  }
 
-/// <summary>
-/// Updates the text on the score display.
-/// </summary>
-/// <param name="score">The score to display.</param>
-public void UpdateScoreText(int score)
-{
+  /// <summary>
+  /// Updates the text on the score display.
+  /// </summary>
+  /// <param name="score">The score to display.</param>
+  public void UpdateScoreText(int score)
+  {
     _scoreText.Text = string.Format(_scoreFormat, score);
-}
+  }
 
-/// <summary>
-/// Tells the game scene ui to show the pause panel.
-/// </summary>
-public void ShowPausePanel()
-{
+  /// <summary>
+  /// Tells the game scene ui to show the pause panel.
+  /// </summary>
+  public void ShowPausePanel()
+  {
     _pausePanel.IsVisible = true;
 
     // Give the resume button focus for keyboard/gamepad input.
@@ -113,58 +113,58 @@ public void ShowPausePanel()
 
     // Ensure the game over panel isn't visible.
     _gameOverPanel.IsVisible = false;
-}
+  }
 
-/// <summary>
-/// Tells the game scene ui to hide the pause panel.
-/// </summary>
-public void HidePausePanel()
-{
+  /// <summary>
+  /// Tells the game scene ui to hide the pause panel.
+  /// </summary>
+  public void HidePausePanel()
+  {
     _pausePanel.IsVisible = false;
-}
+  }
 
-/// <summary>
-/// Tells the game scene ui to show the game over panel.
-/// </summary>
-public void ShowGameOverPanel()
-{
+  /// <summary>
+  /// Tells the game scene ui to show the game over panel.
+  /// </summary>
+  public void ShowGameOverPanel()
+  {
     _gameOverPanel.IsVisible = true;
 
     // Give the retry button focus for keyboard/gamepad input.
-    _retryButton.IsFocused =true;
+    _retryButton.IsFocused = true;
 
     // Ensure the pause panel isn't visible.
     _pausePanel.IsVisible = false;
-}
+  }
 
-/// <summary>
-/// Tells the game scene ui to hide the game over panel.
-/// </summary>
-public void HideGameOverPanel()
-{
+  /// <summary>
+  /// Tells the game scene ui to hide the game over panel.
+  /// </summary>
+  public void HideGameOverPanel()
+  {
     _gameOverPanel.IsVisible = false;
-}
+  }
 
-/// <summary>
-/// Updates the game scene ui.
-/// </summary>
-/// <param name="gameTime">A snapshot of the timing values for the current update cycle.</param>
-public void Update(GameTime gameTime)
-{
+  /// <summary>
+  /// Updates the game scene ui.
+  /// </summary>
+  /// <param name="gameTime">A snapshot of the timing values for the current update cycle.</param>
+  public void Update(GameTime gameTime)
+  {
     GumService.Default.Update(gameTime);
-}
+  }
 
-/// <summary>
-/// Draws the game scene ui.
-/// </summary>
-public void Draw()
-{
+  /// <summary>
+  /// Draws the game scene ui.
+  /// </summary>
+  public void Draw()
+  {
     GumService.Default.Draw();
-}
+  }
 
 
-private void OnResumeButtonClicked(object sender, EventArgs args)
-{
+  private void OnResumeButtonClicked(object sender, EventArgs args)
+  {
     // Button was clicked, play the ui sound effect for auditory feedback.
     JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.Audio.PlaySoundEffect(_uiSoundEffect);
 
@@ -175,8 +175,8 @@ private void OnResumeButtonClicked(object sender, EventArgs args)
     ResumeButtonClick?.Invoke(sender, args);
   }
 
-private void OnRetryButtonClicked(object sender, EventArgs args)
-{
+  private void OnRetryButtonClicked(object sender, EventArgs args)
+  {
     // Button was clicked, play the ui sound effect for auditory feedback.
     JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.Audio.PlaySoundEffect(_uiSoundEffect);
 
@@ -187,8 +187,8 @@ private void OnRetryButtonClicked(object sender, EventArgs args)
     RetryButtonClick?.Invoke(sender, args);
   }
 
-private void OnQuitButtonClicked(object sender, EventArgs args)
-{
+  private void OnQuitButtonClicked(object sender, EventArgs args)
+  {
     // Button was clicked, play the ui sound effect for auditory feedback.
     JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.Audio.PlaySoundEffect(_uiSoundEffect);
 
@@ -197,35 +197,35 @@ private void OnQuitButtonClicked(object sender, EventArgs args)
     HideGameOverPanel();
 
     // Invoke the QuitButtonClick event.
-    if(QuitButtonClick != null)
+    if (QuitButtonClick != null)
     {
-        QuitButtonClick(sender, args);
+      QuitButtonClick(sender, args);
     }
-}
+  }
 
-private void OnElementGotFocus(object sender, EventArgs args)
-{
+  private void OnElementGotFocus(object sender, EventArgs args)
+  {
     // A ui element that can receive focus has received focus, play the
     // ui sound effect for auditory feedback.
     JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.Audio.PlaySoundEffect(_uiSoundEffect);
-}
+  }
 
 
-private TextRuntime CreateScoreText()
-{
+  private TextRuntime CreateScoreText()
+  {
     var text = new TextRuntime();
     text.Anchor(Gum.Wireframe.Anchor.TopLeft);
-    text.WidthUnits = DimensionUnitType.RelativeToChildren;    
+    text.WidthUnits = DimensionUnitType.RelativeToChildren;
     text.X = 20.0f;
     text.Y = 5.0f;
     text.FontScale = 0.25f;
     text.Text = string.Format(_scoreFormat, 0);
 
     return text;
-}
+  }
 
-private Panel CreatePausePanel(TextureAtlas atlas)
-{
+  private Panel CreatePausePanel(TextureAtlas atlas)
+  {
     var panel = new Panel();
     panel.Anchor(Gum.Wireframe.Anchor.Center);
     panel.WidthUnits = DimensionUnitType.Absolute;
@@ -278,10 +278,10 @@ private Panel CreatePausePanel(TextureAtlas atlas)
     panel.AddChild(quitButton);
 
     return panel;
-}
+  }
 
-private Panel CreateGameOverPanel(TextureAtlas atlas)
-{
+  private Panel CreateGameOverPanel(TextureAtlas atlas)
+  {
     var panel = new Panel();
     panel.Anchor(Gum.Wireframe.Anchor.Center);
     panel.WidthUnits = DimensionUnitType.Absolute;
@@ -335,10 +335,10 @@ private Panel CreateGameOverPanel(TextureAtlas atlas)
     panel.AddChild(quitButton);
 
     return panel;
-}
+  }
 
-private TextRuntime CreateHintText()
-{
+  private TextRuntime CreateHintText()
+  {
     var text = new TextRuntime();
     // Bottom-left with small padding
     text.Anchor(Gum.Wireframe.Anchor.BottomLeft);
@@ -354,7 +354,7 @@ private TextRuntime CreateHintText()
     text.Text = "F10: Settings • F11: Fullscreen • F12: Debug";
     text.WidthUnits = DimensionUnitType.RelativeToChildren;
     return text;
-}
+  }
 
 
 }

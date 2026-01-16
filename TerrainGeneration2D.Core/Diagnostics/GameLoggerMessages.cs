@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;

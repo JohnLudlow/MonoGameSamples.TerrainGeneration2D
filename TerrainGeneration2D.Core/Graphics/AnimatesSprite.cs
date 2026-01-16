@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.Xna.Framework;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
@@ -36,7 +36,7 @@ public class AnimatedSprite : Sprite
     {
       _elapsed -= Animation.Delay;
       _currentFrame++;
-      
+
       if (_currentFrame >= Animation.Frames.Count)
       {
         _currentFrame = 0;

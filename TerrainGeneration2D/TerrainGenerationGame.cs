@@ -36,11 +36,11 @@ internal sealed class TerrainGenerationGame : CoreGame
       GraphicsDevice.PresentationParameters.BackBufferHeight);
 
     if (Audio is null) throw new InvalidOperationException($"Unable to start game if {nameof(Audio)} is null");
-    
+
     Audio.SongVolume = 0;
     Audio.PlaySong(_themeSong);
 
-    InitializeGum();    
+    InitializeGum();
 
     ChangeScene(new GameScene());
     GameLoggerMessages.MonoGameInitEnd(_log);
@@ -93,14 +93,14 @@ internal sealed class TerrainGenerationGame : CoreGame
 
   private void InitializeGum()
   {
-    if (Content is null) throw new InvalidOperationException($"Unable to start game if {nameof(Content)} is null");    
+    if (Content is null) throw new InvalidOperationException($"Unable to start game if {nameof(Content)} is null");
 
     GumService.Default.Initialize(this, DefaultVisualsVersion.V3);
 
     GumService.Default.ContentLoader.XnaContentManager = Content;
     FrameworkElement.KeyboardsForUiControl.Add(GumService.Default.Keyboard);
     FrameworkElement.GamePadsForUiControl.AddRange(GumService.Default.Gamepads);
-    
+
     FrameworkElement.TabReverseKeyCombos.Add(
       new KeyCombo { PushedKey = Microsoft.Xna.Framework.Input.Keys.Up }
     );

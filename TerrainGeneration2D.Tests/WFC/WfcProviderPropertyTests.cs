@@ -1,4 +1,4 @@
-namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC;
+﻿namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC;
 
 public class WfcProviderPropertyTests
 {

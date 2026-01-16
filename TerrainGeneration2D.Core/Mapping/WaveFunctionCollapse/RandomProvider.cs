@@ -1,4 +1,4 @@
-namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
+﻿namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 
 /// <summary>
 /// Abstraction over randomness to enable deterministic testing and mocking.

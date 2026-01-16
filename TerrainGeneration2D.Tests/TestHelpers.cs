@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests;
@@ -48,7 +48,7 @@ public static class TestHelpers
   {
     ArgumentNullException.ThrowIfNull(obj);
     ArgumentException.ThrowIfNullOrEmpty(fieldName);
-    
+
     var field = obj.GetType()
         .GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
     return field != null ? (T?)field.GetValue(obj) : default;
@@ -59,7 +59,7 @@ public static class TestHelpers
     ArgumentNullException.ThrowIfNull(obj);
     ArgumentException.ThrowIfNullOrEmpty(methodName);
     ArgumentNullException.ThrowIfNull(parameters);
-    
+
     var method = obj.GetType()
             .GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
     return method?.Invoke(obj, parameters);

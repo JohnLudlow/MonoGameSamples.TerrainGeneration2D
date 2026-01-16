@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework.Input;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Input;
 
@@ -19,8 +19,8 @@ public class KeyboardInfo
   /// </summary>
   public void Update()
   {
-      PreviousState = CurrentState;
-      CurrentState = Keyboard.GetState();
+    PreviousState = CurrentState;
+    CurrentState = Keyboard.GetState();
   }
 
   /// <summary>

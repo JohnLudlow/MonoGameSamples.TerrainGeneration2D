@@ -1,4 +1,4 @@
-// Integration with boundary constraints for chunk seaming
+﻿// Integration with boundary constraints for chunk seaming
 // using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 
