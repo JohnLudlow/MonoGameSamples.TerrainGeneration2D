@@ -72,6 +72,14 @@ jobs:
 
         dotnet build @dotnetParams
 
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: |
+          **/bin/**
+          **/obj/**
+
     - name: Tag Commit
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       shell: pwsh
@@ -93,6 +101,12 @@ jobs:
       with:
         lfs: true
         fetch-depth: 0
+    
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+        path: .
     
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v4.2.0
@@ -124,17 +138,6 @@ jobs:
 
     - name: Restore dependencies
       run: dotnet restore
-
-    - name: Build
-      shell: pwsh
-      run: |
-        $dotnetParams = @(
-          "--no-restore",
-          "/m:1",
-          "--configuration", "$env:CONFIGURATION"
-        )
-
-        dotnet build @dotnetParams
 
     - name: Test
       shell: pwsh
@@ -210,6 +213,12 @@ jobs:
         lfs: true
         fetch-depth: 0
 
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+        path: .
+    
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -223,25 +232,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      shell: pwsh
-      run: |
-        $dotnetParams = @(
-          "--no-restore",
-          "/m:1",
-          "--configuration", "$env:CONFIGURATION"
-        )
-
-        dotnet build @dotnetParams
-
     - name: Run Benchmarks Baseline
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       shell: pwsh
       run: |
         $dotnetParams = @(
+          "--no-build",
           "--configuration", "$env:CONFIGURATION",
           "--project", "TerrainGeneration2D.Benchmarks/TerrainGeneration2D.Benchmarks.csproj",
           "--",
