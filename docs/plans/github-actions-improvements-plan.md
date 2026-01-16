@@ -8,13 +8,13 @@ This plan outlines improvements to the GitHub Actions workflows for the MonoGame
 
 | Term | Meaning | Reference |
 | ---- | ------- | --------- |
-| Semantic Versioning (SemVer) | A versioning scheme using MAJOR.MINOR.PATCH format, where increments indicate breaking changes, new features, or bug fixes. | https://semver.org/ |
-| Code Coverage | The percentage of code lines executed during tests, measured to ensure test adequacy. | https://en.wikipedia.org/wiki/Code_coverage |
+| Semantic Versioning (SemVer) | A versioning scheme using MAJOR.MINOR.PATCH format, where increments indicate breaking changes, new features, or bug fixes. | <https://semver.org/> |
+| Code Coverage | The percentage of code lines executed during tests, measured to ensure test adequacy. | <https://en.wikipedia.org/wiki/Code_coverage> |
 | Auto-reviewing | Automated processes that review code changes for quality, style, and potential issues before human review. | N/A |
-| CI/CD | Continuous Integration/Continuous Deployment, practices for automating build, test, and deployment. | https://en.wikipedia.org/wiki/CI/CD |
-| Pull Request (PR) | A GitHub feature for proposing changes, allowing review and discussion. | https://docs.github.com/en/pull-requests |
-| Artifact | Files generated during a workflow run, such as test reports or build outputs. | https://docs.github.com/en/actions/learn-github-actions/contexts#artifacts |
-| Linting | Static analysis to check code for style, errors, and best practices. | https://en.wikipedia.org/wiki/Lint_(software) |
+| CI/CD | Continuous Integration/Continuous Deployment, practices for automating build, test, and deployment. | <https://en.wikipedia.org/wiki/CI/CD> |
+| Pull Request (PR) | A GitHub feature for proposing changes, allowing review and discussion. | <https://docs.github.com/en/pull-requests> |
+| Artifact | Files generated during a workflow run, such as test reports or build outputs. | <https://docs.github.com/en/actions/learn-github-actions/contexts#artifacts> |
+| Linting | Static analysis to check code for style, errors, and best practices. | <https://en.wikipedia.org/wiki/Lint_(software)> |
 
 ## Requirements
 
