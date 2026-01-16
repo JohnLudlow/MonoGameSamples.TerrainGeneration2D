@@ -7,7 +7,6 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: Build and Test v${{ steps.version_step.outputs.semVer }}
     strategy:
       matrix:
         os: [windows-latest]
@@ -40,6 +39,12 @@ jobs:
       run: |
         "AssemblyVersion=${{ steps.version_step.outputs.assemblySemVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
         "AssemblyFileVersion=${{ steps.version_step.outputs.assemblySemFileVer }}" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+    - name: Update Run Name
+      shell: pwsh
+      run: gh run rename ${{ github.run_id }} "Build and Test v${{ steps.version_step.outputs.semVer }}"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
