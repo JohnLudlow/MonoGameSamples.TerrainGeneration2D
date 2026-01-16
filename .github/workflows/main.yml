@@ -20,6 +20,11 @@ jobs:
       semVer: ${{ steps.version_step.outputs.semVer }}
       
     steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true
+        fetch-depth: 0
+
     - uses: ./.github/actions/setup
 
     - uses: ./.github/actions/build
@@ -60,6 +65,11 @@ jobs:
       CONFIGURATION: Release
 
     steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true
+        fetch-depth: 0
+
     - uses: ./.github/actions/benchmark
 
   lint-cs:
@@ -104,4 +114,9 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: windows-latest
     steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true
+        fetch-depth: 0
+              
     - uses: ./.github/actions/pr-size
