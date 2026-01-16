@@ -92,7 +92,7 @@ jobs:
     - name: Upload coverage report artifact
       uses: actions/upload-artifact@v4
       with:
-        name: CoverageReport-${{ steps.version_step.outputs.semVer }} # Artifact name        
+        name: CoverageReport-${{ steps.version_step.outputs.GitVersion_FullSemVer }} # Artifact name        
         path: coverage 
         
     - name: Publish coverage in build summary
