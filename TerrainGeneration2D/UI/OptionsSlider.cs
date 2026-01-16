@@ -12,7 +12,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UI;
 /// <summary>
 /// A custom slider control that inherits from Gum's Slider class.
 /// </summary>
-internal class OptionsSlider : Slider
+internal sealed class OptionsSlider : Slider
 {
   // Reference to the text label that displays the slider's title
   private TextRuntime _textInstance;
@@ -25,7 +25,7 @@ internal class OptionsSlider : Slider
   /// </summary>
   public string Text
   {
-    get => _textInstance.Text;
+    get => _textInstance.Text ?? string.Empty;
     set => _textInstance.Text = value;
   }
 
@@ -218,9 +218,11 @@ internal class OptionsSlider : Slider
     IsEnabled = true;
 
     // Add event handlers
+#pragma warning disable CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
     Visual.RollOn += HandleRollOn;
     ValueChanged += HandleValueChanged;
     ValueChangedByUi += HandleValueChangedByUi;
+#pragma warning restore CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
   }
 
   /// <summary>

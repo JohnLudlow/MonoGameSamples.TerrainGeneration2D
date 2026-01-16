@@ -28,7 +28,9 @@ public class BoundaryConstraintProvider : IBoundaryConstraintProvider
       // Get tiles along neighbor's bottom row (y = ChunkSize-1)
       for (int x = 0; x < Chunk.ChunkSize; x++)
       {
+#pragma warning disable CA1062 // Validate arguments of public methods
         var tileId = neighborChunk[x, Chunk.ChunkSize - 1];
+#pragma warning restore CA1062 // Validate arguments of public methods
         constraints[x] = new BoundaryConstraint
         {
           Position = x,
@@ -63,6 +65,8 @@ public class BoundaryConstraintProvider : IBoundaryConstraintProvider
   /// <param name="constraints">The boundary constraints to apply.</param>
   public void ApplyConstraints(HashSet<int>?[][] domains, BoundaryConstraint[] constraints)
   {
+    System.ArgumentNullException.ThrowIfNull(constraints);
+
     foreach (var constraint in constraints)
     {
       int x, y;
@@ -91,11 +95,13 @@ public class BoundaryConstraintProvider : IBoundaryConstraintProvider
       }
 
       // Constrain domain to only the required tile (handle nullable arrays)
+#pragma warning disable CA1062 // Validate arguments of public methods
       if (domains[x][y] != null)
       {
         domains[x][y]!.Clear();
         domains[x][y]!.Add(constraint.RequiredTileId);
       }
+#pragma warning restore CA1062 // Validate arguments of public methods
     }
   }
 }

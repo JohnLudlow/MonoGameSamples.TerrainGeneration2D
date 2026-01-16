@@ -74,10 +74,12 @@ internal sealed class TerrainEventCounterListener : EventListener
   {
     if (eventSource?.Name == ProviderName)
     {
+#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
       EnableEvents(eventSource, EventLevel.Informational, EventKeywords.All, new Dictionary<string, string>
             {
                 { "EventCounterIntervalSec", "1" }
             });
+#pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
     }
   }
 

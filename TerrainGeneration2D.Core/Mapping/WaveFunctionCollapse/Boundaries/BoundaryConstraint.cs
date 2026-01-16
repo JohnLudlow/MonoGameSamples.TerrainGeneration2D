@@ -1,4 +1,5 @@
-﻿using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
+﻿using System;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.Boundaries;
 
@@ -11,14 +12,14 @@ public struct BoundaryConstraint : System.IEquatable<BoundaryConstraint>
   public int RequiredTileId { get; init; }  // Tile that must be placed
   public Direction Side { get; init; }      // Which boundary edge this applies to
 
-  public override bool Equals(object obj)
+  public readonly override bool Equals(object? obj)
   {
-    throw new System.NotImplementedException();
+    return false;
   }
 
   public override int GetHashCode()
   {
-    throw new System.NotImplementedException();
+    return HashCode.Combine(Position, RequiredTileId, Side);
   }
 
   public static bool operator ==(BoundaryConstraint left, BoundaryConstraint right)
@@ -31,8 +32,8 @@ public struct BoundaryConstraint : System.IEquatable<BoundaryConstraint>
     return !(left == right);
   }
 
-  public bool Equals(BoundaryConstraint other)
+  public readonly bool Equals(BoundaryConstraint other)
   {
-    throw new System.NotImplementedException();
+    return this == other;
   }
 }

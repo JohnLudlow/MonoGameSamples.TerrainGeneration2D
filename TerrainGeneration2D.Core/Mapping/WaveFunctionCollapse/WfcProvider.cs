@@ -45,7 +45,9 @@ public class WfcProvider
   private readonly TerrainRuleConfiguration _config;
   private readonly IHeightProvider _heightProvider;
   private readonly Point _chunkOrigin;
+#pragma warning disable CA1859 // Use concrete types when possible for improved performance
   private readonly IRuleTable _ruleTable;
+#pragma warning restore CA1859 // Use concrete types when possible for improved performance
   private bool _collapsed;
 
   /// <summary>
@@ -103,7 +105,9 @@ public class WfcProvider
     }
     _collapsed = false;
 
+#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
     Propagator = new AC3Propagator(_ruleTable, _possibilities);
+#pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
 
     _domainEntropy = new DomainEntropyProvider();
     _shannonEntropy = new ShannonEntropyProvider();

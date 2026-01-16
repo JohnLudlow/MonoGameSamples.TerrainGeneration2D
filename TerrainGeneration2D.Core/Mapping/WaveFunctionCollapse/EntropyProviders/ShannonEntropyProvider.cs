@@ -11,9 +11,14 @@ public sealed class ShannonEntropyProvider : ICellEntropyProvider
 {
   public double GetScore(int x, int y, HashSet<int>?[][] possibilities, int[][] output, WfcWeightConfiguration weightConfig)
   {
+    ArgumentNullException.ThrowIfNull(output);
+    ArgumentNullException.ThrowIfNull(weightConfig);
+
+#pragma warning disable CA1062 // Validate arguments of public methods
     var poss = possibilities[x][y];
     if (poss == null || poss.Count <= 1)
       return double.PositiveInfinity;
+#pragma warning restore CA1062 // Validate arguments of public methods
 
     // Collect already-collapsed neighbors
     var neighbors = new List<int>(4);
@@ -21,6 +26,7 @@ public sealed class ShannonEntropyProvider : ICellEntropyProvider
     if (y < output[x].Length - 1 && output[x][y + 1] != -1) neighbors.Add(output[x][y + 1]);
     if (x > 0 && output[x - 1][y] != -1) neighbors.Add(output[x - 1][y]);
     if (x < output.Length - 1 && output[x + 1][y] != -1) neighbors.Add(output[x + 1][y]);
+
 
     // Compute weights using neighbor-match boost
     var weights = new List<int>(poss.Count);

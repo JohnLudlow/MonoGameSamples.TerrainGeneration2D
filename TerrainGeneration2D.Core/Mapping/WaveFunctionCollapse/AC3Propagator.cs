@@ -87,7 +87,9 @@ public class AC3Propagator
   /// <summary>
   /// Gets the neighbor position in the specified direction.
   /// </summary>
+#pragma warning disable CA1822 // Mark members as static
   private (int x, int y) GetNeighborPosition(int x, int y, Direction direction)
+#pragma warning restore CA1822 // Mark members as static
   {
     return direction switch
     {
@@ -125,7 +127,9 @@ public class AC3Propagator
   /// <summary>
   /// Gets the opposite direction for constraint checking.
   /// </summary>
+#pragma warning disable CA1822 // Mark members as static
   private Direction GetOppositeDirection(Direction direction)
+#pragma warning restore CA1822 // Mark members as static
   {
     return direction switch
     {

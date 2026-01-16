@@ -22,17 +22,21 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Scenes;
 /// <summary>
 /// Main game scene with camera, chunked tilemap, and controls
 /// </summary>
-internal class GameScene : Scene
+internal sealed class GameScene : Scene
 {
   private const int MapSizeInTiles = 2048;
+#pragma warning disable CA1852
   private const int MasterSeed = 12345;
+#pragma warning restore CA1852
   private const float CameraSpeed = 400f; // pixels per second
 
   private ChunkedTilemap? _chunkedTilemap;
   private Camera2D? _camera;
   private TooltipManager? _tooltipManager;
   private Vector2? _lastMouseDragPosition;
+#pragma warning disable CA2213 // Disposable fields should be disposed
   private Texture2D? _debugPixel;
+#pragma warning restore CA2213 // Disposable fields should be disposed
   private bool _showDebugOverlay;
   private IReadOnlyCollection<ChunkedTilemap.ActiveChunkInfo> _activeChunkSnapshot = Array.Empty<ChunkedTilemap.ActiveChunkInfo>();
   private readonly ILogger _log = Log.Create<GameScene>();
@@ -40,7 +44,9 @@ internal class GameScene : Scene
   private RuntimeSettingsPanel? _settingsPanel;
   private bool _showSettings;
 
+#pragma warning disable CS8618
   private GameSceneUI _ui;
+#pragma warning restore CS8618
 
   public override void Initialize()
   {
@@ -125,6 +131,11 @@ internal class GameScene : Scene
 
     _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDir, useWaveFunctionCollapse: true, terrainRuleConfiguration: terrainConfig, heightMapConfiguration: heightConfig, weightConfig: weightConfig, heuristicsConfig: heuristics, logger: _log, wfcTimeBudgetMs: timeBudgetMs);
 
+    if (GumService.Default?.ContentLoader?.XnaContentManager is null)
+    {
+      throw new InvalidOperationException("Unable to fetch GUM XnaContentManager");
+    }
+
     // Settings UI
     var content = GumService.Default.ContentLoader.XnaContentManager;
     var atlas = TextureAtlas.FromFile(content, "images/atlas-definition.xml");
@@ -141,9 +152,9 @@ internal class GameScene : Scene
     _settingsPanel.AddToRoot();
 
     // Create camera
-    if (JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.GraphicsDevice != null)
+    if (JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.GraphicsDevice != null)
     {
-      _camera = new Camera2D(JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.GraphicsDevice.Viewport);
+      _camera = new Camera2D(JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.GraphicsDevice.Viewport);
 
       // Start at center of map
       var centerTile = MapSizeInTiles / 2;
@@ -157,7 +168,7 @@ internal class GameScene : Scene
       _tooltipManager.Initialize();
     }
 
-    var graphicsDevice = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.GraphicsDevice;
+    var graphicsDevice = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.GraphicsDevice;
     if (graphicsDevice != null)
     {
       _debugPixel = new Texture2D(graphicsDevice, 1, 1);
@@ -184,7 +195,7 @@ internal class GameScene : Scene
     // Handle fullscreen toggle
     if (GameController.ToggleFullscreen())
     {
-      var graphics = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.Graphics;
+      var graphics = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.Graphics;
       if (graphics != null)
       {
         graphics.IsFullScreen = !graphics.IsFullScreen;
@@ -253,7 +264,7 @@ internal class GameScene : Scene
   {
     GameLoggerMessages.SceneDrawBegin(_log);
     // Clear the back buffer
-    JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.GraphicsDevice?.Clear(Color.Black);
+    JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.GraphicsDevice?.Clear(Color.Black);
 
     if (_camera == null || _chunkedTilemap == null)
     {
@@ -261,7 +272,7 @@ internal class GameScene : Scene
       return;
     }
 
-    var spriteBatch = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.SpriteBatch;
+    var spriteBatch = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.SpriteBatch;
     if (spriteBatch == null)
     {
       base.Draw(gameTime);

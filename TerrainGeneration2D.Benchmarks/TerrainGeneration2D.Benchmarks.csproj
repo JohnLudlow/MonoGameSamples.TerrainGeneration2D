@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <NoWarn>CA1515;</NoWarn>
+    <NoWarn>CA1515;CA1051;CA1822;CA1852;SYSLIB0050;</NoWarn>
     <RootNamespace>JohnLudlow.MonoGameSamples.TerrainGeneration2D.Benchmarks</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

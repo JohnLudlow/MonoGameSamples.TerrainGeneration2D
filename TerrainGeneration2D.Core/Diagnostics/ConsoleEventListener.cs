@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
+using System.Globalization;
 using System.Linq;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
@@ -12,7 +13,7 @@ public sealed class ConsoleEventListener : EventListener
 {
   protected override void OnEventSourceCreated(EventSource eventSource)
   {
-    if (eventSource.Name == "JohnLudlow.TerrainGeneration2D.Performance")
+    if (eventSource?.Name == "JohnLudlow.TerrainGeneration2D.Performance")
     {
       EnableEvents(eventSource, EventLevel.Verbose, EventKeywords.All, new Dictionary<string, string?>
       {
@@ -23,7 +24,7 @@ public sealed class ConsoleEventListener : EventListener
 
   protected override void OnEventWritten(EventWrittenEventArgs eventData)
   {
-    if (eventData.EventName == "EventCounters")
+    if (eventData?.EventName == "EventCounters")
     {
       for (var i = 0; i < eventData.Payload?.Count; i++)
       {
@@ -50,13 +51,13 @@ public sealed class ConsoleEventListener : EventListener
     }
     else
     {
-      var message = eventData.Message;
-      if (message != null && eventData.Payload != null && eventData.Payload.Count > 0)
+      var message = eventData?.Message;
+      if (message != null && eventData?.Payload != null && eventData.Payload.Count > 0)
       {
-        message = string.Format(message, eventData.Payload.ToArray());
+        message = string.Format(CultureInfo.InvariantCulture, message, eventData.Payload?.ToArray() ?? []);
       }
 
-      var level = eventData.Level switch
+      var level = eventData?.Level switch
       {
         EventLevel.Verbose => "VERBOSE",
         EventLevel.Informational => "INFO",
@@ -66,7 +67,7 @@ public sealed class ConsoleEventListener : EventListener
         _ => "LOG"
       };
 
-      Console.WriteLine($"[{level}] {eventData.EventName}: {message}");
+      Console.WriteLine($"[{level}] {eventData?.EventName}: {message}");
     }
   }
 }

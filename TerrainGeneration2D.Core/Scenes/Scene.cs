@@ -11,9 +11,9 @@ public abstract class Scene : IDisposable
 
   protected Scene()
   {
-    Content = new ContentManager(Core.Content.ServiceProvider)
+    Content = new ContentManager(GameCore.Content.ServiceProvider)
     {
-      RootDirectory = Core.Content.RootDirectory
+      RootDirectory = GameCore.Content.RootDirectory
     };
   }
 

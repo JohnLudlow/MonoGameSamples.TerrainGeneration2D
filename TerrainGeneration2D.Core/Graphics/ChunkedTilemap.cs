@@ -31,7 +31,9 @@ public class ChunkedTilemap
   private readonly HeightMapConfiguration _heightMapConfiguration;
   private readonly WfcWeightConfiguration _wfcWeightConfig;
   private readonly HeuristicsConfiguration _heuristicsConfig;
+#pragma warning disable CA1859 // Use concrete types when possible for improved performance
   private readonly IHeightProvider _heightProvider;
+#pragma warning restore CA1859 // Use concrete types when possible for improved performance
   private readonly bool _useWaveFunctionCollapse;
   private readonly ILogger? _logger;
   private int _wfcTimeBudgetMs;
@@ -218,6 +220,7 @@ public class ChunkedTilemap
     TerrainPerformanceEventSource.Log.ChunkLoadBegin(chunkCoords.X, chunkCoords.Y);
     var loaded = false;
 
+#pragma warning disable CA1031 // Do not catch general exception types
     try
     {
       var filePath = GetChunkFilePath(chunkCoords);
@@ -272,6 +275,7 @@ public class ChunkedTilemap
     {
       TerrainPerformanceEventSource.Log.ChunkLoadEnd(chunkCoords.X, chunkCoords.Y, loaded);
     }
+#pragma warning restore CA1031 // Do not catch general exception types
   }
 
   /// <summary>
@@ -288,6 +292,7 @@ public class ChunkedTilemap
     TerrainPerformanceEventSource.Log.ChunkSaveBegin(chunkPos.X, chunkPos.Y);
     var success = false;
 
+#pragma warning disable CA1031 // Do not catch general exception types
     try
     {
       var filePath = GetChunkFilePath(chunkPos);
@@ -321,6 +326,7 @@ public class ChunkedTilemap
     {
       TerrainPerformanceEventSource.Log.ChunkSaveEnd(chunkPos.X, chunkPos.Y, success);
     }
+#pragma warning restore CA1031 // Do not catch general exception types
   }
 
   /// <summary>
@@ -459,7 +465,9 @@ public class ChunkedTilemap
         .ToList();
   }
 
+#pragma warning disable CA1034 // Nested types should not be visible
   public readonly record struct ActiveChunkInfo(Point ChunkPosition, Point WorldTilePosition, bool IsDirty);
+#pragma warning restore CA1034 // Nested types should not be visible
 
   public int WfcTimeBudgetMs
   {
@@ -514,7 +522,9 @@ public class ChunkedTilemap
     }
     foreach (var file in Directory.EnumerateFiles(_saveDirectory, "map_*_*.dat"))
     {
+#pragma warning disable CA1031 // Do not catch general exception types
       try { File.Delete(file); } catch { /* ignore */ }
+#pragma warning restore CA1031 // Do not catch general exception types
     }
   }
 }

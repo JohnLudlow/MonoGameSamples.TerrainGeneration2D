@@ -298,7 +298,9 @@ internal sealed class RuntimeSettingsPanel : Panel
     _regenerateVisible?.Invoke();
   }
 
+#pragma warning disable CA1822 // Mark members as static
   private AnimatedButton CreateToggle(TextureAtlas atlas, string label, float x, float y)
+#pragma warning restore CA1822 // Mark members as static
   {
     var b = new AnimatedButton(atlas);
     b.X = x;

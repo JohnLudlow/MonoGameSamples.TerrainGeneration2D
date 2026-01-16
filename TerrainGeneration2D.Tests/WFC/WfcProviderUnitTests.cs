@@ -98,7 +98,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
               new TerrainRuleConfiguration(),
               default,
               default,
-              null
+              null!
             );
 
             if (tile.EvaluateRules(ctx))
@@ -128,7 +128,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
 
       // Collapse (0,0) to 0
       domains[0][0] = null;
-      var propagator = new AC3Propagator(ruleTable, domains);
+      var propagator = new AC3Propagator(ruleTable, domains!);
       // Act: propagate from (0,0)
       var result = propagator.PropagateFrom(0, 0, 0);
       // Assert: No contradiction, domains reduced
@@ -138,7 +138,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
     }
 
     // Minimal stub for deterministic random
-    private class TestRandomProvider : IRandomProvider
+    private sealed class TestRandomProvider : IRandomProvider
     {
       public int NextInt() => 0;
       public int NextInt(int maxValue) => 0;

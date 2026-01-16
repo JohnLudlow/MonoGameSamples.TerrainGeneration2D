@@ -9,7 +9,9 @@ public class Chunk
 {
   public const int ChunkSize = 64;
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
   private readonly int[,] _tiles;
+#pragma warning restore CA1814 // Prefer jagged arrays over multidimensional
   private bool _isDirty;
 
   /// <summary>
@@ -29,7 +31,9 @@ public class Chunk
   public Chunk(Point chunkPosition)
   {
     ChunkPosition = chunkPosition;
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
     _tiles = new int[ChunkSize, ChunkSize];
+#pragma warning restore CA1814 // Prefer jagged arrays over multidimensional
     _isDirty = false;
   }
 
@@ -49,7 +53,11 @@ public class Chunk
   /// <summary>
   /// Gets the tile array (for serialization)
   /// </summary>
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+#pragma warning disable CA1819 // Prefer jagged arrays over multidimensional
   public int[,] Tiles => _tiles;
+#pragma warning restore CA1819 // Prefer jagged arrays over multidimensional
+#pragma warning restore CA1814 // Prefer jagged arrays over multidimensional
 
   /// <summary>
   /// Gets the world tile position of the top-left corner of this chunk

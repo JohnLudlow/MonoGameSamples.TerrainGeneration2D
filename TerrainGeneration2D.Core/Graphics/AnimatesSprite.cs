@@ -8,7 +8,7 @@ public class AnimatedSprite : Sprite
   private int _currentFrame;
   private TimeSpan _elapsed;
 
-  public AnimatedSprite(TextureRegion textureRegion, Animation animation) : base(textureRegion)
+  public AnimatedSprite(TextureRegion textureRegion, GameAnimation animation) : base(textureRegion)
   {
     Animation = animation ?? throw new ArgumentNullException(nameof(animation));
 
@@ -16,7 +16,7 @@ public class AnimatedSprite : Sprite
     _elapsed = TimeSpan.Zero;
   }
 
-  public Animation Animation
+  public GameAnimation Animation
   {
     get;
     set

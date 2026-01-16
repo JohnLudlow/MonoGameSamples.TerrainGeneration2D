@@ -40,8 +40,8 @@ internal sealed class TooltipManager
 
     // Add a background rectangle
     var background = new ColoredRectangleRuntime();
-    background.WidthUnits = DimensionUnitType.RelativeToContainer;
-    background.HeightUnits = DimensionUnitType.RelativeToContainer;
+    background.WidthUnits = DimensionUnitType.RelativeToParent;
+    background.HeightUnits = DimensionUnitType.RelativeToParent;
     background.Width = 0;
     background.Height = 0;
     background.Color = new Color(0, 0, 0, 200); // Semi-transparent black

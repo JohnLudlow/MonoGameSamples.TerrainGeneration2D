@@ -13,7 +13,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 public class TextureAtlas
 {
   private readonly Dictionary<string, TextureRegion> _regions;
-  private readonly Dictionary<string, Animation> _animations;
+  private readonly Dictionary<string, GameAnimation> _animations;
   public Texture2D Texture { get; set; }
 
 
@@ -57,7 +57,7 @@ public class TextureAtlas
   /// </summary>
   /// <param name="animationName">The name of the animation to add.</param>
   /// <param name="animation">The animation to add.</param>
-  public void AddAnimation(string animationName, Animation animation)
+  public void AddAnimation(string animationName, GameAnimation animation)
   {
     _animations.Add(animationName, animation);
   }
@@ -67,7 +67,7 @@ public class TextureAtlas
   /// </summary>
   /// <param name="animationName">The name of the animation to retrieve.</param>
   /// <returns>The animation with the specified name.</returns>
-  public Animation GetAnimation(string animationName)
+  public GameAnimation GetAnimation(string animationName)
   {
     return _animations[animationName];
   }
@@ -195,7 +195,7 @@ public class TextureAtlas
           }
         }
 
-        var animation = new Animation(frames, delay);
+        var animation = new GameAnimation(frames, delay);
         atlas?.AddAnimation(name ?? throw new XmlException("Animation element is missing required name attribute."), animation);
       }
     }

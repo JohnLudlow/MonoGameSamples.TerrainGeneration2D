@@ -11,9 +11,9 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D;
 /// </summary>
 internal static class GameController
 {
-  private static KeyboardInfo s_keyboard => JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.Input.Keyboard;
-  private static GamePadInfo s_gamePad => JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.Input.GamePads.ElementAt((int)PlayerIndex.One);
-  private static MouseInfo s_mouse => JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Core.Input.Mouse;
+  private static KeyboardInfo s_keyboard => JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.Input.Keyboard;
+  private static GamePadInfo s_gamePad => JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.Input.GamePads.ElementAt((int)PlayerIndex.One);
+  private static MouseInfo s_mouse => JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.Input.Mouse;
 
   /// <summary>
   /// Returns true if the player has triggered the "move up" action.
