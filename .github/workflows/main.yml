@@ -127,6 +127,7 @@ jobs:
 
   pr-size:
     if: github.event_name == 'pull_request'
+    permissions: read-all      
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v5
