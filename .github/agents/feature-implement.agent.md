@@ -2,7 +2,7 @@
 description: Take a planned feature and implement it
 name: FeatureImplementer
 tools: ['vscode/runCommand', 'execute/runInTerminal', 'read', 'edit', 'search', 'web', 'agent', 'todo']
-model: Claude Sonnet 4
+model: GPT-4.1 (copilot)
 handoffs:
   - label: Document Implementation
     agent: ImplementationDocumenter

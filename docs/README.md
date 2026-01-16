@@ -26,6 +26,7 @@ Welcome to the documentation index. Key entries:
 ## Plans
 
 - Wave Function Collapse Completion: [docs/plans/wfc-completion-plan.md](plans/wfc-completion-plan.md)
+- GitHub Actions Improvements: [docs/plans/github-actions-improvements-plan.md](plans/github-actions-improvements-plan.md)
 
 ## Features
 

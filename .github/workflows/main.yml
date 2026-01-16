@@ -24,22 +24,15 @@ jobs:
       shell: pwsh
       run: |
         pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/check-doc-links.ps1
-        
-    - name: Generate Workfloew revsion
-      shell: pwsh
-      id: get_buildrev
-      run: |
-        # Count the runs for the current workflow that were queued today
-        $date = get-date 
-        
-        $rev_suffix=$(gh run list --limit 100 --workflow '${{ github.workflow }}' --json createdAt |  jq -r --arg DATE "$($date.ToString('yyyy-MM-d'))" '[.[] | select(.createdAt | startswith($DATE))] | length ')
-        $rev = "$env:REV_PREFIX.$($date.ToString('yyyyMMdd')).$rev_suffix"
 
-        write-host "Revision: $rev"
-        "AssemblyVersion=$env:REV_PREFIX" >> $env:GITHUB_ENV
-        "AssemblyFileVersion=$rev"        >> $env:GITHUB_ENV
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v4.2.0
+      with:
+        versionSpec: '6.4.x'
+
+    - name: Determine Version
+      id: version_step # step id used as a reference for output values
+      uses: gittools/actions/gitversion/execute@v4.2.0
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
