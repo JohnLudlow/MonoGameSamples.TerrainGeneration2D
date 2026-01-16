@@ -204,12 +204,11 @@ This null-based design requires careful consideration when interfacing with comp
 
 ## Implementation guide
 
-
 ### Child Feature Plans
 
-- [Plugin Architecture](plugin-architecture.md)
-- [Library Abstraction for Non-Tile Domains](library-abstraction.md)
-- [Comprehensive Property-Based and Performance Regression Tests](property-and-performance-tests.md)
+- [Plugin Architecture](wfc-completion-plan/plugin-architecture.md)
+- [Library Abstraction for Non-Tile Domains](wfc-completion-plan/library-abstraction.md)
+- [Comprehensive Property-Based and Performance Regression Tests](wfc-completion-plan/property-and-performance-tests.md)
 
 Detailed step-by-step implementation guide following Test Driven Development principles where applicable, leading with minimal breaking tests, followed by minimal changes to fix tests, followed by refactor, repeating until the feature is complete.
 
@@ -658,9 +657,9 @@ public class WfcProvider
 - ✅ Diagnostics: performance event source, chunk save/load counters, and debug overlay
 - ✅ Extensive XML documentation for public APIs and non-trivial methods
 - ✅ Unit and integration tests for core WFC and chunking logic
-- ❌ **Missing: [Full plugin architecture for entropy/constraint providers](plugin-architecture.md)** (interfaces present, not fully pluggable)
-- ❌ **Missing: [Library abstraction for non-tile domains](library-abstraction.md)** (currently terrain-specific)
-- ❌ **Missing: [Comprehensive property-based and performance regression tests](property-and-performance-tests.md)** (coverage improving, not at target)
+- ❌ **Missing: [Full plugin architecture for entropy/constraint providers](wfc-completion-plan/plugin-architecture.md)** (interfaces present, not fully pluggable)
+- ❌ **Missing: [Library abstraction for non-tile domains](wfc-completion-plan/library-abstraction.md)** (currently terrain-specific)
+- ❌ **Missing: [Comprehensive property-based and performance regression tests](wfc-completion-plan/property-and-performance-tests.md)** (coverage improving, not at target)
 
 ### Phase 2: Chunk Seam Consistency
 

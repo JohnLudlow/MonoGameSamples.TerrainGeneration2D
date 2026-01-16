@@ -125,6 +125,7 @@ This snippet illustrates how candidate weights and probabilities affect entropy 
 This demonstrates why context-aware weighting helps the solver prioritize cells with obvious choices, stabilizing propagation and reducing backtracking.
 
 Example:
+
 ```plain
 Domain candidates: {A, B, C}
 Weights (contextual): {8, 1, 1}
@@ -306,6 +307,7 @@ int ChooseTile(List<(int tile, int weight)> weightedOptions)
 ```
 
 ## WfcProvider Notes
+
 ## How PrecomputedRuleTable Works
 
 The `PrecomputedRuleTable` (see [PrecomputedRuletable.cs](../../../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/PrecomputedRuletable.cs)) is a performance optimization for constraint checking in WFC. Instead of evaluating tile adjacency rules at runtime for every propagation step, it builds a lookup table during initialization:
