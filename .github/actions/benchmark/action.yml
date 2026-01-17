@@ -67,7 +67,14 @@ runs:
 
   - name: Publish performance report in build summary
     shell: pwsh
-    run: cat BenchmarkDotNet.Artifacts/results/*.md >> $env:GITHUB_STEP_SUMMARY
+    run: |
+      cat BenchmarkDotNet.Artifacts/results/*.md >> $env:GITHUB_STEP_SUMMARY
+      "GITHUB_PR_COMMENT=$(cat BenchmarkDotNet.Artifacts/results/*.md)" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+  - uses: mshick/add-pr-comment@v2
+    with:
+      repo-token: ${{ github.token }}
+      message: ${{ env.GITHUB_PR_COMMENT }}
 
   - name: Comment PR with benchmarks
     if: github.event_name == 'pull_request'
