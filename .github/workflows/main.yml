@@ -3,8 +3,10 @@
 
 name: Build and Test
 
-on: [push, pull_request]
-
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
@@ -14,6 +16,12 @@ jobs:
     runs-on: ${{matrix.os}}
     env:
       CONFIGURATION: Release
+    permissions:
+      actions: write
+      artifact-metadata: write
+      checks: write
+      contents: write 
+      pull-requests: write
     outputs:
       assemblySemVer: ${{ steps.version_step.outputs.assemblySemVer }}
       GitVersion_FullSemVer: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}
@@ -25,25 +33,29 @@ jobs:
         lfs: true
         fetch-depth: 0
 
-    - uses: ./.github/actions/setup
+    - id: setup
+      uses: ./.github/actions/setup
 
     - uses: ./.github/actions/build
 
     - name: Tag Commit
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       shell: pwsh
       run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        $tag = "v${{ steps.version_step.outputs.semVer }}"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        $tag = "v${{ steps.setup.outputs.GitVersion_FullSemVer }}"
         git tag $tag
-        git push origin $tag
+        git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git $tag
 
   test:
     needs: build
     runs-on: windows-latest
     env:
       CONFIGURATION: Release
+    permissions:
+      contents: read
+      issues: write
 
     steps:
     - uses: actions/checkout@v5
@@ -63,6 +75,9 @@ jobs:
     runs-on: windows-latest
     env:
       CONFIGURATION: Release
+    permissions:
+      contents: read
+      issues: write
 
     steps:
     - uses: actions/checkout@v5
@@ -95,7 +110,7 @@ jobs:
       with:
         lfs: true
         fetch-depth: 0
-              
+
     - uses: ./.github/actions/codeql
 
   docs-links:
@@ -122,6 +137,9 @@ jobs:
   pr-size:
     if: github.event_name == 'pull_request'
     runs-on: windows-latest
+    permissions:
+      contents: read
+      issues: read
     steps:
     - uses: actions/checkout@v5
       with:
