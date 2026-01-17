@@ -50,6 +50,9 @@ jobs:
     runs-on: windows-latest
     env:
       CONFIGURATION: Release
+    permissions:
+      contents: read
+      issues: write
 
     steps:
     - uses: actions/checkout@v5
@@ -69,6 +72,9 @@ jobs:
     runs-on: windows-latest
     env:
       CONFIGURATION: Release
+    permissions:
+      contents: read
+      issues: write
 
     steps:
     - uses: actions/checkout@v5
@@ -127,8 +133,10 @@ jobs:
 
   pr-size:
     if: github.event_name == 'pull_request'
-    permissions: read-all      
     runs-on: windows-latest
+    permissions:
+      contents: read
+      issues: read
     steps:
     - uses: actions/checkout@v5
       with:
