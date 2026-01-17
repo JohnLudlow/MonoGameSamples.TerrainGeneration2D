@@ -19,14 +19,7 @@ runs:
     with:
       name: build-artifacts
       path: .
-
-  - uses: mshick/add-pr-comment@v2
-    with:
-      message: |
-        **Hello**
-        🌏
-        !
-        
+              
   - name: Test
     shell: pwsh
     run: |
@@ -81,19 +74,27 @@ runs:
 
   - name: Publish coverage in build summary
     shell: pwsh
-    run: cat coverage/SummaryGithub.md >> $env:GITHUB_STEP_SUMMARY
-
-  - name: Comment PR with coverage
-    if: github.event_name == 'pull_request'
-    shell: pwsh
-    env:
-      GH_TOKEN: ${{ github.token }}
     run: |
-      if (Test-Path 'coverage/SummaryGithub.md') {
-        $content = Get-Content 'coverage/SummaryGithub.md' -Raw
-        $prNumber = $env:GITHUB_REF -replace 'refs/pull/', '' -replace '/merge', ''
-        gh pr comment $prNumber --body "## Coverage Report`n`n$content"
-      }
+      cat coverage/SummaryGithub.md >> $env:GITHUB_STEP_SUMMARY
+      cat coverage/SummaryGithub.md >> $env:GITHUB_PR_COMMENT
+      
+
+  - uses: mshick/add-pr-comment@v2
+    with:
+      message: ${{ env.GITHUB_PR_COMMENT }}
+
+
+  # - name: Comment PR with coverage
+  #   if: github.event_name == 'pull_request'
+  #   shell: pwsh
+  #   env:
+  #     GH_TOKEN: ${{ github.token }}
+  #   run: |
+  #     if (Test-Path 'coverage/SummaryGithub.md') {
+  #       $content = Get-Content 'coverage/SummaryGithub.md' -Raw
+  #       $prNumber = $env:GITHUB_REF -replace 'refs/pull/', '' -replace '/merge', ''
+  #       gh pr comment $prNumber --body "## Coverage Report`n`n$content"
+  #     }
 
   - name: Upload Coverage Baseline
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
