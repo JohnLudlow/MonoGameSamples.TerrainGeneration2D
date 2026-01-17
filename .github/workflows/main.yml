@@ -20,7 +20,8 @@ jobs:
       actions: write
       artifact-metadata: write
       checks: write
-      contents: write      
+      contents: write 
+      pull-requests: write
     outputs:
       assemblySemVer: ${{ steps.version_step.outputs.assemblySemVer }}
       GitVersion_FullSemVer: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}

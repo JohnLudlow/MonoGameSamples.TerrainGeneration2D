@@ -2,7 +2,7 @@
 
 ## Overview
 
-The GitHub Actions workflow is failing with "Resource not accessible by integration" error when attempting to post comments on pull requests for coverage and benchmark reports. This error occurs because the GITHUB_TOKEN lacks write permissions to issues/PRs, especially for pull_request events from forked repositories. This plan outlines steps to resolve the permission issue while maintaining security and functionality.
+The GitHub Actions workflow is failing with "Resource not accessible by integration" error when attempting to post comments on pull requests for coverage and benchmark reports. This error occurs because the GITHUB_TOKEN lacks write permissions to issues/PRs, especially for pull_request events from forked repositories. Attempts to convert the comment posting from JavaScript (using actions/github-script) to PowerShell (using gh CLI) resulted in a similar GraphQL error: "Resource not accessible by integration (addComment)". This confirms the issue is token permissions, not the implementation method. This plan outlines steps to resolve the permission issue while maintaining security and functionality.
 
 ## Definition of Terms
 
@@ -26,16 +26,16 @@ The GitHub Actions workflow is failing with "Resource not accessible by integrat
 
 ### Phase 1: Assess Current Permissions and Error Context
 
-1. Confirm the error occurs only on pull_request events, particularly from forks.
+1. Confirm the error occurs only on pull_request events, particularly from forks. (Completed: Error persists after converting to gh CLI, indicating token limitation.)
 2. Verify that job-level permissions (contents: read, issues: write) are set for test and benchmark jobs.
 3. Check if the workflow runs on push events without issues (where GITHUB_TOKEN has more permissions).
 
 ### Phase 2: Implement Conditional Comment Posting
 
-1. Modify the composite actions (.github/actions/test/action.yml and .github/actions/benchmark/action.yml) to include a condition for posting comments.
-2. Add a step to check if the repository is forked or if the token has write permissions.
-3. Use GitHub's API or environment variables (e.g., github.event.pull_request.head.repo.fork) to detect forks.
-4. If commenting is not possible, log a message and skip the step without failing the job.
+1. Modify the composite actions (.github/actions/test/action.yml and .github/actions/benchmark/action.yml) to add a condition checking if the PR is from a fork.
+2. Use the expression `github.event.pull_request.head.repo.fork != true` to only attempt commenting on non-forked PRs.
+3. If the PR is from a fork, log a message (e.g., "Skipping PR comment due to fork restrictions") and skip the step without failing the job.
+4. Test the conditional logic to ensure comments post on same-repo PRs and are skipped on forks.
 
 ### Phase 3: Alternative Authentication Method
 
@@ -59,7 +59,7 @@ The GitHub Actions workflow is failing with "Resource not accessible by integrat
 ## Implementation Considerations
 
 - **Security**: Avoid hardcoding tokens in code; use repository secrets. Limit PAT scopes to necessary permissions only.
-- **Reliability**: Ensure that failing to post a comment does not break the build; treat it as a non-critical step.
+- **Reliability**: Ensure that failing to post a comment does not break the build; treat it as a non-critical step. The conversion to gh CLI did not resolve the permission issue, confirming it's token-based.
 - **Performance**: Comment posting should not significantly impact job runtime; keep it lightweight.
 - **Compatibility**: Solution must work with GitHub's free tier; avoid paid features like GitHub Apps unless necessary.
 - **Maintainability**: Document the permission setup in the workflow comments and README.
@@ -69,7 +69,7 @@ The GitHub Actions workflow is failing with "Resource not accessible by integrat
 ## Testing
 
 - **Unit Tests**: No code changes require unit tests, as this is workflow configuration.
-- **Integration Tests**: 
+- **Integration Tests**:
   - Create a test PR from the same repository and verify comments appear.
   - Create a test PR from a fork and verify no error occurs, with appropriate logging.
 - **Edge Cases**: Test on different event types (push vs. pull_request), and with/without secrets.
