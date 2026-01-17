@@ -20,6 +20,13 @@ runs:
       name: build-artifacts
       path: .
 
+  - uses: mshick/add-pr-comment@v2
+    with:
+      message: |
+        **Hello**
+        🌏
+        !
+        
   - name: Test
     shell: pwsh
     run: |
