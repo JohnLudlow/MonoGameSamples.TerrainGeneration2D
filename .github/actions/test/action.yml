@@ -1,6 +1,5 @@
 name: 'Test'
 description: 'Run tests and generate coverage reports'
-
 inputs:
   configuration:
     description: 'Build configuration'

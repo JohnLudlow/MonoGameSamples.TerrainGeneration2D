@@ -18,6 +18,9 @@ jobs:
     env:
       CONFIGURATION: Release
     permissions:
+      actions: write
+      artifact-metadata: write
+      checks: write
       contents: write      
     outputs:
       assemblySemVer: ${{ steps.version_step.outputs.assemblySemVer }}
