@@ -9,6 +9,20 @@ inputs:
     description: 'Build configuration'
     default: 'Release'
 
+outputs:
+  assemblySemVer:
+    description: 'Assembly semantic version'
+    value: ${{ steps.version_step.outputs.assemblySemVer }}
+  assemblySemFileVer:
+    description: 'Assembly file version'
+    value: ${{ steps.version_step.outputs.assemblySemFileVer }}
+  GitVersion_FullSemVer:
+    description: 'Full GitVersion semver'
+    value: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}
+  semVer:
+    description: 'Semantic version'
+    value: ${{ steps.version_step.outputs.semVer }}
+
 runs:
   using: 'composite'
   steps:
