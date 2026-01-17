@@ -70,7 +70,7 @@ runs:
     run: |
       cat BenchmarkDotNet.Artifacts/results/*.md >> $env:GITHUB_STEP_SUMMARY
       "GITHUB_PR_COMMENT=$(cat BenchmarkDotNet.Artifacts/results/*.md)" | Foreach-Object { "$($_ | Out-File -FilePath $env:GITHUB_ENV -Append)`n" }
-
+ 
   - uses: mshick/add-pr-comment@v2
     with:
       repo-token: ${{ github.token }}
