@@ -43,7 +43,7 @@ runs:
       reporter: dotnet-trx
 
   - name: Download Coverage Baseline
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request'    
     shell: pwsh
     env:
       GH_TOKEN: ${{ github.token }}
@@ -79,6 +79,9 @@ runs:
   - name: Comment PR with coverage
     if: github.event_name == 'pull_request'
     uses: actions/github-script@v7
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_TOKEN: ${{ github.token }}
     with:
       script: |
         const fs = require('fs');
