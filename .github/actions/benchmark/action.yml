@@ -69,31 +69,9 @@ runs:
     shell: pwsh
     run: |
       cat BenchmarkDotNet.Artifacts/results/*.md >> $env:GITHUB_STEP_SUMMARY
-      "GITHUB_PR_COMMENT=$(cat BenchmarkDotNet.Artifacts/results/*.md)" | Out-File -FilePath $env:GITHUB_ENV -Append
+      "GITHUB_PR_COMMENT=$(cat BenchmarkDotNet.Artifacts/results/*.md)" | Foreach-Object { "$($_ | Out-File -FilePath $env:GITHUB_ENV -Append)`n" }
 
   - uses: mshick/add-pr-comment@v2
     with:
       repo-token: ${{ github.token }}
       message: ${{ env.GITHUB_PR_COMMENT }}
-
-  - name: Comment PR with benchmarks
-    if: github.event_name == 'pull_request'
-    uses: actions/github-script@v7
-    with:
-      script: |
-        const fs = require('fs');
-        const path = require('path');
-        const resultsDir = 'BenchmarkDotNet.Artifacts/results';
-        if (fs.existsSync(resultsDir)) {
-          const files = fs.readdirSync(resultsDir).filter(f => f.endsWith('.md'));
-          let content = '';
-          for (const file of files) {
-            content += fs.readFileSync(path.join(resultsDir, file), 'utf8') + '\n\n';
-          }
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: `## Benchmark Report\n\n${content}`
-          });
-        }
