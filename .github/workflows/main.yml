@@ -21,7 +21,7 @@ jobs:
       artifact-metadata: write
       checks: write
       contents: write 
-      pull-requests: write
+      pull-requests: write      
     outputs:
       assemblySemVer: ${{ steps.version_step.outputs.assemblySemVer }}
       GitVersion_FullSemVer: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}
@@ -32,7 +32,12 @@ jobs:
       with:
         lfs: true
         fetch-depth: 0
-
+    - uses: mshick/add-pr-comment@v2
+      with:
+        message: |
+          **Hello**
+          🌏
+          !
     - id: setup
       uses: ./.github/actions/setup
 
