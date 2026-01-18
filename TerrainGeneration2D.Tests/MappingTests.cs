@@ -1,6 +1,7 @@
 ﻿using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 using Microsoft.Xna.Framework;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests;
@@ -65,13 +66,13 @@ public class MappingTests
   [Fact]
   public void TileTypeRegistry_RespectsBeachRules()
   {
-    var config = new TerrainRuleConfiguration
+    var config = new TileTypeRuleConfiguration();
+    config.Rules.Add(new GroupRuleConfiguration
     {
-      BeachOceanSizeMin = 1,
-      BeachOceanSizeMax = 1,
-      BeachPlainsSizeMin = 1,
-      BeachPlainsSizeMax = 1
-    };
+      Id = TerrainTileIds.Beach,
+      MinGroupSizeX = 1,
+      MaxGroupSizeX = 1
+    });
 
     var registry = TileTypeRegistry.CreateDefault(7, config);
     var mapping = new MappingInformationService(CreateEmptyJaggedArray(2, 2));
@@ -95,7 +96,7 @@ public class MappingTests
   {
     var registry = TileTypeRegistry.CreateDefault(5);
     var random = new Random(123);
-    var wfc = new Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+    var wfc = new Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TileTypeRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
 
     var success = wfc.Generate(maxIterations: 1000);
     Assert.True(success);
@@ -109,7 +110,7 @@ public class MappingTests
   {
     var registry = TileTypeRegistry.CreateDefault(5);
     var random = new Random(456);
-    var wfc = new Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+    var wfc = new Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TileTypeRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
 
     var success = wfc.Generate(enableBacktracking: true, maxIterations: 1000, maxBacktrackSteps: 2048, maxDepth: 128);
     Assert.True(success);
@@ -123,7 +124,7 @@ public class MappingTests
   {
     var registry = TileTypeRegistry.CreateDefault(5);
     var random = new Random(789);
-    var wfc = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+    var wfc = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TileTypeRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
 
     // Exercise the backtracking path with tight limits to ensure parameters are honored
     var success = wfc.Generate(enableBacktracking: true, maxIterations: 1000, maxBacktrackSteps: 0, maxDepth: 4);
@@ -138,8 +139,8 @@ public class MappingTests
   {
     var registry = TileTypeRegistry.CreateDefault(5);
     var random = new Random(321);
-    var wfcNoBacktrack = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
-    var wfcBacktrack = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, new Random(654), new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+    var wfcNoBacktrack = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, random, new TileTypeRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+    var wfcBacktrack = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, new Random(654), new TileTypeRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
 
     var successNoBack = wfcNoBacktrack.Generate(maxIterations: 1);
     var successBack = wfcBacktrack.Generate(enableBacktracking: true, maxIterations: 1000, maxBacktrackSteps: 4096, maxDepth: 128);
@@ -152,20 +153,20 @@ public class MappingTests
   public void WaveFunctionCollapse_Backtracking_Recovers_From_Contradiction()
   {
     // Registry with one universally invalid tile (0), one universally invalid tile (1) and one universally valid tile (2)
-    var registry = new TileTypeRegistry(new TileType[]
-    {
+    var registry = new TileTypeRegistry(
+    [
             new AlwaysInvalidTileType(0),
             new AlwaysInvalidTileType(1),
             new AlwaysValidTileType(2)
-    });
+    ]);
     // Deterministic provider yields consistent choices; non-backtracking fails, backtracking recovers
-    var wfcNoBacktrack = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, new DeterministicRandomProvider(), new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+    var wfcNoBacktrack = new WfcProvider(8, 8, registry, new DeterministicRandomProvider(), new TileTypeRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
     // Force collapse of first cell to invalid tile (0)
     wfcNoBacktrack.GetOutput()[0][0] = 0;
     var successNoBack = wfcNoBacktrack.Generate(maxIterations: 1000);
     Assert.False(successNoBack);
 
-    var wfcBacktrack = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, new DeterministicRandomProvider(), new TerrainRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
+    var wfcBacktrack = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.WfcProvider(8, 8, registry, new DeterministicRandomProvider(), new TileTypeRuleConfiguration(), DefaultHeightProvider.Instance, Point.Zero);
     var successBack = wfcBacktrack.Generate(enableBacktracking: true, maxIterations: 10000, maxBacktrackSteps: 4096, maxDepth: 256);
     Assert.True(successBack);
   }

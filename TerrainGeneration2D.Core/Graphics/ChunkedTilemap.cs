@@ -27,7 +27,7 @@ public class ChunkedTilemap
   private readonly string _saveDirectory;
   private readonly Random _random;
   private readonly TileTypeRegistry _tileTypeRegistry;
-  private readonly TerrainRuleConfiguration _terrainRuleConfig;
+  private readonly TileTypeRuleConfiguration _terrainRuleConfig;
   private readonly HeightMapConfiguration _heightMapConfiguration;
   private readonly WfcWeightConfiguration _wfcWeightConfig;
   private readonly HeuristicsConfiguration _heuristicsConfig;
@@ -42,7 +42,19 @@ public class ChunkedTilemap
   public int MapSizeInTiles => _mapSizeInTiles;
   public Tileset Tileset => _tileset;
 
-  public ChunkedTilemap(Tileset tileset, int mapSizeInTiles, int masterSeed, string saveDirectory, bool useWaveFunctionCollapse = true, TerrainRuleConfiguration? terrainRuleConfiguration = null, HeightMapConfiguration? heightMapConfiguration = null, WfcWeightConfiguration? weightConfig = null, HeuristicsConfiguration? heuristicsConfig = null, ILogger? logger = null, int? wfcTimeBudgetMs = null)
+  public ChunkedTilemap(
+    Tileset tileset,
+    int mapSizeInTiles,
+    int masterSeed,
+    string saveDirectory,
+    bool useWaveFunctionCollapse = true,
+    TileTypeRuleConfiguration? terrainRuleConfiguration = null,
+    HeightMapConfiguration? heightMapConfiguration = null,
+    WfcWeightConfiguration? weightConfig = null,
+    HeuristicsConfiguration? heuristicsConfig = null,
+    ILogger? logger = null,
+    int? wfcTimeBudgetMs = null
+  )
   {
     _tileset = tileset ?? throw new ArgumentNullException(nameof(tileset));
     _tileSize = tileset.TileWidth;
@@ -53,12 +65,16 @@ public class ChunkedTilemap
     _activeChunks = new Dictionary<Point, Chunk>();
     _random = new Random();
     _useWaveFunctionCollapse = useWaveFunctionCollapse;
-    _terrainRuleConfig = terrainRuleConfiguration ?? new TerrainRuleConfiguration();
+    
+    
     _heightMapConfiguration = heightMapConfiguration ?? new HeightMapConfiguration();
     _heightProvider = new HeightMapGenerator(masterSeed, _heightMapConfiguration);
     _wfcWeightConfig = weightConfig ?? new WfcWeightConfiguration();
     _heuristicsConfig = heuristicsConfig ?? new HeuristicsConfiguration();
+    
+    _terrainRuleConfig = terrainRuleConfiguration ?? new TileTypeRuleConfiguration();
     _tileTypeRegistry = TileTypeRegistry.CreateDefault(tileset.Count, _terrainRuleConfig);
+    
     _logger = logger;
     _wfcTimeBudgetMs = wfcTimeBudgetMs ?? 50;
 
@@ -174,24 +190,38 @@ public class ChunkedTilemap
 
   private int PickTileByHeight(HeightSample sample, Random random)
   {
+    // Use the new GroupRuleConfiguration for terrain rules
+    // This logic assumes GroupRuleConfiguration exposes the same properties as before, or provides a method for tile selection
     var config = _terrainRuleConfig;
 
-    if (sample.Altitude <= config.OceanHeightMax)
+    // Example: If GroupRuleConfiguration exposes a method for picking a tile by height sample, use it
+    // Otherwise, fallback to the previous logic, but using config as GroupRuleConfiguration
+    // (If GroupRuleConfiguration exposes a PickTileByHeight method, replace this logic with a call to that method)
+
+    // Ocean
+    var oceanRule = config.GetRuleForType(TerrainTileIds.Ocean);
+    if (oceanRule != null && sample.Altitude <= oceanRule.ElevationMax)
     {
       return TerrainTileIds.Ocean;
     }
 
-    if (sample.Altitude >= config.MountainHeightMin && sample.MountainNoise >= config.MountainNoiseThreshold)
+    // Mountain
+    var mountainRule = config.GetRuleForType(TerrainTileIds.Mountain);
+    if (mountainRule != null && sample.Altitude >= mountainRule.ElevationMin && sample.MountainNoise >= mountainRule.NoiseThreshold)
     {
       return TerrainTileIds.Mountain;
     }
 
-    if (sample.Altitude >= config.SnowHeightMin)
+    // Snow
+    var snowRule = config.GetRuleForType(TerrainTileIds.Snow);
+    if (snowRule != null && sample.Altitude >= snowRule.ElevationMin)
     {
       return TerrainTileIds.Snow;
     }
 
-    if (sample.Altitude >= config.BeachHeightMin && sample.Altitude <= config.BeachHeightMax)
+    // Beach
+    var beachRule = config.GetRuleForType(TerrainTileIds.Beach);
+    if (beachRule != null && sample.Altitude >= beachRule.ElevationMin && sample.Altitude <= beachRule.ElevationMax)
     {
       if (sample.DetailNoise > random.NextSingle())
       {
@@ -199,12 +229,16 @@ public class ChunkedTilemap
       }
     }
 
-    if (sample.Altitude >= config.ForestHeightMin && sample.Altitude <= config.ForestHeightMax)
+    // Forest
+    var forestRule = config.GetRuleForType(TerrainTileIds.Forest);
+    if (forestRule != null && sample.Altitude >= forestRule.ElevationMin && sample.Altitude <= forestRule.ElevationMax)
     {
       return sample.DetailNoise > 0.5f ? TerrainTileIds.Forest : TerrainTileIds.Plains;
     }
 
-    if (sample.Altitude >= config.PlainsHeightMin)
+    // Plains
+    var plainsRule = config.GetRuleForType(TerrainTileIds.Plains);
+    if (plainsRule != null && sample.Altitude >= plainsRule.ElevationMin)
     {
       return TerrainTileIds.Plains;
     }

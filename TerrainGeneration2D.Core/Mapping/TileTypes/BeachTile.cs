@@ -2,34 +2,33 @@
 
 public sealed class BeachTileType : TileType
 {
-  private readonly TerrainRuleConfiguration _config;
-
-  public BeachTileType(int tileId, TerrainRuleConfiguration config)
+  public BeachTileType(int tileId)
       : base(tileId, "Beach")
   {
-    _config = config;
   }
 
   public override bool EvaluateRules(TileRuleContext context)
   {
+    var rule = context.Config.GetRuleForType(TileId);
     var altitude = context.CandidateHeight.Altitude;
-    if (altitude < context.Config.BeachHeightMin || altitude > context.Config.BeachHeightMax)
+    if (rule != null)
     {
-      return false;
+      if (altitude < rule.ElevationMin || altitude > rule.ElevationMax)
+      {
+        return false;
+      }
     }
-
-    if (context.NeighborTileId == TerrainTileIds.Ocean)
-    {
-      var metrics = context.GetNeighborGroupMetrics();
-      return !metrics.IsValid || IsWithin(metrics.Count, _config.BeachOceanSizeMin, _config.BeachOceanSizeMax);
-    }
-
-    if (context.NeighborTileId == TerrainTileIds.Plains)
+    // Neighbor group size checks
+    if (context.NeighborTileId == TerrainTileIds.Ocean && rule != null)
     {
       var metrics = context.GetNeighborGroupMetrics();
-      return !metrics.IsValid || IsWithin(metrics.Count, _config.BeachPlainsSizeMin, _config.BeachPlainsSizeMax);
+      return !metrics.IsValid || IsWithin(metrics.Count, rule.MinGroupSizeX, rule.MaxGroupSizeX);
     }
-
+    if (context.NeighborTileId == TerrainTileIds.Plains && rule != null)
+    {
+      var metrics = context.GetNeighborGroupMetrics();
+      return !metrics.IsValid || IsWithin(metrics.Count, rule.MinGroupSizeY, rule.MaxGroupSizeY);
+    }
     return false;
   }
 

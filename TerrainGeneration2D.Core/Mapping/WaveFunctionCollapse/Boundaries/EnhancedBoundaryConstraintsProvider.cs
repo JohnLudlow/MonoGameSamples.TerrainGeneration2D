@@ -42,7 +42,7 @@ public class EnhancedWfcProvider : WfcProvider
       int height,
       TileTypeRegistry tileRegistry,
       IRandomProvider randomProvider,
-      TerrainRuleConfiguration config,
+      TileTypeRuleConfiguration config,
       IHeightProvider heightProvider,
       Point chunkOrigin,
       WfcConfiguration wfcConfig,

@@ -9,7 +9,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
     public void DomainLifecycle_InitializesAndCollapsesCorrectly()
     {
       // Arrange: 2x2 grid, 2 tile types
-      var registry = TileTypeRegistry.CreateDefault(2, new TerrainRuleConfiguration());
+      var registry = TileTypeRegistry.CreateDefault(2, new TileTypeRuleConfiguration());
       var random = new TestRandomProvider();
       var config = new WfcWeightConfiguration();
       var heuristics = new HeuristicsConfiguration();
@@ -17,7 +17,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
         2, 2,
         registry,
         random,
-        new TerrainRuleConfiguration(),
+        new TileTypeRuleConfiguration(),
         Core.Mapping.HeightMap.DefaultHeightProvider.Instance,
         Microsoft.Xna.Framework.Point.Zero,
         config,
@@ -41,7 +41,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
     public void EntropyHeuristics_SelectsCorrectCell()
     {
       // Arrange: 2x2 grid, custom entropy config
-      var registry = TileTypeRegistry.CreateDefault(2, new TerrainRuleConfiguration());
+      var registry = TileTypeRegistry.CreateDefault(2, new TileTypeRuleConfiguration());
       var random = new TestRandomProvider();
       var config = new WfcWeightConfiguration();
       var heuristics = new HeuristicsConfiguration { UseDomainEntropy = true, UseShannonEntropy = false };
@@ -49,7 +49,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
         2, 2,
         registry,
         random,
-        new TerrainRuleConfiguration(),
+        new TileTypeRuleConfiguration(),
         Core.Mapping.HeightMap.DefaultHeightProvider.Instance,
         Microsoft.Xna.Framework.Point.Zero,
         config,
@@ -72,8 +72,8 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
     public void RuleTable_Correctness_MatchesRuntimeEvaluation()
     {
       // Arrange: 2 tile types, all directions
-      var registry = TileTypeRegistry.CreateDefault(2, new TerrainRuleConfiguration());
-      var ruleTable = new PrecomputedRuleTable(registry);
+      var registry = TileTypeRegistry.CreateDefault(2, new TileTypeRuleConfiguration());
+      var ruleTable = new PrecomputedTileTypeRuleTable(registry);
       foreach (var tileId in registry.TileIds)
       {
         var tile = registry.GetTileType(tileId);
@@ -95,7 +95,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
               default,
               neighbor.TileId,
               dir,
-              new TerrainRuleConfiguration(),
+              new TileTypeRuleConfiguration(),
               default,
               default,
               null!
@@ -114,8 +114,8 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC
     public void AC3Propagation_EliminatesInvalidDomains()
     {
       // Arrange: 2x2 grid, custom domains
-      var registry = TileTypeRegistry.CreateDefault(2, new TerrainRuleConfiguration());
-      var ruleTable = new PrecomputedRuleTable(registry);
+      var registry = TileTypeRegistry.CreateDefault(2, new TileTypeRuleConfiguration());
+      var ruleTable = new PrecomputedTileTypeRuleTable(registry);
       var domains = new HashSet<int>?[2][];
 
       for (var x = 0; x < 2; x++)

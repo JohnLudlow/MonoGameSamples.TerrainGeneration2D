@@ -31,9 +31,8 @@ internal sealed class TerrainGeneration2DContentBuilder : ContentBuilder
     contentCollection.Include<WildcardRule>("audio/collect.wav");
     contentCollection.Include<WildcardRule>("audio/theme.ogg");
 
-    contentCollection.Include<WildcardRule>("fonts/04B_30.spritefont");
-    contentCollection.Include<WildcardRule>("fonts/04B_30_5x.spritefont");
-    contentCollection.IncludeCopy<WildcardRule>("fonts/04b_30.fnt");
+    contentCollection.IncludeCopy<WildcardRule>("fonts/NotArial_0.png");
+    contentCollection.IncludeCopy<WildcardRule>("fonts/NotArial.fnt");
 
     contentCollection.Include<WildcardRule>("effects/grayscaleEffect.fx");
 

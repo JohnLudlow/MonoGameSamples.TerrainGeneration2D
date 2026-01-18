@@ -1,62 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
-
-public static class TerrainTileIds
-{
-  public const int Void = 0;
-  public const int Ocean = 1;
-  public const int Beach = 2;
-  public const int Plains = 3;
-  public const int Forest = 4;
-  public const int Snow = 5;
-  public const int Mountain = 6;
-}
-
-public enum Direction
-{
-  North,
-  South,
-  East,
-  West
-}
-
-public readonly record struct TileRuleContext(
-    TilePoint CandidatePosition,
-    int CandidateTileId,
-    TilePoint NeighborPosition,
-    int NeighborTileId,
-    Direction DirectionToNeighbor,
-    TerrainRuleConfiguration Config,
-    HeightSample CandidateHeight,
-    HeightSample NeighborHeight,
-    MappingInformationService MappingService)
-{
-  public GroupMetrics GetCandidateGroupMetrics() => MappingService.GetGroupMetrics(CandidatePosition, CandidateTileId);
-  public GroupMetrics GetNeighborGroupMetrics() => MappingService.GetGroupMetrics(NeighborPosition);
-}
-
-public abstract class TileType
-{
-  protected TileType(int tileId, string name)
-  {
-    TileId = tileId;
-    Name = name;
-  }
-
-  public int TileId { get; }
-  public string Name { get; }
-
-  public abstract bool EvaluateRules(TileRuleContext context);
-
-  protected static bool MatchesNeighbor(TileRuleContext context, params int[] allowed)
-  {
-    return allowed.Contains(context.NeighborTileId);
-  }
-}
 
 public sealed class TileTypeRegistry
 {
@@ -86,9 +32,9 @@ public sealed class TileTypeRegistry
   public IReadOnlyList<int> TileIds => _tileOrder;
   public IReadOnlyList<int> ValidTileIds => _validTileIds;
 
-  public static TileTypeRegistry CreateDefault(int tileCount, TerrainRuleConfiguration? config = null)
+  public static TileTypeRegistry CreateDefault(int tileCount, TileTypeRuleConfiguration? config = null)
   {
-    config ??= new TerrainRuleConfiguration();
+    config ??= new TileTypeRuleConfiguration();
     var tileTypes = new List<TileType>();
 
     if (tileCount > TerrainTileIds.Void)
@@ -103,7 +49,7 @@ public sealed class TileTypeRegistry
 
     if (tileCount > TerrainTileIds.Beach)
     {
-      tileTypes.Add(new BeachTileType(TerrainTileIds.Beach, config));
+      tileTypes.Add(new BeachTileType(TerrainTileIds.Beach));
     }
 
     if (tileCount > TerrainTileIds.Plains)
@@ -123,7 +69,7 @@ public sealed class TileTypeRegistry
 
     if (tileCount > TerrainTileIds.Mountain)
     {
-      tileTypes.Add(new MountainTileType(TerrainTileIds.Mountain, config));
+      tileTypes.Add(new MountainTileType(TerrainTileIds.Mountain));
     }
 
     for (var tileId = TerrainTileIds.Mountain + 1; tileId < tileCount; tileId++)

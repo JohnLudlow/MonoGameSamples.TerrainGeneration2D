@@ -41,7 +41,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFuncti
         int height,
         TileTypeRegistry tileRegistry,
         IRandomProvider randomProvider,
-        TerrainRuleConfiguration terrainConfig,
+        TileTypeRuleConfiguration terrainConfig,
         IHeightProvider heightProvider,
         Point chunkOrigin,
         WfcConfiguration wfcConfig,

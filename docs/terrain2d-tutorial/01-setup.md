@@ -183,7 +183,7 @@ internal sealed class TerrainGeneration2DContentBuilder : ContentBuilder
         // Fonts
         content.Include<WildcardRule>("fonts/04B_30.spritefont");
         content.Include<WildcardRule>("fonts/04B_30_5x.spritefont");
-        content.IncludeCopy<WildcardRule>("fonts/04b_30.fnt");
+        content.IncludeCopy<WildcardRule>("fonts/NotArial.fnt");
 
         // Effects/Shaders
         content.Include<WildcardRule>("effects/grayscaleEffect.fx");

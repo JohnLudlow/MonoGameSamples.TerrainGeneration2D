@@ -35,7 +35,7 @@ public sealed class UniformPickFractionTests
       1,
       registry,
       new DeterministicRandomProvider(),
-      new TerrainRuleConfiguration(),
+      new TileTypeRuleConfiguration(),
       DefaultHeightProvider.Instance,
       Point.Zero,
       new WfcWeightConfiguration { Base = 1, NeighborMatchBoost = 5 },

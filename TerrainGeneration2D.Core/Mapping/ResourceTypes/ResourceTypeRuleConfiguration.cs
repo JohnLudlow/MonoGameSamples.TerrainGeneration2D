@@ -1,6 +1,6 @@
 ﻿namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 
-public sealed class TerrainRuleConfiguration
+public sealed class ResourceTypeRuleConfiguration
 {
   public int MountainRangeMin { get; set; } = 8;
   public int MountainRangeMax { get; set; } = 48;

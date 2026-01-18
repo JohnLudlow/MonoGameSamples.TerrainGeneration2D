@@ -2,58 +2,55 @@
 
 public sealed class MountainTileType : TileType
 {
-  private readonly TerrainRuleConfiguration _config;
-
-  public MountainTileType(int tileId, TerrainRuleConfiguration config)
+  public MountainTileType(int tileId)
       : base(tileId, "Mountain")
   {
-    _config = config;
   }
 
   public override bool EvaluateRules(TileRuleContext context)
   {
+    var rule = context.Config.GetRuleForType(TileId);
     var altitude = context.CandidateHeight.Altitude;
-    if (altitude < context.Config.MountainHeightMin || context.CandidateHeight.MountainNoise < context.Config.MountainNoiseThreshold)
+    var noise = context.CandidateHeight.MountainNoise;
+    if (rule != null)
     {
-      return false;
+      if (altitude < rule.ElevationMin || (rule.NoiseThreshold.HasValue && noise < rule.NoiseThreshold.Value))
+      {
+        return false;
+      }
     }
-
     if (!MatchesNeighbor(context, TerrainTileIds.Forest, TerrainTileIds.Snow, TerrainTileIds.Mountain))
     {
       return false;
     }
-
     var candidateMetrics = context.GetCandidateGroupMetrics();
     var neighborMetrics = context.GetNeighborGroupMetrics();
-
-    if (candidateMetrics.MaxDimension > _config.MountainWidthMax)
+    if (rule != null)
     {
-      return false;
+      if (candidateMetrics.MaxDimension > rule.MaxGroupSizeX)
+      {
+        return false;
+      }
+      if (candidateMetrics.Count > rule.MaxGroupSizeY)
+      {
+        return false;
+      }
+      if (neighborMetrics.IsValid && neighborMetrics.Count > rule.MaxGroupSizeY)
+      {
+        return false;
+      }
+      var combinedCount = candidateMetrics.Count + neighborMetrics.Count;
+      if (combinedCount > rule.MaxGroupSizeY)
+      {
+        return false;
+      }
+      if (candidateMetrics.Count > 0 && candidateMetrics.Count < rule.MinGroupSizeX &&
+          neighborMetrics.Count + candidateMetrics.Count < rule.MinGroupSizeX)
+      {
+        // Allow small seeds to grow until they reach the minimum requirement
+        return true;
+      }
     }
-
-    if (candidateMetrics.Count > _config.MountainRangeMax)
-    {
-      return false;
-    }
-
-    if (neighborMetrics.IsValid && neighborMetrics.Count > _config.MountainRangeMax)
-    {
-      return false;
-    }
-
-    var combinedCount = candidateMetrics.Count + neighborMetrics.Count;
-    if (combinedCount > _config.MountainRangeMax)
-    {
-      return false;
-    }
-
-    if (candidateMetrics.Count > 0 && candidateMetrics.Count < _config.MountainRangeMin &&
-        neighborMetrics.Count + candidateMetrics.Count < _config.MountainRangeMin)
-    {
-      // Allow small seeds to grow until they reach the minimum requirement
-      return true;
-    }
-
     return true;
   }
 }

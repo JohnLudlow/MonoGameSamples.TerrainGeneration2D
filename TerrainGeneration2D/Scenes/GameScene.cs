@@ -80,27 +80,58 @@ internal sealed class GameScene : Scene
     };
 
     var rulesSection = cfg.GetSection("TerrainRules");
-    var terrainConfig = new TerrainRuleConfiguration
+    var terrainConfig = new TileTypeRuleConfiguration();
+    terrainConfig.Rules.AddRange(new List<GroupRuleConfiguration>
     {
-      MountainRangeMin = rulesSection.GetValue<int>("MountainRangeMin", 8),
-      MountainRangeMax = rulesSection.GetValue<int>("MountainRangeMax", 48),
-      MountainWidthMax = rulesSection.GetValue<int>("MountainWidthMax", 12),
-      MountainWidthMin = rulesSection.GetValue<int>("MountainWidthMin", 3),
-      BeachOceanSizeMin = rulesSection.GetValue<int>("BeachOceanSizeMin", 12),
-      BeachOceanSizeMax = rulesSection.GetValue<int>("BeachOceanSizeMax", 180),
-      BeachPlainsSizeMin = rulesSection.GetValue<int>("BeachPlainsSizeMin", 20),
-      BeachPlainsSizeMax = rulesSection.GetValue<int>("BeachPlainsSizeMax", 400),
-      OceanHeightMax = rulesSection.GetValue<float>("OceanHeightMax", 0.34f),
-      BeachHeightMin = rulesSection.GetValue<float>("BeachHeightMin", 0.33f),
-      BeachHeightMax = rulesSection.GetValue<float>("BeachHeightMax", 0.48f),
-      PlainsHeightMin = rulesSection.GetValue<float>("PlainsHeightMin", 0.35f),
-      PlainsHeightMax = rulesSection.GetValue<float>("PlainsHeightMax", 0.78f),
-      ForestHeightMin = rulesSection.GetValue<float>("ForestHeightMin", 0.42f),
-      ForestHeightMax = rulesSection.GetValue<float>("ForestHeightMax", 0.88f),
-      SnowHeightMin = rulesSection.GetValue<float>("SnowHeightMin", 0.82f),
-      MountainHeightMin = rulesSection.GetValue<float>("MountainHeightMin", 0.76f),
-      MountainNoiseThreshold = rulesSection.GetValue<float>("MountainNoiseThreshold", 0.55f)
-    };
+      // Ocean
+      new GroupRuleConfiguration
+      {
+        Id = TerrainTileIds.Ocean,
+        ElevationMax = rulesSection.GetValue<float>("OceanHeightMax", 0.34f)
+      },
+      // Beach
+      new GroupRuleConfiguration
+      {
+        Id = TerrainTileIds.Beach,
+        ElevationMin = rulesSection.GetValue<float>("BeachHeightMin", 0.33f),
+        ElevationMax = rulesSection.GetValue<float>("BeachHeightMax", 0.48f),
+        MinGroupSizeX = rulesSection.GetValue<int>("BeachOceanSizeMin", 12),
+        MaxGroupSizeX = rulesSection.GetValue<int>("BeachOceanSizeMax", 180)
+      },
+      // Plains
+      new GroupRuleConfiguration
+      {
+        Id = TerrainTileIds.Plains,
+        ElevationMin = rulesSection.GetValue<float>("PlainsHeightMin", 0.35f),
+        ElevationMax = rulesSection.GetValue<float>("PlainsHeightMax", 0.78f),
+        MinGroupSizeX = rulesSection.GetValue<int>("BeachPlainsSizeMin", 20),
+        MaxGroupSizeX = rulesSection.GetValue<int>("BeachPlainsSizeMax", 400)
+      },
+      // Forest
+      new GroupRuleConfiguration
+      {
+        Id = TerrainTileIds.Forest,
+        ElevationMin = rulesSection.GetValue<float>("ForestHeightMin", 0.42f),
+        ElevationMax = rulesSection.GetValue<float>("ForestHeightMax", 0.88f)
+      },
+      // Snow
+      new GroupRuleConfiguration
+      {
+        Id = TerrainTileIds.Snow,
+        ElevationMin = rulesSection.GetValue<float>("SnowHeightMin", 0.82f)
+      },
+      // Mountain
+      new GroupRuleConfiguration
+      {
+        Id = TerrainTileIds.Mountain,
+        ElevationMin = rulesSection.GetValue<float>("MountainHeightMin", 0.76f),
+        NoiseThreshold = rulesSection.GetValue<float>("MountainNoiseThreshold", 0.55f),
+        MinGroupSizeX = rulesSection.GetValue<int>("MountainWidthMin", 3),
+        MaxGroupSizeX = rulesSection.GetValue<int>("MountainWidthMax", 12),
+        MinGroupSizeY = rulesSection.GetValue<int>("MountainRangeMin", 8),
+        MaxGroupSizeY = rulesSection.GetValue<int>("MountainRangeMax", 48)
+      }
+    });
 
     var hmSection = cfg.GetSection("HeightMap");
     var heightConfig = new HeightMapConfiguration

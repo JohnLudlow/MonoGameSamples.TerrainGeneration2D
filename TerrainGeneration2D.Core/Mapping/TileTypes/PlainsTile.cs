@@ -9,12 +9,16 @@ public sealed class PlainsTileType : TileType
 
   public override bool EvaluateRules(TileRuleContext context)
   {
+    var rule = context.Config.GetRuleForType(TileId);
     var altitude = context.CandidateHeight.Altitude;
-    if (altitude < context.Config.PlainsHeightMin || altitude > context.Config.PlainsHeightMax)
+    if (rule != null)
     {
-      return false;
+      if (altitude < rule.ElevationMin || altitude > rule.ElevationMax)
+      {
+        return false;
+      }
     }
-
+    // If no rule, allow by default (or you may choose to return false)
     return MatchesNeighbor(context, TerrainTileIds.Beach, TerrainTileIds.Plains, TerrainTileIds.Forest);
   }
 }

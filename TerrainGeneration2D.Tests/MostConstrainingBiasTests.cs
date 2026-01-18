@@ -34,7 +34,7 @@ public sealed class MostConstrainingBiasTests
       3,
       registry,
       new HighRollRandomProvider(),
-      new TerrainRuleConfiguration(),
+      new TileTypeRuleConfiguration(),
       DefaultHeightProvider.Instance,
       Point.Zero,
       new WfcWeightConfiguration(),

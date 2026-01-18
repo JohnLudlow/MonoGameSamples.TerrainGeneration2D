@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
@@ -13,7 +14,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFuncti
 /// <remarks>
 /// Wraps System.Collections.BitArray with set-like operations for WFC domains.
 /// </remarks>
-public class BitSet
+public class BitSet : IEnumerable<int>
 {
   private readonly BitArray _bits;
 
@@ -50,4 +51,14 @@ public class BitSet
         if (_bits[i]) yield return i;
     }
   }
+
+  /// <summary>
+  /// Returns an enumerator that iterates through the set of tile IDs.
+  /// </summary>
+  public IEnumerator<int> GetEnumerator() => TileIds.GetEnumerator();
+
+  /// <summary>
+  /// Returns a non-generic enumerator that iterates through the set of tile IDs.
+  /// </summary>
+  IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

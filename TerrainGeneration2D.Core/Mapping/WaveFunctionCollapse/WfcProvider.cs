@@ -42,7 +42,7 @@ public class WfcProvider
   private readonly HashSet<int>?[][] _possibilities;
   private readonly int[][] _output;
   private readonly MappingInformationService _mappingService;
-  private readonly TerrainRuleConfiguration _config;
+  private readonly TileTypeRuleConfiguration _tileTypeRuleConfig;
   private readonly IHeightProvider _heightProvider;
   private readonly Point _chunkOrigin;
 #pragma warning disable CA1859 // Use concrete types when possible for improved performance
@@ -57,27 +57,40 @@ public class WfcProvider
   /// <param name="height">Number of tiles in Y for this solve.</param>
   /// <param name="tileRegistry">Tile registry and rules.</param>
   /// <param name="randomProvider">Random provider for deterministic generation.</param>
-  /// <param name="config">Terrain rule configuration.</param>
+  /// <param name="tileTypeRuleConfig">Terrain rule configuration.</param>
   /// <param name="heightProvider">Height/biome sampler for contextual rules.</param>
   /// <param name="chunkOrigin">World-space origin of this chunk, used for sampling.</param>
   /// <param name="weightConfig">WFC weight configuration for tile selection.</param>
   /// <param name="heuristicsConfig">Heuristics configuration for cell selection.</param>
-  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, IRandomProvider randomProvider,
-    TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin,
-    WfcWeightConfiguration? weightConfig = null, HeuristicsConfiguration? heuristicsConfig = null)
+  public WfcProvider(
+    int width,
+    int height,
+    TileTypeRegistry tileRegistry,
+    IRandomProvider randomProvider,
+    TileTypeRuleConfiguration tileTypeRuleConfig,
+    IHeightProvider heightProvider,
+    Point chunkOrigin,
+    WfcWeightConfiguration? weightConfig = null,
+    HeuristicsConfiguration? heuristicsConfig = null
+  )
   {
+    ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
+    ArgumentNullException.ThrowIfNull(heightProvider);
+    ArgumentNullException.ThrowIfNull(tileRegistry);
+    ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
+
     _width = width;
     _height = height;
     _tileRegistry = tileRegistry ?? throw new ArgumentNullException(nameof(tileRegistry));
     _random = randomProvider ?? throw new ArgumentNullException(nameof(randomProvider));
-    _config = config ?? throw new ArgumentNullException(nameof(config));
+    _tileTypeRuleConfig = tileTypeRuleConfig ?? throw new ArgumentNullException(nameof(tileTypeRuleConfig));
     _heightProvider = heightProvider ?? throw new ArgumentNullException(nameof(heightProvider));
     _chunkOrigin = chunkOrigin;
 
     _weightConfig = weightConfig ?? new WfcWeightConfiguration();
     _heuristicsConfig = heuristicsConfig ?? new HeuristicsConfiguration();
 
-    _ruleTable = new PrecomputedRuleTable(tileRegistry);
+    _ruleTable = new PrecomputedTileTypeRuleTable(tileRegistry);
     _possibilities = new HashSet<int>?[_width][];
 
     // Initialize domains with all possible tile types
@@ -122,12 +135,27 @@ public class WfcProvider
   /// <param name="height">Number of tiles in Y for this solve.</param>
   /// <param name="tileRegistry">Tile registry and rules.</param>
   /// <param name="random">Deterministic random source (seeded per-chunk).</param>
-  /// <param name="config">Terrain rule configuration.</param>
+  /// <param name="tileTypeRuleConfig">Terrain rule configuration.</param>
   /// <param name="heightProvider">Height/biome sampler for contextual rules.</param>
   /// <param name="chunkOrigin">World-space origin of this chunk, used for sampling.</param>
-  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, Random random,
-    TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin)
-    : this(width, height, tileRegistry, new RandomAdapter(random), config, heightProvider, chunkOrigin)
+  public WfcProvider(
+    int width,
+    int height,
+    TileTypeRegistry tileRegistry,
+    Random random,
+    TileTypeRuleConfiguration tileTypeRuleConfig,
+    IHeightProvider heightProvider,
+    Point chunkOrigin
+  )
+    : this(
+        width,
+        height,
+        tileRegistry,
+        new RandomAdapter(random),
+        tileTypeRuleConfig,
+        heightProvider,
+        chunkOrigin
+      )
   {
     ArgumentNullException.ThrowIfNull(random);
   }
@@ -135,18 +163,52 @@ public class WfcProvider
   /// <summary>
   /// Create a WFC solver using a custom random provider and weight configuration.
   /// </summary>
-  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, IRandomProvider randomProvider,
-    TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin, WfcWeightConfiguration weightConfig)
-    : this(width, height, tileRegistry, randomProvider, config, heightProvider, chunkOrigin, weightConfig, null)
+  public WfcProvider(
+    int width,
+    int height,
+    TileTypeRegistry tileRegistry,
+    IRandomProvider randomProvider,
+    TileTypeRuleConfiguration tileTypeRuleConfig,
+    IHeightProvider heightProvider,
+    Point chunkOrigin,
+    WfcWeightConfiguration weightConfig)
+    : this(
+        width,
+        height,
+        tileRegistry,
+        randomProvider,
+        tileTypeRuleConfig,
+        heightProvider,
+        chunkOrigin,
+        weightConfig,
+        null
+      )
   {
   }
 
   /// <summary>
   /// Create a WFC solver using System.Random and weight configuration.
   /// </summary>
-  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, Random random,
-    TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin, WfcWeightConfiguration weightConfig)
-    : this(width, height, tileRegistry, new RandomAdapter(random), config, heightProvider, chunkOrigin, weightConfig, null)
+  public WfcProvider(
+    int width,
+    int height,
+    TileTypeRegistry tileRegistry,
+    Random random,
+    TileTypeRuleConfiguration tileTypeRuleConfig,
+    IHeightProvider heightProvider,
+    Point chunkOrigin,
+    WfcWeightConfiguration weightConfig)
+    : this(
+        width,
+        height,
+        tileRegistry,
+        new RandomAdapter(random),
+        tileTypeRuleConfig,
+        heightProvider,
+        chunkOrigin,
+        weightConfig,
+        null
+      )
   {
     ArgumentNullException.ThrowIfNull(random);
   }
@@ -679,10 +741,11 @@ public class WfcProvider
           neighborPosition,
           neighborTileId,
           directionToNeighbor,
-          _config,
+          _tileTypeRuleConfig,
           candidateSample,
           neighborSample,
-          _mappingService);
+          _mappingService
+        );
 
       var allowedNeighborsNorth = _ruleTable.GetAllowedNeighbors(tileId, Direction.North);
       var allowedNeighborsSouth = _ruleTable.GetAllowedNeighbors(tileId, Direction.South);
@@ -758,7 +821,7 @@ public class WfcProvider
           neighborPosition,
           neighborTileId,
           directionToNeighbor,
-          _config,
+          _tileTypeRuleConfig,
           candidateSample,
           neighborSample,
           _mappingService);

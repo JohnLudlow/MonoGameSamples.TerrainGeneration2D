@@ -1,11 +1,10 @@
 ﻿// Rule table implementation that converts TileTypeRegistry to AC3 format
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 
-namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
+namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 
 /// <summary>
 /// Precomputed rule table implementation that converts TileTypeRegistry adjacency rules 
@@ -15,7 +14,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFuncti
 /// Built once during initialization to eliminate runtime rule evaluation costs.
 /// Uses BitSet data structures for efficient set operations on tile ID collections.
 /// </remarks>
-public class PrecomputedRuleTable : IRuleTable
+public class PrecomputedTileTypeRuleTable : IRuleTable, IRuleTable<int>
 {
   private readonly Dictionary<(int tileId, Direction dir), BitSet> _allowedNeighbors;
 
@@ -25,7 +24,7 @@ public class PrecomputedRuleTable : IRuleTable
   /// </summary>
   /// <param name="registry">Tile registry containing adjacency rules to precompute</param>
   /// <exception cref="ArgumentNullException">Thrown when registry is null</exception>
-  public PrecomputedRuleTable(TileTypeRegistry registry)
+  public PrecomputedTileTypeRuleTable(TileTypeRegistry registry)
   {
     ArgumentNullException.ThrowIfNull(registry);
 
@@ -46,6 +45,17 @@ public class PrecomputedRuleTable : IRuleTable
   }
 
   /// <summary>
+  /// Gets the set of allowed neighboring tile IDs for a given tile in a specific direction.
+  /// </summary>
+  /// <param name="tileId">Source tile ID to check neighbors for</param>
+  /// <param name="direction">Direction to check (North, South, East, West)</param>
+  /// <returns>BitSet containing allowed neighbor tile IDs; empty set if no constraints</returns>
+  IEnumerable<int> IRuleTable<int>.GetAllowedNeighbors(int tileId, Direction direction)
+  {
+    return _allowedNeighbors.GetValueOrDefault((tileId, direction), new BitSet(0));
+  }
+
+  /// <summary>
   /// Precomputes all adjacency rules by testing every tile-direction-neighbor combination
   /// and storing results in efficient BitSet lookup tables.
   /// </summary>
@@ -59,23 +69,29 @@ public class PrecomputedRuleTable : IRuleTable
     // Convert TileType adjacency rules into efficient BitSet lookups
     var directions = new[] { Direction.North, Direction.East, Direction.South, Direction.West };
 
-    // Helper: pick valid context for each tile type
-    TerrainRuleConfiguration config = new TerrainRuleConfiguration();
-    for (int tileId = 0; tileId < registry.TileCount; tileId++)
+    // Use new flexible configuration
+    var config = new TileTypeRuleConfiguration();
+    // Optionally: populate config.Rules with sensible defaults if needed
+
+    for (var tileId = 0; tileId < registry.TileCount; tileId++)
     {
       var tileType = registry.GetTileType(tileId);
+      var rule = config.GetRuleForType(tileId);
 
-      // Pick valid height sample for this tile type
-      HeightSample validHeight = tileType switch
+      // Pick valid height sample for this tile type using rule if present
+      HeightSample validHeight;
+      if (rule != null)
       {
-        OceanTileType => new HeightSample { Altitude = config.OceanHeightMax - 0.01f },
-        BeachTileType => new HeightSample { Altitude = config.BeachHeightMin + 0.01f },
-        PlainsTileType => new HeightSample { Altitude = config.PlainsHeightMin + 0.01f },
-        ForestTileType => new HeightSample { Altitude = config.ForestHeightMin + 0.01f },
-        SnowTileType => new HeightSample { Altitude = config.SnowHeightMin + 0.01f },
-        MountainTileType => new HeightSample { Altitude = config.MountainHeightMin + 0.01f, MountainNoise = config.MountainNoiseThreshold + 0.01f },
-        _ => new HeightSample { Altitude = 0.5f }
-      };
+        validHeight = new HeightSample
+        {
+          Altitude = rule.ElevationMin + 0.01f,
+          MountainNoise = rule.NoiseThreshold.HasValue ? rule.NoiseThreshold.Value + 0.01f : 0.5f
+        };
+      }
+      else
+      {
+        validHeight = new HeightSample { Altitude = 0.5f };
+      }
 
       foreach (var direction in directions)
       {

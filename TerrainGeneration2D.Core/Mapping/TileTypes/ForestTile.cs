@@ -9,12 +9,15 @@ public sealed class ForestTileType : TileType
 
   public override bool EvaluateRules(TileRuleContext context)
   {
+    var rule = context.Config.GetRuleForType(TileId);
     var altitude = context.CandidateHeight.Altitude;
-    if (altitude < context.Config.ForestHeightMin || altitude > context.Config.ForestHeightMax)
+    if (rule != null)
     {
-      return false;
+      if (altitude < rule.ElevationMin || altitude > rule.ElevationMax)
+      {
+        return false;
+      }
     }
-
     return MatchesNeighbor(context, TerrainTileIds.Plains, TerrainTileIds.Forest, TerrainTileIds.Snow, TerrainTileIds.Mountain);
   }
 }

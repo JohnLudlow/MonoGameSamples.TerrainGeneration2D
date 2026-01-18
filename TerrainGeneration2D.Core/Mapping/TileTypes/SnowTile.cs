@@ -9,11 +9,11 @@ public sealed class SnowTileType : TileType
 
   public override bool EvaluateRules(TileRuleContext context)
   {
-    if (context.CandidateHeight.Altitude < context.Config.SnowHeightMin)
+    var rule = context.Config.GetRuleForType(TileId);
+    if (rule != null && context.CandidateHeight.Altitude < rule.ElevationMin)
     {
       return false;
     }
-
     return MatchesNeighbor(context, TerrainTileIds.Forest, TerrainTileIds.Snow, TerrainTileIds.Mountain);
   }
 }
