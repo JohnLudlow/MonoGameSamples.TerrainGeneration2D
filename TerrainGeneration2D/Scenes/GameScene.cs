@@ -43,6 +43,8 @@ internal sealed class GameScene : Scene
   private HeuristicsConfiguration? _heuristicsConfig;
   private RuntimeSettingsPanel? _settingsPanel;
   private bool _showSettings;
+  private int _viewportWidth;
+  private int _viewportHeight;
 
 #pragma warning disable CS8618
   private GameSceneUI _ui;
@@ -71,7 +73,7 @@ internal sealed class GameScene : Scene
 
     // Create chunked tilemap
     // Read configurations from appsettings
-    var cfg = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Log.Config;
+    var cfg = Log.Config;
     var weightsSection = cfg.GetSection("WfcWeights");
     var weightConfig = new WfcWeightConfiguration
     {
@@ -99,8 +101,7 @@ internal sealed class GameScene : Scene
         MaxGroupSizeX = rulesSection.GetValue<int>("BeachOceanSizeMax", 180)
       },
       // Plains
-      new GroupRuleConfiguration
-      {
+      new() {
         Id = TerrainTileIds.Plains,
         ElevationMin = rulesSection.GetValue<float>("PlainsHeightMin", 0.35f),
         ElevationMax = rulesSection.GetValue<float>("PlainsHeightMax", 0.78f),
@@ -108,21 +109,18 @@ internal sealed class GameScene : Scene
         MaxGroupSizeX = rulesSection.GetValue<int>("BeachPlainsSizeMax", 400)
       },
       // Forest
-      new GroupRuleConfiguration
-      {
+      new() {
         Id = TerrainTileIds.Forest,
         ElevationMin = rulesSection.GetValue<float>("ForestHeightMin", 0.42f),
         ElevationMax = rulesSection.GetValue<float>("ForestHeightMax", 0.88f)
       },
       // Snow
-      new GroupRuleConfiguration
-      {
+      new() {
         Id = TerrainTileIds.Snow,
         ElevationMin = rulesSection.GetValue<float>("SnowHeightMin", 0.82f)
       },
       // Mountain
-      new GroupRuleConfiguration
-      {
+      new() {
         Id = TerrainTileIds.Mountain,
         ElevationMin = rulesSection.GetValue<float>("MountainHeightMin", 0.76f),
         NoiseThreshold = rulesSection.GetValue<float>("MountainNoiseThreshold", 0.55f),
@@ -175,17 +173,19 @@ internal sealed class GameScene : Scene
         heuristics,
         terrainConfig,
         getBudget: () => _chunkedTilemap?.WfcTimeBudgetMs ?? timeBudgetMs,
-        setBudget: v => { if (_chunkedTilemap != null) _chunkedTilemap.WfcTimeBudgetMs = v; },
+        setBudget: v => { _chunkedTilemap?.WfcTimeBudgetMs = v; },
         regenerateVisible: () => { if (_chunkedTilemap != null && _camera != null) _chunkedTilemap.RegenerateChunksInView(_camera.ViewportWorldBounds, overwriteSaves: true); },
         clearSaves: () => { _chunkedTilemap?.ClearAllSavedChunks(); }
     );
-    _settingsPanel.IsVisible = false;
+    _settingsPanel.IsVisible = true;
     _settingsPanel.AddToRoot();
 
     // Create camera
-    if (JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.GraphicsDevice != null)
+    if (Core.GameCore.GraphicsDevice != null)
     {
-      _camera = new Camera2D(JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.GraphicsDevice.Viewport);
+      _camera = new Camera2D(Core.GameCore.GraphicsDevice.Viewport);
+      _viewportWidth = Core.GameCore.GraphicsDevice.Viewport.Width;
+      _viewportHeight = Core.GameCore.GraphicsDevice.Viewport.Height;
 
       // Start at center of map
       var centerTile = MapSizeInTiles / 2;
@@ -199,7 +199,7 @@ internal sealed class GameScene : Scene
       _tooltipManager.Initialize();
     }
 
-    var graphicsDevice = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.GraphicsDevice;
+    var graphicsDevice = Core.GameCore.GraphicsDevice;
     if (graphicsDevice != null)
     {
       _debugPixel = new Texture2D(graphicsDevice, 1, 1);
@@ -226,7 +226,7 @@ internal sealed class GameScene : Scene
     // Handle fullscreen toggle
     if (GameController.ToggleFullscreen())
     {
-      var graphics = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.Graphics;
+      var graphics = Core.GameCore.Graphics;
       if (graphics != null)
       {
         graphics.IsFullScreen = !graphics.IsFullScreen;
@@ -270,6 +270,19 @@ internal sealed class GameScene : Scene
     // Update active chunks based on camera viewport
     _chunkedTilemap.UpdateActiveChunks(_camera.ViewportWorldBounds);
 
+    // Handle window resize
+    var graphicsDevice = Core.GameCore.GraphicsDevice;
+    if (graphicsDevice != null && (graphicsDevice.Viewport.Width != _viewportWidth || graphicsDevice.Viewport.Height != _viewportHeight))
+    {
+      _viewportWidth = graphicsDevice.Viewport.Width;
+      _viewportHeight = graphicsDevice.Viewport.Height;
+      var oldPos = _camera.Position;
+      var oldZoom = _camera.Zoom;
+      _camera = new Camera2D(graphicsDevice.Viewport);
+      _camera.Position = oldPos;
+      _camera.Zoom = oldZoom;
+    }
+
     if (GameController.ToggleDebugOverlay())
     {
       _showDebugOverlay = !_showDebugOverlay;
@@ -295,7 +308,7 @@ internal sealed class GameScene : Scene
   {
     GameLoggerMessages.SceneDrawBegin(_log);
     // Clear the back buffer
-    JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.GraphicsDevice?.Clear(Color.Black);
+    Core.GameCore.GraphicsDevice?.Clear(Color.Black);
 
     if (_camera == null || _chunkedTilemap == null)
     {
@@ -303,7 +316,7 @@ internal sealed class GameScene : Scene
       return;
     }
 
-    var spriteBatch = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore.SpriteBatch;
+    var spriteBatch = Core.GameCore.SpriteBatch;
     if (spriteBatch == null)
     {
       base.Draw(gameTime);

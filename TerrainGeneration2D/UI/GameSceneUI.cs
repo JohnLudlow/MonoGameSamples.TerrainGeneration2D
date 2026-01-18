@@ -382,7 +382,8 @@ internal sealed class GameSceneUI : ContainerRuntime
   {
     var text = new TextRuntime();
     // Bottom-left with small padding
-    text.Anchor(Gum.Wireframe.Anchor.BottomLeft);
+    text.Dock(Gum.Wireframe.Dock.Bottom);
+    text.Anchor(Gum.Wireframe.Anchor.Bottom);
     text.X = 10.0f;
     text.Y = -10.0f;
     text.UseCustomFont = true;
