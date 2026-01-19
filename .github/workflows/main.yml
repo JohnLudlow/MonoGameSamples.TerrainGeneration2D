@@ -20,33 +20,33 @@ jobs:
       actions: write
       artifact-metadata: write
       checks: write
-      contents: write 
-      pull-requests: write      
+      contents: write
+      pull-requests: write
     outputs:
       assemblySemVer: ${{ steps.version_step.outputs.assemblySemVer }}
       GitVersion_FullSemVer: ${{ steps.version_step.outputs.GitVersion_FullSemVer }}
       semVer: ${{ steps.version_step.outputs.semVer }}
-      
+
     steps:
-    - uses: actions/checkout@v5
-      with:
-        lfs: true
-        fetch-depth: 0
+      - uses: actions/checkout@v5
+        with:
+          lfs: true
+          fetch-depth: 0
 
-    - id: setup
-      uses: ./.github/actions/setup
+      - id: setup
+        uses: ./.github/actions/setup
 
-    - uses: ./.github/actions/build
+      - uses: ./.github/actions/build
 
-    - name: Tag Commit
-      # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      shell: pwsh
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        $tag = "v${{ steps.setup.outputs.GitVersion_FullSemVer }}"
-        git tag $tag
-        git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git $tag
+      - name: Tag Commit
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          $tag = "v${{ steps.setup.outputs.GitVersion_FullSemVer }}"
+          git tag $tag
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git $tag
 
   test:
     needs: build
@@ -58,17 +58,17 @@ jobs:
       issues: write
 
     steps:
-    - uses: actions/checkout@v5
-      with:
-        lfs: true
-        fetch-depth: 0
+      - uses: actions/checkout@v5
+        with:
+          lfs: true
+          fetch-depth: 0
 
-    - uses: ./.github/actions/setup
+      - uses: ./.github/actions/setup
 
-    - uses: ./.github/actions/test
-      with:
-        assembly-semver: ${{ needs.build.outputs.assemblySemVer }}
-        gitversion-full-semver: ${{ needs.build.outputs.GitVersion_FullSemVer }}
+      - uses: ./.github/actions/test
+        with:
+          assembly-semver: ${{ needs.build.outputs.assemblySemVer }}
+          gitversion-full-semver: ${{ needs.build.outputs.GitVersion_FullSemVer }}
 
   benchmark:
     needs: build
@@ -80,22 +80,22 @@ jobs:
       issues: write
 
     steps:
-    - uses: actions/checkout@v5
-      with:
-        lfs: true
-        fetch-depth: 0
+      - uses: actions/checkout@v5
+        with:
+          lfs: true
+          fetch-depth: 0
 
-    - uses: ./.github/actions/benchmark
+      - uses: ./.github/actions/benchmark
 
   lint-cs:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v5
-      with:
-        lfs: true
-        fetch-depth: 0
+      - uses: actions/checkout@v5
+        with:
+          lfs: true
+          fetch-depth: 0
 
-    - uses: ./.github/actions/lint
+      - uses: ./.github/actions/lint
 
   codeql:
     env:
@@ -106,33 +106,33 @@ jobs:
       contents: read
       security-events: write
     steps:
-    - uses: actions/checkout@v5
-      with:
-        lfs: true
-        fetch-depth: 0
+      - uses: actions/checkout@v5
+        with:
+          lfs: true
+          fetch-depth: 0
 
-    - uses: ./.github/actions/codeql
+      - uses: ./.github/actions/codeql
 
   docs-links:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v5
-    - name: Run link checker
-      shell: pwsh
-      run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/check-doc-links.ps1
+      - uses: actions/checkout@v5
+      - name: Run link checker
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/check-doc-links.ps1
 
   markdownlint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
-    - name: Setup Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-    - name: Install markdownlint-cli
-      run: npm install -g markdownlint-cli
-    - name: Run markdownlint
-      run: markdownlint "**/*.md" --ignore "**/bin/**" --ignore "**/obj/**"
+      - uses: actions/checkout@v5
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install markdownlint-cli
+        run: npm install -g markdownlint-cli
+      - name: Run markdownlint
+        run: markdownlint "**/*.md" --ignore "**/bin/**" --ignore "**/obj/**"
 
   pr-size:
     if: github.event_name == 'pull_request'
@@ -141,9 +141,9 @@ jobs:
       contents: read
       issues: read
     steps:
-    - uses: actions/checkout@v5
-      with:
-        lfs: true
-        fetch-depth: 0
+      - uses: actions/checkout@v5
+        with:
+          lfs: true
+          fetch-depth: 0
 
-    - uses: ./.github/actions/pr-size
+      - uses: ./.github/actions/pr-size
