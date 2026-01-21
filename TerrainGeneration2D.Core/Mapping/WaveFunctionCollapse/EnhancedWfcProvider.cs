@@ -177,11 +177,11 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFuncti
     {
       var neighborOffsets = new[]
       {
-            (new Point(0, -1), Direction.North),
-            (new Point(1, 0), Direction.East),
-            (new Point(0, 1), Direction.South),
-            (new Point(-1, 0), Direction.West)
-        };
+        (new Point(0, -1), Direction.North),
+        (new Point(1, 0), Direction.East),
+        (new Point(0, 1), Direction.South),
+        (new Point(-1, 0), Direction.West)
+      };
 
       foreach (var (offset, direction) in neighborOffsets)
       {
@@ -201,21 +201,42 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFuncti
     private void PropagateInitialConstraints()
     {
       // Propagate from all boundary cells that have been constrained
-      for (var x = 0; x < this.Width; x++)
+      for (var x = 0; x < Width; x++)
       {
-        for (var y = 0; y < this.Height; y++)
+        for (var y = 0; y < Height; y++)
         {
           var cellPoss = GetPossibilities()[x][y];
           if (cellPoss != null && cellPoss.Count == 1)
           {
             // Single-domain cell acts as initial constraint
             var constrainedTile = cellPoss.First();
-            if (!this.Propagator.PropagateFrom(x, y, constrainedTile))
+            if (!Propagator.PropagateFrom(x, y, constrainedTile))
             {
               throw new InvalidOperationException(
                   $"Boundary constraints created contradiction at ({x},{y})");
             }
           }
+        }
+      }
+    }
+
+    /// <summary>
+    /// Applies strict seam equality constraints for internal boundaries in multi-chunk WFC solves.
+    /// </summary>
+    /// <param name="output">WFC output array.</param>
+    /// <param name="chunkSize">Size of each chunk.</param>
+    /// <param name="numChunks">Number of chunks horizontally.</param>
+    public static void ApplyStrictSeamEquality(int[][] output, int chunkSize, int numChunks)
+    {
+      // For each seam between adjacent chunks, force seam cells to be identical
+      for (int chunk = 1; chunk < numChunks; chunk++)
+      {
+        int seamXLeft = chunk * chunkSize - 1;
+        int seamXRight = chunk * chunkSize;
+        for (int y = 0; y < chunkSize; y++)
+        {
+          int seamValue = output[seamXLeft][y];
+          output[seamXRight][y] = seamValue;
         }
       }
     }

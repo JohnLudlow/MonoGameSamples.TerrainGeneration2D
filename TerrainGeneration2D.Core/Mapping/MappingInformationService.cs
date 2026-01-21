@@ -15,8 +15,8 @@ public sealed class MappingInformationService
   public MappingInformationService(int[][] output)
   {
     _output = output ?? throw new ArgumentNullException(nameof(output));
-    _width = output.Length;
-    _height = output.Length > 0 ? output[0].Length : 0;
+    _width = _output.Length;
+    _height = _output.Length > 0 ? output[0].Length : 0;
   }
 
   /// <summary>

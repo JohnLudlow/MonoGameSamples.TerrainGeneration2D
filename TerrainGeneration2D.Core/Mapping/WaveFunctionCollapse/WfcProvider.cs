@@ -246,9 +246,9 @@ public class WfcProvider
   {
 
     // Pre-collapse any pre-filled output cells and propagate constraints
-    for (int x = 0; x < _width; x++)
+    for (var x = 0; x < _width; x++)
     {
-      for (int y = 0; y < _height; y++)
+      for (var y = 0; y < _height; y++)
       {
         if (_output[x][y] != -1)
         {
@@ -263,6 +263,8 @@ public class WfcProvider
         }
       }
     }
+
+    // (Removed: collapse singleton domains before main loop)
 
     if (!enableBacktracking)
     {
@@ -304,6 +306,7 @@ public class WfcProvider
         if (x > 0 && _output[x - 1][y] != -1) neighborTiles.Add(_output[x - 1][y]);
         if (x < _width - 1 && _output[x + 1][y] != -1) neighborTiles.Add(_output[x + 1][y]);
 
+        // Always push the selected cell onto the stack, even if singleton domain
         var weighted = poss.Select(tile => new { Tile = tile, Weight = _weightConfig.Base + neighborTiles.Count(n => n == tile) * _weightConfig.NeighborMatchBoost }).ToList();
         var ordered = weighted
           .OrderByDescending(w => w.Weight)
@@ -382,14 +385,7 @@ public class WfcProvider
           break;
         }
 
-        if (advanced)
-        {
-          context.iterations++;
-        }
-        else
-        {
-          context.iterations++;
-        }
+        context.iterations++;
       }
 
       context.success = false;
@@ -512,7 +508,8 @@ public class WfcProvider
       for (var x = 0; x < _width; x++)
       {
         var poss = _possibilities[x][y];
-        if (poss == null || poss.Count <= 1) continue;
+        // Select cells with domain size >= 1 and not yet assigned
+        if (poss == null || poss.Count == 0) continue;
 
         var k = _heuristicsConfig.UseDomainEntropy ? _domainEntropy.GetScore(x, y, _possibilities, _output, _weightConfig) : double.PositiveInfinity;
         var h = _heuristicsConfig.UseShannonEntropy ? _shannonEntropy.GetScore(x, y, _possibilities, _output, _weightConfig) : double.PositiveInfinity;
@@ -527,6 +524,65 @@ public class WfcProvider
         candidateCells.Add((x, y, k, h, influence));
       }
     }
+
+    if (candidateCells.Count == 0)
+      return (-1, -1);
+
+    // Always select the cell with the lowest domain size (including size 1)
+    var minDomain = candidateCells.Min(c => _possibilities[c.x][c.y]?.Count ?? int.MaxValue);
+    var entropyShortlist = candidateCells.Where(c => _possibilities[c.x][c.y]?.Count == minDomain).ToList();
+
+    TerrainPerformanceEventSource.Log.ReportWfcShortlistSize(entropyShortlist.Count);
+
+    bool doInfluenceTieBreak = _heuristicsConfig.UseMostConstrainingTieBreak &&
+      (
+        (_heuristicsConfig.UseDomainEntropy && _heuristicsConfig.UseShannonEntropy) ||
+        _heuristicsConfig.ApplyInfluenceTieBreakForSingleHeuristic
+      );
+
+    if (doInfluenceTieBreak)
+    {
+      if (_heuristicsConfig.MostConstrainingBias > 0)
+      {
+        // Soft bias: weighted random by influence
+        var weights = entropyShortlist.Select(c => 1.0 + _heuristicsConfig.MostConstrainingBias * c.influence).ToArray();
+        var total = weights.Sum();
+        var roll = _random.NextDouble() * total;
+        double acc = 0;
+        for (int i = 0; i < entropyShortlist.Count; i++)
+        {
+          acc += weights[i];
+          if (roll <= acc)
+          {
+            TerrainPerformanceEventSource.Log.WfcTieBreakInfluenceApplied(entropyShortlist.Count);
+            var chosenBiased = entropyShortlist[i];
+            return (chosenBiased.x, chosenBiased.y);
+          }
+        }
+      }
+      else
+      {
+        // Hard filter: prefer maximum influence
+        var maxInf = entropyShortlist.Max(c => c.influence);
+        entropyShortlist = entropyShortlist.Where(c => c.influence == maxInf).ToList();
+        TerrainPerformanceEventSource.Log.WfcTieBreakInfluenceApplied(entropyShortlist.Count);
+      }
+    }
+
+    if (_heuristicsConfig.PreferCentralCellTieBreak && entropyShortlist.Count > 1)
+    {
+      var centerX = _width / 2;
+      var centerY = _height / 2;
+      int Distance((int x, int y, double k, double h, int influence) c)
+        => Math.Abs(c.x - centerX) + Math.Abs(c.y - centerY);
+
+      var minDist = entropyShortlist.Min(Distance);
+      entropyShortlist = entropyShortlist.Where(c => Distance(c) == minDist).ToList();
+      TerrainPerformanceEventSource.Log.WfcTieBreakCentralApplied(entropyShortlist.Count);
+    }
+
+    var entropyChoice = entropyShortlist[_random.NextInt(entropyShortlist.Count)];
+    return (entropyChoice.x, entropyChoice.y);
 
     if (candidateCells.Count == 0)
       return (-1, -1);

@@ -1,4 +1,6 @@
-﻿namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.WFC;
+using Xunit;
+
+namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests.Core.Mapping.WaveFunctionCollapse;
 
 public class WfcProviderPropertyTests
 {

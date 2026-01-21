@@ -310,7 +310,7 @@ int ChooseTile(List<(int tile, int weight)> weightedOptions)
 
 ## How PrecomputedRuleTable Works
 
-The `PrecomputedRuleTable` (see [PrecomputedRuletable.cs](../../../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/PrecomputedRuletable.cs)) is a performance optimization for constraint checking in WFC. Instead of evaluating tile adjacency rules at runtime for every propagation step, it builds a lookup table during initialization:
+The `PrecomputedTileTypeRuleTable` (see [PrecomputedTileTypeRuleTable.cs](../../../../../TerrainGeneration2D.Core/Mapping/TileTypes/PrecomputedTileTypeRuleTable.cs)) is a performance optimization for constraint checking in WFC. Instead of evaluating tile adjacency rules at runtime for every propagation step, it builds a lookup table during initialization:
 
 - For each tile type and direction, it tests every possible neighbor tile using a valid context (e.g., appropriate altitude for terrain tiles).
 - If the adjacency rule passes, the neighbor tile is added to a BitSet for that direction.

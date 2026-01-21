@@ -1,12 +1,16 @@
-﻿using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.TestCommon.Core.Mapping;
 using Microsoft.Xna.Framework;
 
-namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests;
+namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UnitTests.Core.Mapping;
 
 public sealed class HeuristicsSelectionTests
 {
+  public object NappingTestHelpers { get; private set; }
+
   private sealed class DeterministicRandomProvider : IRandomProvider
   {
     public int NextInt() => 0;
@@ -27,7 +31,6 @@ public sealed class HeuristicsSelectionTests
       ApplyInfluenceTieBreakForSingleHeuristic = true,
       PreferCentralCellTieBreak = false
     };
-
     var wfc = new WfcProvider(
       3,
       3,
@@ -38,13 +41,10 @@ public sealed class HeuristicsSelectionTests
       Point.Zero,
       new WfcWeightConfiguration(),
       heuristics);
-
-    var poss = TestHelpers.GetPrivateField<HashSet<int>?[][]>(wfc, "_possibilities");
-    var output = TestHelpers.GetPrivateField<int[][]>(wfc, "_output");
+    var poss = MappingTestHelpers.GetPrivateField<HashSet<int>?[][]>(wfc, "_possibilities");
+    var output = MappingTestHelpers.GetPrivateField<int[][]>(wfc, "_output");
     Assert.NotNull(poss);
     Assert.NotNull(output);
-
-    // Initialize all cells as decided (null possibilities)
     for (var y = 0; y < 3; y++)
     {
       for (var x = 0; x < 3; x++)
@@ -53,19 +53,13 @@ public sealed class HeuristicsSelectionTests
         output![x][y] = -1;
       }
     }
-
-    // Two candidate cells with equal domain size: corner (0,0) and center (1,1)
-    poss![0][0] = [1, 2]; // influence will be 0 (neighbors are null)
-    poss[1][1] = [1, 2]; // we will give it 4 undecided neighbors
-
-    // Make center's neighbors undecided to raise influence
-    poss[1][0] = [1];
-    poss[1][2] = [1];
-    poss[0][1] = [1];
-    poss[2][1] = [1];
-
-    // Invoke private FindLowestEntropy and assert it selects the center (1,1)
-    var result = (ValueTuple<int, int>)TestHelpers.InvokePrivateMethod(wfc, "FindLowestEntropy")!;
+    poss![0][0] = new HashSet<int> { 1, 2 };
+    poss[1][1] = new HashSet<int> { 1, 2 };
+    poss[1][0] = new HashSet<int> { 1 };
+    poss[1][2] = new HashSet<int> { 1 };
+    poss[0][1] = new HashSet<int> { 1 };
+    poss[2][1] = new HashSet<int> { 1 };
+    var result = (System.ValueTuple<int, int>)MappingTestHelpers.InvokePrivateMethod(wfc, "FindLowestEntropy")!;
     Assert.Equal((1, 1), result);
   }
 
@@ -92,13 +86,12 @@ public sealed class HeuristicsSelectionTests
       Point.Zero,
       new WfcWeightConfiguration(),
       heuristics);
+    var poss = MappingTestHelpers.GetPrivateField<HashSet<int>?[][]>(wfc, "_possibilities");
+    var output = MappingTestHelpers.GetPrivateField<int[][]>(wfc, "_output");
 
-    var poss = TestHelpers.GetPrivateField<HashSet<int>?[][]>(wfc, "_possibilities");
-    var output = TestHelpers.GetPrivateField<int[][]>(wfc, "_output");
     Assert.NotNull(poss);
     Assert.NotNull(output);
 
-    // Initialize all cells as decided
     for (var y = 0; y < 3; y++)
     {
       for (var x = 0; x < 3; x++)
@@ -107,21 +100,10 @@ public sealed class HeuristicsSelectionTests
         output![x][y] = -1;
       }
     }
-
-    // Two candidates with equal domain and equal influence: corner (0,0) and center (1,1)
     poss![0][0] = [1, 2];
+    poss[2][2] = [1, 2];
     poss[1][1] = [1, 2];
-
-    // Give the corner exactly 2 undecided neighbors (max possible for a corner)
-    poss[1][0] = [1];
-    poss[0][1] = [1];
-
-    // Give the center also exactly 2 undecided neighbors to tie influence
-    poss[1][0] = [1]; // already set, shared neighbor
-    poss[1][2] = [1];
-    // Note: left/right of center remain decided (null) to keep influence equal to 2
-
-    var result = (ValueTuple<int, int>)TestHelpers.InvokePrivateMethod(wfc, "FindLowestEntropy")!;
+    var result = (ValueTuple<int, int>)MappingTestHelpers.InvokePrivateMethod(wfc, "FindLowestEntropy")!;
     Assert.Equal((1, 1), result);
   }
 }

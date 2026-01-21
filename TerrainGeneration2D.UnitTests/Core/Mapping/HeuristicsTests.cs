@@ -1,7 +1,7 @@
-﻿using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.EntropyProviders;
 
-namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests;
+namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UnitTests.Core.Mapping;
 
 public sealed class HeuristicsTests
 {
@@ -15,18 +15,16 @@ public sealed class HeuristicsTests
     var provider = new DomainEntropyProvider();
     var possibilities = new HashSet<int>?[2][]
     {
-      [[.. TestDomain1], null],
-      [[.. TestDomain2], null]
+      [new HashSet<int>(TestDomain1), null],
+      [new HashSet<int>(TestDomain2), null]
     };
     var output = new int[2][]
     {
-      [-1, -1],
-      [-1, -1]
+      new int[] { -1, -1 },
+      new int[] { -1, -1 }
     };
-
     var k00 = provider.GetScore(0, 0, possibilities, output, DefaultWeights);
     var k10 = provider.GetScore(1, 0, possibilities, output, DefaultWeights);
-
     Assert.True(k10 < k00); // 2 < 3
   }
 
@@ -36,18 +34,15 @@ public sealed class HeuristicsTests
     var provider = new ShannonEntropyProvider();
     var possibilities = new HashSet<int>?[2][]
     {
-      [[.. TestDomain1], null],
+      [new HashSet<int>(TestDomain1), null],
       [null, null]
     };
     var output = new int[2][]
     {
-      [-1, 1],
-      [-1, -1]
+      new int[] { -1, 1 },
+      new int[] { -1, -1 }
     };
-
     var h = provider.GetScore(0, 0, possibilities, output, DefaultWeights);
-
-    // Compare with uniform entropy ln(3) ≈ 1.099; expect h < ln(3)
     Assert.True(h < Math.Log(3.0));
   }
 }

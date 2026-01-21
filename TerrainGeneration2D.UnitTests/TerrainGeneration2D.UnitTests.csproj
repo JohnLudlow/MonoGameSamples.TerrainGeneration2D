@@ -1,12 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-
     <NoWarn>CA1515;CA1861</NoWarn>
+
+    <RootNamespace>JohnLudlow.MonoGameSamples.TerrainGeneration2D.UnitTests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TerrainGeneration2D.TestCommon\TerrainGeneration2D.TestCommon.csproj" />
     <ProjectReference Include="..\TerrainGeneration2D.Core\TerrainGeneration2D.Core.csproj" />
   </ItemGroup>
 
