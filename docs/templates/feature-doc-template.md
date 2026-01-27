@@ -1,4 +1,4 @@
-# Feature Title
+﻿# Feature Title
 
 ## Overview
 
@@ -7,10 +7,6 @@ Detailed description of the feature including purpose and intent as well as inte
 ## Table of contents
 
 - Table of contents with links to child sections
-
-## Feature requirements
-
-Detailed description of the feature and its requirements
 
 ## Feature status
 
@@ -32,7 +28,7 @@ If the feature is composed of multiple parts and some are implemented, list the 
 
 ## Definition of terms
 
-Detailed list of terms not considered 'common english'. Include references to articles about the term
+Detailed table (sorted alphabetically by the term) of terms not considered 'common english'. Include references to articles about the term.
 
 | Term | Meaning | Reference |
 | ---- | ------- | --------- |
@@ -57,7 +53,33 @@ complete.
 
 If the feature is extensive and complex, create multiple subsections to make these steps more legible.
 
+### Feature requirements
+
+Detailed description of the feature and its requirements
+
+A list of feature-level requirements in Given/When/Then syntax.
+
+If a feature is considered complete then indicate with a ***COMPLETE*** prefix.
+
+```markdown
+- (***requirement status***) Requirement descriptive text
+  - GIVEN a precondition
+  - WHEN an event happens
+  - THEN an action is taken / a result property is true
+
+> Details of missing implementation / link to phase with missing implementation
+
+- (***requirement status***) Requirement descriptive text
+  - GIVEN a precondition
+  - WHEN an event happens
+  - THEN an action is taken / a result property is true
+
+> Details of missing implementation / link to phase with missing implementation
+```
+
 ### Phase N
+
+***Phase status***
 
 #### Objective
 
@@ -70,6 +92,28 @@ Description of success criteria
 Detailed description of how this part of the feature works.
 
 Include technical details, diagrams, and deeper explanation of what this element tries to achieve.
+
+#### Phase requirements
+
+A list of phase-level requirements in Given/When/Then syntax.
+
+If a phase is considered complete then indicate with a ***COMPLETE*** prefix.
+
+```markdown
+- (***requirement status***) Requirement descriptive text
+  - GIVEN a precondition
+  - WHEN an event happens
+  - THEN an action is taken / a result property is true
+
+> Details of missing implementation / link to phase with missing implementation
+
+- (***requirement status***) Requirement descriptive text
+  - GIVEN a precondition
+  - WHEN an event happens
+  - THEN an action is taken / a result property is true
+
+> Details of missing implementation / link to phase with missing implementation
+```
 
 #### Examples
 

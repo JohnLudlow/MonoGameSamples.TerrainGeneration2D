@@ -1,4 +1,4 @@
-# Comprehensive Property-Based and Performance Regression Tests for WFC
+﻿# Comprehensive Property-Based and Performance Regression Tests for WFC
 
 ## Overview
 
@@ -15,10 +15,35 @@ Achieve comprehensive property-based and performance regression testing for the 
 
 ## Feature requirements
 
-- Property-based tests for constraint satisfaction, determinism, and completeness
-- Performance regression tests for chunk generation time and memory usage
-- Automated test integration with CI pipeline
-- Statistical analysis of test results (e.g., 95th percentile timing)
+### Feature requirements
+
+- (Incomplete) Property-based tests for constraint satisfaction, determinism, and completeness
+  - GIVEN the WFC system and a range of random inputs
+  - WHEN property-based tests are run
+  - THEN all outputs satisfy constraints, are deterministic, and complete
+
+> Implementation not started. See Implementation guide Phase 1.
+
+- (Incomplete) Performance regression tests for chunk generation time and memory usage
+  - GIVEN the WFC system and chunk generation benchmarks
+  - WHEN performance tests are run
+  - THEN chunk generation time and memory usage are within budget
+
+> Implementation not started. See Implementation guide Phase 2.
+
+- (Incomplete) Automated test integration with CI pipeline
+  - GIVEN property-based and performance tests
+  - WHEN the CI pipeline runs
+  - THEN all tests are executed and results are reported
+
+> Implementation not started. See Implementation guide Phase 3.
+
+- (Incomplete) Statistical analysis of test results (e.g., 95th percentile timing)
+  - GIVEN test results from property and performance tests
+  - WHEN analyzing results
+  - THEN statistical metrics (e.g., 95th percentile) are reported and tracked
+
+> Implementation not started. See Implementation guide Phase 3.
 
 ## Feature status
 

@@ -1,4 +1,4 @@
-# Wave Function Collapse Implementation Completion Plan
+﻿# Wave Function Collapse Implementation Completion Plan
 
 ## Overview
 
@@ -49,20 +49,36 @@ into a standalone library for production strategy games.
 
 ## Feature requirements
 
-- **AC-3 Constraint Propagation**: Replace current propagation with proper arc
-  consistency algorithm for 40% reduction in contradictions
-- **Precomputed Rule Tables**: Achieve 70% performance improvement in rule evaluation
-  through lookup tables
-- **Boundary Constraint System**: Ensure 100% consistency between adjacent chunk
-  boundaries with no visual seams
-- **Performance Optimization**: 60% reduction in memory allocations and 80% reduction
-  in height-related computations
-- **Library Abstraction**: Generic WFC solver interface supporting non-tile domains
-  and plugin architecture
-- **Comprehensive Testing**: ≥95% code coverage with unit, integration,
-  property-based, and performance regression tests
-- **Developer Documentation**: Complete onboarding materials enabling productivity
-  within 2 weeks for WFC newcomers
+See Implementation guide > Feature requirements for all high-level requirements in GWT format.
+
+## Implementation guide
+
+### Feature requirements
+
+- Map generation requirements:
+  - GIVEN a valid configuration and tile rules
+  - WHEN chunk generation is triggered
+  - THEN the WFC algorithm produces a seamless, deterministic terrain map with no visual seams between chunks
+
+- Performance requirements:
+  - GIVEN a time budget constraint
+  - WHEN terrain generation runs
+  - THEN chunk generation completes within the specified time budget
+
+- Extensibility requirements:
+  - GIVEN a new tile type or rule system
+  - WHEN the plugin architecture is used
+  - THEN the WFC solver supports extension without core changes
+
+Technical Feature Requirements:
+
+- AC-3 Constraint Propagation: Replace current propagation with proper arc consistency algorithm for 40% reduction in contradictions
+- Precomputed Rule Tables: Achieve 70% performance improvement in rule evaluation through lookup tables
+- Boundary Constraint System: Ensure 100% consistency between adjacent chunk boundaries with no visual seams
+- Performance Optimization: 60% reduction in memory allocations and 80% reduction in height-related computations
+- Library Abstraction: Generic WFC solver interface supporting non-tile domains and plugin architecture
+- Comprehensive Testing: ≥95% code coverage with unit, integration, property-based, and performance regression tests
+- Developer Documentation: Complete onboarding materials enabling productivity within 2 weeks for WFC newcomers
 
 ## Feature status
 
@@ -230,42 +246,88 @@ This foundational phase converts array declarations and access patterns througho
 
 **Breaking Changes**: This phase introduces breaking changes to public interfaces. All entropy providers, rule tables, and diagnostic utilities must be updated simultaneously.
 
+### Phase requirements
+
+- Array migration:
+  - GIVEN a partial WFC implementation
+  - WHEN AC-3 propagation is implemented
+  - THEN contradictions are reduced and propagation is more robust
+
 #### Examples
 
 **Array Migration Comparison:** This example demonstrates the conversion from multidimensional to jagged arrays for WFC domains, showing the syntax changes required and performance benefits achieved.
 
-```csharp
-// Before: Multidimensional array declaration and access
-private readonly HashSet<int>?[,] _possibilities;
-private readonly int[,] _output;
+### Feature requirements
 
-// Initialize
-_possibilities = new HashSet<int>?[width, height];
-_output = new int[width, height];
+- (Incomplete) Map generation produces seamless, deterministic terrain
+  - GIVEN a valid configuration and tile rules
+  - WHEN the WFC algorithm runs
+  - THEN the WFC algorithm produces a seamless, deterministic terrain map with no visual seams between chunks
 
-// Access
-var domain = _possibilities[x, y];
-_output[x, y] = selectedTile;
-```
+> Implementation in progress. See Implementation guide Phases 1–3.
 
-```csharp
-// After: Jagged array declaration and access  
-private readonly HashSet<int>?[][] _possibilities;
-private readonly int[][] _output;
+- (Incomplete) Chunk generation completes within time budget
+  - GIVEN a time budget constraint
+  - WHEN chunk generation is triggered
+  - THEN chunk generation completes within the specified time budget
 
-// Initialize
-_possibilities = new HashSet<int>?[width][];
-_output = new int[width][];
-for (int x = 0; x < width; x++)
-{
-    _possibilities[x] = new HashSet<int>?[height];
-    _output[x] = new int[height];
-}
+> Implementation in progress. See Implementation guide Phase 3.
 
-// Access
-var domain = _possibilities[x][y];
-_output[x][y] = selectedTile;
-```
+- (Incomplete) Solver supports extension without core changes
+  - GIVEN a new tile type or rule system
+  - WHEN extending the WFC solver
+  - THEN the WFC solver supports extension without core changes
+
+> Implementation not started. See Implementation guide Phase 4.
+
+- (Incomplete) AC-3 constraint propagation reduces contradictions
+  - GIVEN the current propagation algorithm
+  - WHEN AC-3 is implemented
+  - THEN contradictions are reduced by 40%
+
+> Implementation not started. See Implementation guide Phase 1.
+
+- (Incomplete) Precomputed rule tables improve performance
+  - GIVEN rule evaluation in the WFC algorithm
+  - WHEN precomputed lookup tables are used
+  - THEN rule evaluation performance improves by 70%
+
+> Implementation not started. See Implementation guide Phase 2.
+
+- (Incomplete) Boundary constraint system ensures chunk consistency
+  - GIVEN adjacent chunk boundaries
+  - WHEN boundary constraint system is implemented
+  - THEN 100% consistency is achieved between adjacent chunk boundaries
+
+> Implementation not started. See Implementation guide Phase 2.
+
+- (Incomplete) Performance optimization reduces allocations and computation
+  - GIVEN current memory and computation profile
+  - WHEN optimizations are applied
+  - THEN memory allocations are reduced by 60% and height-related computations by 80%
+
+> Implementation not started. See Implementation guide Phase 3.
+
+- (Incomplete) Library abstraction supports non-tile domains and plugins
+  - GIVEN the WFC solver
+  - WHEN library abstraction is implemented
+  - THEN the solver supports non-tile domains and plugin architecture
+
+> Implementation not started. See Implementation guide Phase 4.
+
+- (Incomplete) Comprehensive testing achieves ≥95% code coverage
+  - GIVEN the WFC implementation
+  - WHEN unit, integration, property-based, and performance regression tests are run
+  - THEN code coverage is ≥95%
+
+> Implementation not started. See Implementation guide Phase 5.
+
+- (Incomplete) Developer documentation enables onboarding in 2 weeks
+  - GIVEN onboarding materials
+  - WHEN new developers join
+  - THEN productivity is achieved within 2 weeks
+
+> Implementation not started. See Implementation guide Phase 6.
 
 **Interface Signature Updates:** This example shows how entropy provider interfaces need to be updated to use jagged arrays instead of multidimensional arrays for domain parameters.
 
@@ -304,6 +366,13 @@ Key architectural changes:
 - **Arc queue management**: Efficient queue processing with neighbor enumeration and direction mapping
 - **Contradiction detection**: Early termination when domains become empty, triggering backtracking
 - **Performance optimization**: Use jagged arrays (`HashSet<int>[][]`) instead of multidimensional arrays (`HashSet<int>[,]`) for 10-30% faster domain access in tight WFC loops
+
+### Phase requirements
+
+- Core algorithm enhancement:
+  - GIVEN a working WFC core
+  - WHEN precomputed rule tables are added
+  - THEN rule evaluation performance improves
 
 #### Examples
 
@@ -685,6 +754,13 @@ Key technical considerations:
 - **Flexible boundaries**: Support for incomplete neighbor sets during initial world generation
 - **Rule compatibility**: Boundary constraints work seamlessly with existing adjacency rule system
 
+### Phase requirements
+
+- Chunk seam consistency:
+  - GIVEN adjacent chunks with boundary constraints
+  - WHEN chunk generation completes
+  - THEN boundaries are visually and logically consistent
+
 #### Examples
 
 **Boundary Constraint Interface:** This interface and supporting classes demonstrate how to extract tile constraints from neighboring chunks and apply them to ensure seamless boundaries between generated chunks.
@@ -849,6 +925,13 @@ Memory optimization strategies:
 - **Object pooling**: Reuse domain HashSet instances across multiple WFC runs
 - **Struct optimization**: Use value types for frequently allocated objects like coordinates
 - **Lazy initialization**: Defer expensive computations until actually needed
+
+### Phase requirements
+
+- Performance optimization:
+  - GIVEN a set of unit, integration, and property tests
+  - WHEN the WFC implementation is updated
+  - THEN code coverage remains ≥95%
 
 #### Examples
 
