@@ -325,12 +325,10 @@ This foundational phase converts array declarations and access patterns througho
 
 #### Phase requirements
 
-```markdown
 - (***COMPLETE***) Array migration to jagged arrays
-    - GIVEN a partial WFC implementation
-    - WHEN array migration is performed
-    - THEN domain access is 10-30% faster and CA1814 warnings are eliminated
-```
+  - GIVEN a partial WFC implementation
+  - WHEN array migration is performed
+  - THEN domain access is 10-30% faster and CA1814 warnings are eliminated
 
 #### Examples
 
@@ -376,17 +374,15 @@ Key architectural changes:
 
 #### Phase requirements
 
-```markdown
 - (***COMPLETE***) AC-3 constraint propagation implemented
-    - GIVEN the current propagation algorithm
-    - WHEN AC-3 is implemented
-    - THEN contradictions are reduced by 40%
+  - GIVEN the current propagation algorithm
+  - WHEN AC-3 is implemented
+  - THEN contradictions are reduced by 40%
 
 - (***COMPLETE***) Precomputed rule tables for performance
-    - GIVEN rule evaluation in the WFC algorithm
-    - WHEN precomputed lookup tables are used
-    - THEN rule evaluation performance improves by 70%
-```
+  - GIVEN rule evaluation in the WFC algorithm
+  - WHEN precomputed lookup tables are used
+  - THEN rule evaluation performance improves by 70%
 
 #### Examples
 
@@ -1071,12 +1067,10 @@ Achieve ≥95% code coverage with comprehensive unit, integration, property-base
 
 #### Phase requirements
 
-```markdown
 - (Incomplete) Comprehensive testing achieves ≥95% code coverage
-    - GIVEN the WFC implementation
-    - WHEN unit, integration, property-based, and performance regression tests are run
-    - THEN code coverage is ≥95%
-```
+  - GIVEN the WFC implementation
+  - WHEN unit, integration, property-based, and performance regression tests are run
+  - THEN code coverage is ≥95%
 
 Comprehensive testing strategy validates both algorithmic correctness and performance characteristics across the entire WFC implementation. Testing architecture covers multiple validation levels from unit-level algorithm verification to end-to-end integration scenarios.
 
