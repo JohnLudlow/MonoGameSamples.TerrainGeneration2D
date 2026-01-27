@@ -1,4 +1,4 @@
-# This workflow will build a .NET project
+﻿# This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
 name: Build and Test
@@ -39,7 +39,7 @@ jobs:
     - uses: ./.github/actions/build
 
     - name: Tag Commit
-      # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       shell: pwsh
       run: |
         git config --local user.email "action@github.com"
