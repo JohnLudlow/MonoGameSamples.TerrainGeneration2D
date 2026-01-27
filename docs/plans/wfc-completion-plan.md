@@ -281,9 +281,9 @@ This null-based design requires careful consideration when interfacing with comp
 > Implementation not started. See Implementation guide Phase 5.
 
 - (Incomplete) Developer documentation enables onboarding in 2 weeks
-    - GIVEN onboarding materials
-    - WHEN new developers join
-    - THEN productivity is achieved within 2 weeks
+  - GIVEN onboarding materials
+  - WHEN new developers join
+  - THEN productivity is achieved within 2 weeks
 
 > Implementation not started. See Implementation guide Phase 6.
 
@@ -758,7 +758,6 @@ Key technical considerations:
   - WHEN chunk generation completes
   - THEN boundaries are visually and logically consistent
 
-
 #### Examples
 
 **Boundary Constraint Interface:** This interface and supporting classes demonstrate how to extract tile constraints from neighboring chunks and apply them to ensure seamless boundaries between generated chunks.
@@ -1060,7 +1059,6 @@ public interface IEntropyProviderPlugin
 }
 ```
 
-
 ### Phase 5: Comprehensive Testing
 
 (Incomplete)
@@ -1161,7 +1159,6 @@ public void ChunkGeneration_CompletesWithinTimeBudget_Under95PercentOfCases()
         $"95th percentile timing {percentile95.TotalMilliseconds}ms exceeds 100ms budget");
 }
 ```
-
 
 ### Phase 6: Documentation and Onboarding
 
