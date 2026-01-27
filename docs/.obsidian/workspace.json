@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "plans/github-actions-improvements-plan.md",
+                "file": "plans/wfc-completion-plan.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "github-actions-improvements-plan"
+              "title": "wfc-completion-plan"
             }
           },
           {
@@ -92,7 +92,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 200
   },
   "right": {
     "id": "7a8063ce0dea8ef5",
@@ -199,6 +199,13 @@
   },
   "active": "a3a192fd42fe2bd2",
   "lastOpenFiles": [
+    "templates/feature-doc-template.md",
+    "plans/wfc-completion-plan.md",
+    "plans/wfc-completion-plan/performance-analysis.md",
+    "plans/wfc-completion-plan/wfc-completion-plan-append.md",
+    "plans/wfc-completion-plan-append.md",
+    "wfc/wfc-implementation-roadmap.md",
+    "plans/github-actions-improvements-plan.md",
     "plans/fix-pr-comment-permissions-plan.md",
     "plans/resolve-build-warnings-plan.md",
     "features/mapping/map-generation/wfc/05-heuristics.md",
@@ -207,7 +214,6 @@
     "plans/wfc-completion-plan/plugin-architecture.md",
     "plans/wfc-completion-plan/property-and-performance-tests.md",
     "plans/wfc-completion-plan/library-abstraction.md",
-    "plans/wfc-completion-plan.md",
     "plans/wfc-completion-plan"
   ]
 }
