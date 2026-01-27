@@ -1,4 +1,5 @@
-﻿# Wave Function Collapse Implementation Completion Plan
+﻿
+# Wave Function Collapse Implementation Completion Plan
 
 ## Overview
 
@@ -38,47 +39,22 @@ into a standalone library for production strategy games.
 - Developer Onboarding: Clear interfaces and comprehensive documentation for teams
   unfamiliar with constraint satisfaction
 
-## Table of Contents
+## Table of contents
 
 - [Overview](#overview)
-- [Feature requirements](#feature-requirements)
 - [Feature status](#feature-status)
 - [Definition of terms](#definition-of-terms)
 - [Architectural considerations and constraints](#architectural-considerations-and-constraints)
 - [Implementation guide](#implementation-guide)
-
-## Feature requirements
-
-See Implementation guide > Feature requirements for all high-level requirements in GWT format.
-
-## Implementation guide
-
-### Feature requirements
-
-- Map generation requirements:
-  - GIVEN a valid configuration and tile rules
-  - WHEN chunk generation is triggered
-  - THEN the WFC algorithm produces a seamless, deterministic terrain map with no visual seams between chunks
-
-- Performance requirements:
-  - GIVEN a time budget constraint
-  - WHEN terrain generation runs
-  - THEN chunk generation completes within the specified time budget
-
-- Extensibility requirements:
-  - GIVEN a new tile type or rule system
-  - WHEN the plugin architecture is used
-  - THEN the WFC solver supports extension without core changes
-
-Technical Feature Requirements:
-
-- AC-3 Constraint Propagation: Replace current propagation with proper arc consistency algorithm for 40% reduction in contradictions
-- Precomputed Rule Tables: Achieve 70% performance improvement in rule evaluation through lookup tables
-- Boundary Constraint System: Ensure 100% consistency between adjacent chunk boundaries with no visual seams
-- Performance Optimization: 60% reduction in memory allocations and 80% reduction in height-related computations
-- Library Abstraction: Generic WFC solver interface supporting non-tile domains and plugin architecture
-- Comprehensive Testing: ≥95% code coverage with unit, integration, property-based, and performance regression tests
-- Developer Documentation: Complete onboarding materials enabling productivity within 2 weeks for WFC newcomers
+  - [Feature requirements](#feature-requirements)
+  - [Child Feature Plans](#child-feature-plans)
+  - [Phase 0: Array Migration (Prerequisite)](#phase-0-array-migration-prerequisite)
+  - [Phase 1: Core Algorithm Enhancement](#phase-1-core-algorithm-enhancement)
+  - [Phase 2: Chunk Seam Consistency](#phase-2-chunk-seam-consistency)
+  - [Phase 3: Performance Optimization](#phase-3-performance-optimization)
+  - [Phase 4: Library Abstraction](#phase-4-library-abstraction)
+  - [Phase 5: Comprehensive Testing](#phase-5-comprehensive-testing)
+  - [Phase 6: Documentation and Onboarding](#phase-6-documentation-and-onboarding)
 
 ## Feature status
 
@@ -87,6 +63,25 @@ Technical Feature Requirements:
 The WFC implementation is currently partial with basic functionality in place, but
 requires significant completion work to meet production requirements for strategy game
 integration.
+
+**Current Implementation Status:**
+
+- ✅ Complete jagged array structure (`HashSet<int>?[][]`) for domains and outputs
+- ✅ Comprehensive `Generate()` methods (with and without backtracking)
+- ✅ Advanced entropy-based cell selection with multiple heuristics (domain size, Shannon entropy, most constraining variable, etc.)
+- ✅ Weighted tile selection with neighbor matching and configurable weights
+- ✅ Change logging and full backtracking support for contradiction recovery
+- ✅ AC3Propagator integration: arc consistency propagation is fully implemented and used for all constraint propagation
+- ✅ ChangeLog support in AC3Propagator: reversible propagation and backtracking are correctly supported
+- ✅ PrecomputedRuleTable implemented and used for all adjacency checks; all components requiring adjacency checks receive the shared instance, eliminating duplicate or legacy rule table construction
+- ✅ Chunk boundary constraints: interfaces and partial implementation for seamless chunk seaming
+- ✅ Runtime configuration via `appsettings.json` and F10 panel (heuristics, weights, time budget)
+- ✅ Diagnostics: performance event source, chunk save/load counters, and debug overlay
+- ✅ Extensive XML documentation for public APIs and non-trivial methods
+- ✅ Unit and integration tests for core WFC and chunking logic
+- ❌ **Missing: [Full plugin architecture for entropy/constraint providers](wfc-completion-plan/plugin-architecture.md)** (interfaces present, not fully pluggable)
+- ❌ **Missing: [Library abstraction for non-tile domains](wfc-completion-plan/library-abstraction.md)** (currently terrain-specific)
+- ❌ **Missing: [Comprehensive property-based and performance regression tests](wfc-completion-plan/property-and-performance-tests.md)** (coverage improving, not at target)
 
 ## Definition of terms
 
@@ -220,43 +215,6 @@ This null-based design requires careful consideration when interfacing with comp
 
 ## Implementation guide
 
-### Child Feature Plans
-
-- [Plugin Architecture](wfc-completion-plan/plugin-architecture.md)
-- [Library Abstraction for Non-Tile Domains](wfc-completion-plan/library-abstraction.md)
-- [Comprehensive Property-Based and Performance Regression Tests](wfc-completion-plan/property-and-performance-tests.md)
-
-Detailed step-by-step implementation guide following Test Driven Development principles where applicable, leading with minimal breaking tests, followed by minimal changes to fix tests, followed by refactor, repeating until the feature is complete.
-
-### Phase 0: Array Migration (Prerequisite)
-
-#### Objective
-
-Migrate all WFC-related data structures from multidimensional arrays to jagged arrays to achieve 10-30% performance improvement in domain access operations and eliminate CA1814 analyzer warnings.
-
-#### Technical details
-
-This foundational phase converts array declarations and access patterns throughout the WFC system. The migration follows a specific order to minimize compilation errors:
-
-1. **Interface updates**: Modify `ICellEntropyProvider` and related interfaces
-2. **Core WFC classes**: Update `WfcProvider._possibilities` and `._output` fields  
-3. **Algorithm implementations**: Convert `AC3Propagator`, `ChangeLog`, entropy providers
-4. **Supporting services**: Update `MappingInformationService` and diagnostic utilities
-5. **Test infrastructure**: Convert test fixtures and benchmark data
-
-**Breaking Changes**: This phase introduces breaking changes to public interfaces. All entropy providers, rule tables, and diagnostic utilities must be updated simultaneously.
-
-### Phase requirements
-
-- Array migration:
-  - GIVEN a partial WFC implementation
-  - WHEN AC-3 propagation is implemented
-  - THEN contradictions are reduced and propagation is more robust
-
-#### Examples
-
-**Array Migration Comparison:** This example demonstrates the conversion from multidimensional to jagged arrays for WFC domains, showing the syntax changes required and performance benefits achieved.
-
 ### Feature requirements
 
 - (Incomplete) Map generation produces seamless, deterministic terrain
@@ -329,6 +287,53 @@ This foundational phase converts array declarations and access patterns througho
 
 > Implementation not started. See Implementation guide Phase 6.
 
+- AC-3 Constraint Propagation: Replace current propagation with proper arc consistency algorithm for 40% reduction in contradictions
+- Precomputed Rule Tables: Achieve 70% performance improvement in rule evaluation through lookup tables
+- Boundary Constraint System: Ensure 100% consistency between adjacent chunk boundaries with no visual seams
+- Performance Optimization: 60% reduction in memory allocations and 80% reduction in height-related computations
+- Library Abstraction: Generic WFC solver interface supporting non-tile domains and plugin architecture
+- Comprehensive Testing: ≥95% code coverage with unit, integration, property-based, and performance regression tests
+- Developer Documentation: Complete onboarding materials enabling productivity within 2 weeks for WFC newcomers
+
+### Child Feature Plans
+
+- [Plugin Architecture](wfc-completion-plan/plugin-architecture.md)
+- [Library Abstraction for Non-Tile Domains](wfc-completion-plan/library-abstraction.md)
+- [Comprehensive Property-Based and Performance Regression Tests](wfc-completion-plan/property-and-performance-tests.md)
+
+Detailed step-by-step implementation guide following Test Driven Development principles where applicable, leading with minimal breaking tests, followed by minimal changes to fix tests, followed by refactor, repeating until the feature is complete.
+
+### Phase 0: Array Migration (Prerequisite)
+
+***COMPLETE***
+
+#### Objective
+
+Migrate all WFC-related data structures from multidimensional arrays to jagged arrays to achieve 10-30% performance improvement in domain access operations and eliminate CA1814 analyzer warnings.
+
+#### Technical details
+
+This foundational phase converts array declarations and access patterns throughout the WFC system. The migration follows a specific order to minimize compilation errors:
+
+1. **Interface updates**: Modify `ICellEntropyProvider` and related interfaces
+2. **Core WFC classes**: Update `WfcProvider._possibilities` and `._output` fields  
+3. **Algorithm implementations**: Convert `AC3Propagator`, `ChangeLog`, entropy providers
+4. **Supporting services**: Update `MappingInformationService` and diagnostic utilities
+5. **Test infrastructure**: Convert test fixtures and benchmark data
+
+**Breaking Changes**: This phase introduces breaking changes to public interfaces. All entropy providers, rule tables, and diagnostic utilities must be updated simultaneously.
+
+#### Phase requirements
+
+- (***COMPLETE***) Array migration to jagged arrays
+  - GIVEN a partial WFC implementation
+  - WHEN array migration is performed
+  - THEN domain access is 10-30% faster and CA1814 warnings are eliminated
+
+#### Examples
+
+**Array Migration Comparison:** This example demonstrates the conversion from multidimensional to jagged arrays for WFC domains, showing the syntax changes required and performance benefits achieved.
+
 **Interface Signature Updates:** This example shows how entropy provider interfaces need to be updated to use jagged arrays instead of multidimensional arrays for domain parameters.
 
 ```csharp
@@ -347,11 +352,11 @@ public interface ICellEntropyProvider
 
 ### Phase 1: Core Algorithm Enhancement
 
+***COMPLETE***
+
 #### Objective
 
 Replace runtime rule evaluation with precomputed tables and implement proper AC-3 constraint propagation to achieve 70% performance improvement in rule evaluation and proper arc consistency with reduced contradiction rates.
-
-**Prerequisites: Array Migration** - Before implementing AC-3, convert all WFC data structures from multidimensional arrays (`[,]`) to jagged arrays (`[][]`) for optimal performance in hot-path domain operations.
 
 #### Technical details
 
@@ -367,12 +372,17 @@ Key architectural changes:
 - **Contradiction detection**: Early termination when domains become empty, triggering backtracking
 - **Performance optimization**: Use jagged arrays (`HashSet<int>[][]`) instead of multidimensional arrays (`HashSet<int>[,]`) for 10-30% faster domain access in tight WFC loops
 
-### Phase requirements
+#### Phase requirements
 
-- Core algorithm enhancement:
-  - GIVEN a working WFC core
-  - WHEN precomputed rule tables are added
-  - THEN rule evaluation performance improves
+- (***COMPLETE***) AC-3 constraint propagation implemented
+  - GIVEN the current propagation algorithm
+  - WHEN AC-3 is implemented
+  - THEN contradictions are reduced by 40%
+
+- (***COMPLETE***) Precomputed rule tables for performance
+  - GIVEN rule evaluation in the WFC algorithm
+  - WHEN precomputed lookup tables are used
+  - THEN rule evaluation performance improves by 70%
 
 #### Examples
 
@@ -629,7 +639,7 @@ The AC3Propagator integrates into the existing WFC architecture by replacing the
 3. **Constraint propagation**: Use AC-3 algorithm instead of simple neighbor checks
 4. **Backtracking integration**: Ensure AC3Propagator state resets properly during backtrack operations
 
-#### Examples
+##### Examples
 
 **WfcProvider Integration:** This example demonstrates how the AC3Propagator would integrate into the existing WFC solver. **Note: The actual WfcProvider.cs already contains a comprehensive implementation - this shows the key integration points for AC-3 rather than the complete existing codebase.**
 
@@ -711,26 +721,9 @@ public class WfcProvider
 }
 ```
 
-**Current Implementation Status:**
-
-- ✅ Complete jagged array structure (`HashSet<int>?[][]`) for domains and outputs
-- ✅ Comprehensive `Generate()` methods (with and without backtracking)
-- ✅ Advanced entropy-based cell selection with multiple heuristics (domain size, Shannon entropy, most constraining variable, etc.)
-- ✅ Weighted tile selection with neighbor matching and configurable weights
-- ✅ Change logging and full backtracking support for contradiction recovery
-- ✅ AC3Propagator integration: arc consistency propagation is fully implemented and used for all constraint propagation
-- ✅ ChangeLog support in AC3Propagator: reversible propagation and backtracking are correctly supported
-- ✅ PrecomputedRuleTable implemented and used for all adjacency checks; all components requiring adjacency checks receive the shared instance, eliminating duplicate or legacy rule table construction
-- ✅ Chunk boundary constraints: interfaces and partial implementation for seamless chunk seaming
-- ✅ Runtime configuration via `appsettings.json` and F10 panel (heuristics, weights, time budget)
-- ✅ Diagnostics: performance event source, chunk save/load counters, and debug overlay
-- ✅ Extensive XML documentation for public APIs and non-trivial methods
-- ✅ Unit and integration tests for core WFC and chunking logic
-- ❌ **Missing: [Full plugin architecture for entropy/constraint providers](wfc-completion-plan/plugin-architecture.md)** (interfaces present, not fully pluggable)
-- ❌ **Missing: [Library abstraction for non-tile domains](wfc-completion-plan/library-abstraction.md)** (currently terrain-specific)
-- ❌ **Missing: [Comprehensive property-based and performance regression tests](wfc-completion-plan/property-and-performance-tests.md)** (coverage improving, not at target)
-
 ### Phase 2: Chunk Seam Consistency
+
+***COMPLETE***
 
 #### Objective
 
@@ -754,9 +747,9 @@ Key technical considerations:
 - **Flexible boundaries**: Support for incomplete neighbor sets during initial world generation
 - **Rule compatibility**: Boundary constraints work seamlessly with existing adjacency rule system
 
-### Phase requirements
+#### Phase requirements
 
-- Chunk seam consistency:
+- (***COMPLETE***) Chunk seam consistency
   - GIVEN adjacent chunks with boundary constraints
   - WHEN chunk generation completes
   - THEN boundaries are visually and logically consistent
@@ -926,7 +919,7 @@ Memory optimization strategies:
 - **Struct optimization**: Use value types for frequently allocated objects like coordinates
 - **Lazy initialization**: Defer expensive computations until actually needed
 
-### Phase requirements
+#### Phase requirements
 
 - Performance optimization:
   - GIVEN a set of unit, integration, and property tests
@@ -1064,11 +1057,20 @@ public interface IEntropyProviderPlugin
 
 ### Phase 5: Comprehensive Testing
 
+(Incomplete)
+
 #### Objective
 
 Achieve ≥95% code coverage with comprehensive unit, integration, property-based, and performance regression testing to ensure production readiness.
 
 #### Technical details
+
+#### Phase requirements
+
+- (Incomplete) Comprehensive testing achieves ≥95% code coverage
+  - GIVEN the WFC implementation
+  - WHEN unit, integration, property-based, and performance regression tests are run
+  - THEN code coverage is ≥95%
 
 Comprehensive testing strategy validates both algorithmic correctness and performance characteristics across the entire WFC implementation. Testing architecture covers multiple validation levels from unit-level algorithm verification to end-to-end integration scenarios.
 
@@ -1154,11 +1156,20 @@ public void ChunkGeneration_CompletesWithinTimeBudget_Under95PercentOfCases()
 
 ### Phase 6: Documentation and Onboarding
 
+(Incomplete)
+
 #### Objective
 
 Provide comprehensive documentation enabling developers unfamiliar with WFC to become productive within 2 weeks, with systematic performance tuning guidance.
 
 #### Technical details
+
+#### Phase requirements
+
+- (Incomplete) Developer documentation enables onboarding in 2 weeks
+  - GIVEN onboarding materials
+  - WHEN new developers join
+  - THEN productivity is achieved within 2 weeks
 
 Documentation strategy targets multiple developer skill levels and use cases, from newcomers learning constraint satisfaction concepts to experienced developers optimizing performance for production deployments.
 
