@@ -1,4 +1,4 @@
-﻿# Feature Title
+# Feature Title
 
 ## Overview
 
@@ -6,7 +6,7 @@ Detailed description of the feature including purpose and intent as well as inte
 
 ## Table of contents
 
-- Table of contents with links to child sections
+- Table of contents with links to child sections, including subsections and child documents (which will be in a folder matching the feature document name).
 
 ## Feature status
 
