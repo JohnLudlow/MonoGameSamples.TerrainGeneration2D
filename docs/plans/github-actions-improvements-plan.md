@@ -1,4 +1,4 @@
-# GitHub Actions Improvements Plan
+﻿# GitHub Actions Improvements Plan
 
 ## Overview
 
@@ -16,40 +16,163 @@ This plan outlines improvements to the GitHub Actions workflows for the MonoGame
 | Artifact | Files generated during a workflow run, such as test reports or build outputs. | <https://docs.github.com/en/actions/learn-github-actions/contexts#artifacts> |
 | Linting | Static analysis to check code for style, errors, and best practices. | <https://en.wikipedia.org/wiki/Lint_(software)> |
 
-## Requirements
+## Implementation guide
 
-- **Version Numbering**: Implement semantic versioning based on Git tags and commits, replacing the current date-based revision system.
-- **Auto-reviewing**: Add automated code quality checks for C# code, including linting, security scans, and PR size limits.
-- **Reporting**: Enhance test and coverage reporting with better visualization, integration with external services, and summary improvements.
+### Feature requirements
 
-## Implementation Steps
+- (***COMPLETE***) Semantic versioning ensures consistent artifact and release versioning
+  - GIVEN a GitHub Actions workflow for the project
+  - WHEN semantic versioning is implemented
+  - THEN build artifacts and releases use MAJOR.MINOR.PATCH format
+
+- (Incomplete) Automated code quality and security checks for pull requests
+  - GIVEN a pull request is opened
+  - WHEN auto-reviewing jobs run
+  - THEN code quality, linting, and security checks are performed automatically
+
+> Partially implemented. Linting and basic security scanning are present, but PR size checks and full reviewdog integration for C# are not yet complete. See Implementation guide Phase 2.
+
+- (Incomplete) Enhanced reporting provides clear feedback on test and coverage status
+  - GIVEN tests and coverage jobs are run
+  - WHEN reporting is enhanced
+  - THEN contributors see clear, visual feedback on test and coverage status
+
+> Coverage reporting and test result visualization are present, but integration with GitHub Checks API and enhanced build summaries are still in progress. See Implementation guide Phase 3.
 
 ### Phase 1: Version Numbering Refinement
 
-1. **Research Semantic Versioning Tools**: Evaluate GitVersion or similar tools for automatic version calculation based on Git history.
-2. **Update Workflow**: Modify `main.yml` to use GitVersion action instead of custom PowerShell script.
-3. **Configure Versioning**: Set up versioning rules in a `GitVersion.yml` file to handle major, minor, patch increments.
-4. **Test Versioning**: Run workflow on test branches to verify version numbers are generated correctly.
+#### Objective
+
+Implement semantic versioning for build artifacts and releases using GitVersion or similar tools, ensuring MAJOR.MINOR.PATCH format is used consistently.
+
+Success criteria: All build artifacts and releases use correct semantic versioning, and version numbers are generated automatically from Git history.
+
+#### Technical details
+
+1. Research and select a semantic versioning tool (e.g., GitVersion).
+2. Update workflow files to use the selected tool.
+3. Configure versioning rules in GitVersion.yml.
+4. Test versioning on feature and release branches.
+
+#### Phase 1 requirements
+
+- ***COMPLETE*** Semantic versioning is applied to all build artifacts and releases
+  - GIVEN a GitHub Actions workflow for the project
+  - WHEN semantic versioning is implemented
+  - THEN build artifacts and releases use MAJOR.MINOR.PATCH format
+
+#### Examples
+
+```yaml
+# Example: Using GitVersion in a workflow
+steps:
+  - name: Install GitVersion
+  uses: GitTools/actions/gitversion/setup@v0.9.10
+  - name: Run GitVersion
+  uses: GitTools/actions/gitversion/execute@v0.9.10
+```
 
 ### Phase 2: Auto-reviewing Enhancements
 
-1. **Add C# Linting**: Integrate dotnet-format or StyleCop for code style checks in a new job.
-2. **Security Scanning**: Add a job using CodeQL or similar for vulnerability detection.
-3. **PR Size Check**: Implement a check to warn or fail on large PRs using GitHub CLI or custom script.
-4. **Reviewdog Integration**: Extend reviewdog usage for C# issues, similar to markdownlint.
+#### Objective
+
+Enhance code quality and security checks in PRs by integrating linting, security scanning, PR size checks, and reviewdog for C# issues.
+
+Success criteria: All PRs are automatically checked for code style, vulnerabilities, and size, with clear feedback provided to contributors.
+
+#### Technical details
+
+1. Integrate dotnet-format or StyleCop for C# linting.
+2. Add CodeQL or similar for security scanning.
+3. Implement PR size checks using GitHub CLI or scripts.
+4. Extend reviewdog integration for C#.
+
+#### Phase 2 requirements
+
+- PRs are automatically checked for code quality, style, and vulnerabilities
+  - GIVEN a pull request is opened
+  - WHEN auto-reviewing jobs run
+  - THEN code quality, linting, and security checks are performed automatically
+
+> Linting and security scanning are implemented, but PR size checks and full reviewdog integration for C# are not yet complete.
+
+#### Examples
+
+```yaml
+# Example: Adding dotnet-format to a workflow
+steps:
+  - name: Run dotnet-format
+    run: dotnet format --check
+```
 
 ### Phase 3: Reporting Improvements
 
-1. **Enhanced Coverage Reporting**: Integrate with services like Codecov or Coveralls for detailed coverage reports.
-2. **Test Result Visualization**: Use additional reporters for better test result displays, perhaps integrating with GitHub Checks API.
-3. **Build Summary Enhancements**: Add more details to the build summary, including performance metrics if available.
-4. **Artifact Management**: Organize artifacts better, perhaps with retention policies.
+#### Objective
+
+Improve test and coverage reporting with enhanced visualization and integration into PRs and build summaries.
+
+Success criteria: Contributors see clear, visual feedback on test and coverage status in PRs and build summaries.
+
+#### Technical details
+
+1. Integrate Codecov or Coveralls for coverage reporting.
+2. Add reporters for test results and integrate with GitHub Checks API.
+3. Enhance build summaries with performance metrics and organized artifacts.
+
+#### Phase 3 requirements
+
+- Contributors see clear, visual feedback on test and coverage status
+  - GIVEN tests and coverage jobs are run
+  - WHEN reporting is enhanced
+  - THEN contributors see clear, visual feedback on test and coverage status
+
+> Coverage upload and basic test result reporting are present, but integration with GitHub Checks API and enhanced build summaries are still in progress.
+
+#### Examples
+
+```yaml
+# Example: Uploading coverage to Codecov
+steps:
+  - name: Upload coverage to Codecov
+    uses: codecov/codecov-action@v3
+    with:
+      files: ./coverage.xml
+```
 
 ### Phase 4: Workflow Optimization
 
-1. **Parallel Jobs**: Optimize job dependencies to run checks in parallel where possible.
-2. **Caching**: Add caching for dependencies to speed up builds.
-3. **Notifications**: Integrate with Slack or email for build status notifications.
+#### Objective
+
+Optimize workflow run times and feedback by running jobs in parallel, caching dependencies, and adding notifications.
+
+Success criteria: Workflow run times are minimized, and contributors receive timely notifications about build status.
+
+#### Technical details
+
+1. Optimize job dependencies for parallel execution.
+2. Add caching for dependencies.
+3. Integrate notifications with Slack or email.
+
+#### Phase 4 requirements
+
+- Workflow run times are minimized and contributors receive timely notifications
+  - GIVEN workflow jobs
+  - WHEN jobs are optimized for parallel execution and notifications are added
+  - THEN workflow run times are minimized and contributors receive timely notifications
+
+> Some jobs run in parallel and caching is present, but notification integration (e.g., Slack/email) and full optimization are not yet complete.
+
+#### Examples
+
+```yaml
+# Example: Caching dependencies in a workflow
+steps:
+  - name: Cache NuGet packages
+    uses: actions/cache@v3
+    with:
+      path: ~/.nuget/packages
+      key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+```
 
 ## Implementation Considerations
 
