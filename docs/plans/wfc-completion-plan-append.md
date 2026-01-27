@@ -1,4 +1,48 @@
-# Wave Function Collapse Implementation - Performance and Decisions
+﻿# Wave Function Collapse Implementation - Performance and Decisions
+
+## Feature requirements
+
+- (Incomplete) AC-3 propagation implemented for constraint satisfaction
+  - GIVEN the need for robust constraint propagation
+  - WHEN AC-3 is used instead of forward checking
+  - THEN backtracking events are reduced by 40%
+
+> Implementation not started. See Performance Notes: Critical Hot Paths.
+
+- (Incomplete) Precomputed rule tables for performance
+  - GIVEN rule evaluation in WFC
+  - WHEN precomputed lookup tables are used
+  - THEN rule lookup is 70% faster
+
+> Implementation not started. See Performance Notes: Critical Hot Paths.
+
+- (Incomplete) BitSet domain representation for large tile sets
+  - GIVEN large tile sets (>32 tiles)
+  - WHEN BitSet is used for domain representation
+  - THEN domain operations are 60% faster
+
+> Implementation not started. See Performance Notes: Memory Management.
+
+- (Incomplete) Diagnostics integration for performance monitoring
+  - GIVEN WFC generation
+  - WHEN diagnostics are enabled
+  - THEN performance events and counters are available
+
+> Implementation not started. See Diagnostics Integration section.
+
+- (Incomplete) Time budget compliance and adaptive fallback
+  - GIVEN a time budget for chunk generation
+  - WHEN WFC exceeds the budget
+  - THEN fallback algorithms or early termination are used
+
+> Implementation not started. See Time Budget Compliance section.
+
+- (Incomplete) Open questions and future work documented
+  - GIVEN architectural and performance trade-offs
+  - WHEN open questions arise
+  - THEN they are documented for future implementation
+
+> Ongoing. See Open Questions and Technical Debt sections.
 
 ## Performance Notes
 
