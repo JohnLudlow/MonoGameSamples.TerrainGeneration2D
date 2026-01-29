@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Benchmarks;
 
+#pragma warning disable CA1515 // these types should be public
 public enum EntropyStrategy
 {
   Domain,

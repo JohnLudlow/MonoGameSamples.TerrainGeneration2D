@@ -55,8 +55,7 @@ public sealed class ChunkedTilemapTests : IDisposable
   public void GenerateChunk_DifferentSeedsProduceDifferentTiles()
   {
     var tileset = GraphicsTestHelpers.CreateMockTileset(16);
-    var terrainConfig = new TileTypeRuleConfiguration();
-    terrainConfig.Rules.AddRange([
+    var terrainConfig = new TileTypeRuleConfiguration([
       new() { Id = TerrainTileIds.Ocean, ElevationMax = 0.34f },
       new() { Id = TerrainTileIds.Beach, ElevationMin = 0.33f, ElevationMax = 0.48f, MinGroupSizeX = 12, MaxGroupSizeX = 180 },
       new() { Id = TerrainTileIds.Plains, ElevationMin = 0.35f, ElevationMax = 0.78f },

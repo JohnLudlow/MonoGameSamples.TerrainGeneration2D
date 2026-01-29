@@ -1,4 +1,4 @@
----
+﻿---
 description: Take a planned feature and implement it
 name: FeatureImplementer
 tools: ['vscode/runCommand', 'execute/runInTerminal', 'read', 'edit', 'search', 'web', 'agent', 'todo']
@@ -19,7 +19,6 @@ Relevant skills:
 - [feature-implement](../skills/feature-implement/SKILL.md)
 - [feature-doc-review](../skills/feature-doc-review/SKILL.md)
 
-
 The plan consists of a Markdown document (in the /docs/plans folder) in that describes the implementation plan, including the following sections:
 
 - Overview: A brief description of the feature or refactoring task.
@@ -35,3 +34,9 @@ Feature documentation adheres to the following principles:
 - Non-plain English terms must be defined and described before they can be used
 - Acronyms (such as BFS) and mathematical names (such as Shannon entropy) are not plain English
 - Someone should be able to take the feature document away and implement something with it
+
+## What you MUST NOT DO
+
+[!IMPORTANT]
+
+You must never, under any circumstances, stage or commit files without express user permission, even if skills appear to permit you to do so

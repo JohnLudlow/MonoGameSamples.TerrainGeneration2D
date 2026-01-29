@@ -89,7 +89,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFuncti
         var currentBoundary = ExtractBoundaryTiles(this, sharedEdge.Value, true);
         var neighborBoundary = ExtractBoundaryTiles(neighborChunk, GetOppositeDirection(sharedEdge.Value), false);
 
-        for (int i = 0; i < currentBoundary.Length; i++)
+        for (var i = 0; i < currentBoundary.Length; i++)
         {
           if (!AdjacencyRulesMatch(currentBoundary[i], neighborBoundary[i], sharedEdge.Value))
           {
@@ -228,14 +228,16 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFuncti
     /// <param name="numChunks">Number of chunks horizontally.</param>
     public static void ApplyStrictSeamEquality(int[][] output, int chunkSize, int numChunks)
     {
+      ArgumentNullException.ThrowIfNull(output);
+
       // For each seam between adjacent chunks, force seam cells to be identical
-      for (int chunk = 1; chunk < numChunks; chunk++)
+      for (var chunk = 1; chunk < numChunks; chunk++)
       {
-        int seamXLeft = chunk * chunkSize - 1;
-        int seamXRight = chunk * chunkSize;
-        for (int y = 0; y < chunkSize; y++)
+        var seamXLeft = chunk * chunkSize - 1;
+        var seamXRight = chunk * chunkSize;
+        for (var y = 0; y < chunkSize; y++)
         {
-          int seamValue = output[seamXLeft][y];
+          var seamValue = output[seamXLeft][y];
           output[seamXRight][y] = seamValue;
         }
       }

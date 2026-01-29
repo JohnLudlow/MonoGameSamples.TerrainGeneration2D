@@ -94,6 +94,7 @@ internal sealed class TerrainGenerationGame : CoreGame
     if (disposing)
     {
       _themeSong?.Dispose();
+      _disposed = true;
     }
 
     base.Dispose(disposing);

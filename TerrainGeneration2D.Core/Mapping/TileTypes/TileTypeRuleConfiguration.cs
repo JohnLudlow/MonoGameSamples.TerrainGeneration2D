@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 
@@ -24,8 +26,18 @@ public sealed class GroupRuleConfiguration
 /// </summary>
 public sealed class TileTypeRuleConfiguration
 {
-  public List<GroupRuleConfiguration> Rules { get; } = [];
+
+  public ReadOnlyCollection<GroupRuleConfiguration> Rules { get; }
+  public TileTypeRuleConfiguration()
+  {
+    Rules = [];
+  }
+
+  public TileTypeRuleConfiguration(ReadOnlyCollection<GroupRuleConfiguration> rules)
+  {
+    Rules = rules;
+  }
 
   public GroupRuleConfiguration? GetRuleForType(int id)
-      => Rules.Find(r => r.Id == id);
+      => Rules.FirstOrDefault(r => r.Id == id);
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using Gum.DataTypes;
 using Gum.Forms.Controls;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
@@ -70,7 +71,7 @@ internal sealed class RuntimeSettingsPanel : Panel
     float y = 0;
     foreach (var rule in _rules.Rules)
     {
-      var grid = new OptionsGroupRuleGrid(rule.Id.ToString(), rule)
+      var grid = new OptionsGroupRuleGrid(rule.Id.ToString(CultureInfo.InvariantCulture), rule)
       {
         X = 0,
         Y = y,

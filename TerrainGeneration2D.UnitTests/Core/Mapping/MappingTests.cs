@@ -26,15 +26,16 @@ public class MappingTests
   [Fact]
   public void TileTypeRegistry_RespectsBeachRules()
   {
-    var config = new TileTypeRuleConfiguration();
-    config.Rules.Add(new GroupRuleConfiguration
-    {
-      Id = TerrainTileIds.Beach,
-      MinGroupSizeX = 1,
-      MaxGroupSizeX = 1,
-      ElevationMin = 0.0f,
-      ElevationMax = 1.0f
-    });
+    var config = new TileTypeRuleConfiguration([
+      new GroupRuleConfiguration
+      {
+        Id = TerrainTileIds.Beach,
+        MinGroupSizeX = 1,
+        MaxGroupSizeX = 1,
+        ElevationMin = 0.0f,
+        ElevationMax = 1.0f
+      }]
+    );
     var registry = TileTypeRegistry.CreateDefault(7, config);
 
     var output = new int[2][]
