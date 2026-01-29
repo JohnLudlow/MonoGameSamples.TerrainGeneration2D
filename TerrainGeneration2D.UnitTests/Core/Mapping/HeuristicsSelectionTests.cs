@@ -9,8 +9,6 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UnitTests.Core.Mapping;
 
 public sealed class HeuristicsSelectionTests
 {
-  public object? MappingTestHelpers { get; private set; }
-
   private sealed class DeterministicRandomProvider : IRandomProvider
   {
     public int NextInt() => 0;
@@ -73,6 +71,7 @@ public sealed class HeuristicsSelectionTests
       Point.Zero,
       new WfcWeightConfiguration(),
       heuristics);
+      
     var poss = MappingTestHelpers.GetPrivateField<HashSet<int>?[][]>(wfc, "_possibilities");
     var output = MappingTestHelpers.GetPrivateField<int[][]>(wfc, "_output");
     Assert.NotNull(poss);
