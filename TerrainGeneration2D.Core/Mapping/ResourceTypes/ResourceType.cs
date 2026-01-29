@@ -11,7 +11,7 @@ public static class ResourceTypeIds
   public const int Wood = 2;
   public const int Stone = 3;
   public const int Gold = 4;
-  public const int Metal = 4;
+  public const int Metal = 5;
 
 }
 
