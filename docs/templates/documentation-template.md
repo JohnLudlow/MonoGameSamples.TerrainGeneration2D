@@ -1,4 +1,4 @@
-# Feature Title
+﻿# Feature Title
 
 ## Overview
 
@@ -52,7 +52,23 @@ public int SelectNextCell(/* params */)
 }
 ```
 
-## Navigation
+## See also
 
-- Links to related pages, related by topic
-- Links to related pages, related by structure (for example, parent or child topics)
+For large features that are split across multiple files, a list of links to those files.
+
+These will be in a well-ordered file structure:
+
+- `docs/features/<this-feature>.md` - this file
+- `docs/features/<this-feature>/` - folder containing child features
+  - `docs/features/<this-feature>/<child-feature>.md` - child features documentation
+
+This section will contain a table of contents with links to those child features
+
+This structure is repeated as deep as is needed.
+
+This section will also contain links to related/sibling features by topic and parent features by structure.
+
+## References
+
+A list of links to external resources such as library documentation or articles about
+relevant techniques

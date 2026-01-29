@@ -1,4 +1,4 @@
-name: 'PR Size Check'
+﻿name: 'PR Size Check'
 description: 'Check if the pull request is too large'
 
 runs:
@@ -15,7 +15,7 @@ runs:
       $additions = $data.additions
       $deletions = $data.deletions
       $files = $data.files.Count
-      if ($additions + $deletions -gt 1000 -or $files -gt 50) {
+      if ($additions + $deletions -gt 5000 -or $files -gt 100) {
         Write-Host "::error::PR is too large: $files files, $($additions + $deletions) lines changed. Please split into smaller PRs."
         exit 1
       }

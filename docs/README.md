@@ -1,4 +1,4 @@
-# Docs Index
+﻿# Docs Index
 
 [![Build and Test](https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/actions/workflows/main.yml/badge.svg)](https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/actions/workflows/main.yml)
 ![.NET Version](https://img.shields.io/badge/.NET-10.0-blue)
@@ -21,7 +21,7 @@ Welcome to the documentation index. Key entries:
 
 ## Templates
 
-- Feature/Component Doc Template: [docs/templates/feature-doc-template.md](templates/feature-doc-template.md)
+- Feature/Component Doc Template: [docs/templates/feature-doc-template.md](templates/documentation-template.md)
 
 ## Plans
 

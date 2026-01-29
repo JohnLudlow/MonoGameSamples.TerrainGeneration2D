@@ -1,4 +1,4 @@
----
+﻿---
 name: feature-doc-elaborate
 description: Produce a feature/component documentation that adheres to repo standards.
 ---
@@ -24,7 +24,7 @@ Use this skill when the user wants to describe a new feature.
 
 ## How to generate the new feature document
 
-- Create or update a Markdown Document under [docs](../../docs/features) using the [provided template](../../../docs/templates/feature-doc-template.md).
+- Create or update a Markdown Document under [docs](../../docs/features) using the [provided template](../../../docs/templates/plan-template.md).
 - When adding code snippets:
   - Include a short paragraph description before the code snippet explaining what it does.
   - Remember to ensure any custom types have been defined before trying to use them
@@ -37,3 +37,8 @@ Use this skill when the user wants to describe a new feature.
 - Rollback: revert doc if requirements unmet; fix and re-run.
 - Naming: place feature docs at `docs/features/<feature-name>.md`; use kebab-case (e.g., `chunked-tilemap.md`), no spaces, concise names.
 - Use the [review process](../feature-doc-review/SKILL.md) to check the document for issues and fix them
+
+### Child features
+
+When a feature grows too large for one file, or at the user's request, move sections to child features and link as described in
+the [provided template](../../../docs/templates/plan-template.md).
