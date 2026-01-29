@@ -2,12 +2,6 @@
 description: Take a planned feature and implement it
 name: FeatureImplementer
 tools: ['vscode/runCommand', 'execute/runInTerminal', 'read', 'edit', 'search', 'web', 'agent', 'todo']
-model: GPT-4.1 (copilot)
-handoffs:
-  - label: Document Implementation
-    agent: ImplementationDocumenter
-    prompt: Document the implementation outlined above.
-    send: false
 ---
 # Planning instructions
 
