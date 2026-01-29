@@ -1,4 +1,4 @@
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
+﻿using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
@@ -7,37 +7,6 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UnitTests.Core.Mapping;
 
 public class MappingTests
 {
-  private sealed class DeterministicRandomProvider : IRandomProvider
-  {
-    public int NextInt() => 0;
-    public int NextInt(int maxValue) => 0;
-    public int NextInt(int minValue, int maxValue) => minValue;
-    public double NextDouble() => 0.0;
-  }
-
-  private sealed class AlwaysInvalidTileType : TileType
-  {
-    public AlwaysInvalidTileType(int tileId) : base(tileId, "Invalid") { }
-    public override bool EvaluateRules(TileRuleContext context) => false;
-  }
-  
-  private sealed class AlwaysValidTileType : TileType
-  {
-    public AlwaysValidTileType(int tileId) : base(tileId, "Valid") { }
-    public override bool EvaluateRules(TileRuleContext context)
-    {
-      return context.NeighborTileId == 2;
-    }
-  }
-  private static int[][] CreateEmptyJaggedArray(int rows, int cols)
-  {
-    var result = new int[rows][];
-    for (int i = 0; i < rows; i++)
-    {
-      result[i] = new int[cols];
-    }
-    return result;
-  }
   [Fact]
   public void MappingInformationService_ReturnsCorrectGroupMetrics()
   {

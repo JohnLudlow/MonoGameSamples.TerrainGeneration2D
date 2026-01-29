@@ -12,13 +12,6 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UI;
 
 internal sealed class RuntimeSettingsPanel : Panel
 {
-  private const float ControlHeight = 16f;
-  private const float ControlSpacing = 4f;
-  private const float LabelFontScale = 0.18f;
-  private const float SliderWidth = 120f;
-  private float _scrollOffset;
-  private float _currentY;
-
   private HeuristicsConfiguration? _heur;
   private Func<int>? _getBudget;
   private Action<int>? _setBudget;
@@ -115,5 +108,5 @@ internal sealed class RuntimeSettingsPanel : Panel
     };
     clearButton.Click += (_, __) => _clearSaves?.Invoke();
     AddChild(clearButton);
-  }  
+  }
 }

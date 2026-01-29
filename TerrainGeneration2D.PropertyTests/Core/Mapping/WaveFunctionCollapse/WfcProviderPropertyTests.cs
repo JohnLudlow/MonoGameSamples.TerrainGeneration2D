@@ -1,4 +1,4 @@
-using Xunit;
+﻿using Xunit;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests.Core.Mapping.WaveFunctionCollapse;
 

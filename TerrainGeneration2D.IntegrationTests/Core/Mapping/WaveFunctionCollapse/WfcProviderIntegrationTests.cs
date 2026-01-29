@@ -1,4 +1,4 @@
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
+﻿using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.TestCommon.Core.Graphics;
@@ -32,7 +32,7 @@ public class WfcProviderIntegrationTests
     var heightProvider = new TerrainGeneration2D.Core.Mapping.HeightMap.HeightMapGenerator(seed, heightConfig);
 
     // Act
-    var wfc1 = new WfcProvider(chunkSize, chunkSize, registry, new RandomAdapter(new Random(seed)), tileTypeConfig, heightProvider, new Microsoft.Xna.Framework.Point(0, 0));    
+    var wfc1 = new WfcProvider(chunkSize, chunkSize, registry, new RandomAdapter(new Random(seed)), tileTypeConfig, heightProvider, new Microsoft.Xna.Framework.Point(0, 0));
 
     Assert.True(wfc1.Generate());
     var wfc1Output = wfc1.GetOutput();
@@ -117,9 +117,9 @@ public class WfcProviderIntegrationTests
     var chunkSize = 32;
     var registry = TileTypeRegistry.CreateDefault(8, tileTypeConfig);
     var heightProvider = new JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap.HeightMapGenerator(seed, heightConfig);
-    
+
     // Act
-    
+
     var wfcA = new WfcProvider(chunkSize, chunkSize, registry, new RandomAdapter(new Random(seed)), tileTypeConfig, heightProvider, new Microsoft.Xna.Framework.Point(0, 0));
     var wfcB = new WfcProvider(chunkSize, chunkSize, registry, new RandomAdapter(new Random(seed)), tileTypeConfig, heightProvider, new Microsoft.Xna.Framework.Point(0, 0));
 
@@ -156,7 +156,7 @@ public class WfcProviderIntegrationTests
     var registry = TileTypeRegistry.CreateDefault(4, tileTypeConfig);
     var heightProvider = new TerrainGeneration2D.Core.Mapping.HeightMap.HeightMapGenerator(seed, heightConfig);
     var wfc = new WfcProvider(chunkSize, chunkSize, registry, new RandomAdapter(new Random(seed)), tileTypeConfig, heightProvider, new Microsoft.Xna.Framework.Point(0, 0));
-    
+
     // Act
     // Create a contradiction that can be resolved by backtracking:
     // Cell [0][0] can be 0 or 1, but [1][0] must be 0 (so if [0][0]=1, contradiction)

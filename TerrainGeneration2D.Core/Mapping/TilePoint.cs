@@ -8,5 +8,5 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
 [DebuggerDisplay("({X},{Y})")]
 public readonly record struct TilePoint(int X, int Y)
 {
-	public override string ToString() => $"({X},{Y})";
+  public override string ToString() => $"({X},{Y})";
 }

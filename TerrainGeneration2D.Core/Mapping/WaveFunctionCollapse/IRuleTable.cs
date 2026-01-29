@@ -36,11 +36,11 @@ public interface IRuleTable
 /// <typeparam name="TValue">Value type for which constraints are defined</typeparam>
 public interface IRuleTable<TValue> : IRuleTable
 {
-    /// <summary>
-    /// Gets allowed neighboring values for a given value in a specific direction.
-    /// </summary>
-    /// <param name="value">The source value to check neighbors for</param>
-    /// <param name="direction">The direction to check (North, South, East, West)</param>
-    /// <returns>Enumeration of allowed neighboring values</returns>
-    IEnumerable<TValue> GetAllowedNeighbors(TValue value, Direction direction);
+  /// <summary>
+  /// Gets allowed neighboring values for a given value in a specific direction.
+  /// </summary>
+  /// <param name="value">The source value to check neighbors for</param>
+  /// <param name="direction">The direction to check (North, South, East, West)</param>
+  /// <returns>Enumeration of allowed neighboring values</returns>
+  IEnumerable<TValue> GetAllowedNeighbors(TValue value, Direction direction);
 }

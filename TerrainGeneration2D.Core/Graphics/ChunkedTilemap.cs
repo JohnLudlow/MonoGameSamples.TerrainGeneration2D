@@ -65,16 +65,16 @@ public class ChunkedTilemap
     _activeChunks = new Dictionary<Point, Chunk>();
     _random = new Random();
     _useWaveFunctionCollapse = useWaveFunctionCollapse;
-    
-    
+
+
     _heightMapConfiguration = heightMapConfiguration ?? new HeightMapConfiguration();
     _heightProvider = new HeightMapGenerator(masterSeed, _heightMapConfiguration);
     _wfcWeightConfig = weightConfig ?? new WfcWeightConfiguration();
     _heuristicsConfig = heuristicsConfig ?? new HeuristicsConfiguration();
-    
+
     _terrainRuleConfig = terrainRuleConfiguration ?? new TileTypeRuleConfiguration();
     _tileTypeRegistry = TileTypeRegistry.CreateDefault(tileset.Count, _terrainRuleConfig);
-    
+
     _logger = logger;
     _wfcTimeBudgetMs = wfcTimeBudgetMs ?? 50;
 
