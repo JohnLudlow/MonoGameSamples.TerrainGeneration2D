@@ -7,11 +7,23 @@ Abstract the WFC library to support non-tile domains, enabling procedural genera
 ## Table of contents
 
 - [Overview](#overview)
+- [Plan issue](#plan-issue)
 - [Feature requirements](#feature-requirements)
 - [Feature status](#feature-status)
 - [Definition of terms](#definition-of-terms)
 - [Architectural considerations and constraints](#architectural-considerations-and-constraints)
 - [Implementation guide](#implementation-guide)
+- [See also](#see-also)
+- [References](#references)
+
+## Plan issue
+
+This plan is tracked by GitHub issue [#12][issue-12]:
+
+- **Library Abstraction for Non-Tile Domains**
+- Part of [WFC Completion Plan][parent-plan] Phase 4
+
+See [meta issue #22][issue-22] for overall WFC completion tracking.
 
 ## Feature requirements
 
@@ -47,16 +59,12 @@ Abstract the WFC library to support non-tile domains, enabling procedural genera
 
 > Implementation not started. See Implementation guide Phase 4.
 
-## Feature status
-
-- Not started
-
 ## Definition of terms
 
-| Term | Meaning | Reference |
-| ---- | ------- | --------- |
-| Domain | The set of possible values for a cell | |
-| Adapter | A component that translates between generic and domain-specific logic | |
+| Term    | Meaning                                                               | Reference |
+| ------- | --------------------------------------------------------------------- | --------- |
+| Adapter | A component that translates between generic and domain-specific logic |           |
+| Domain  | The set of possible values for a cell                                 |           |
 
 ## Architectural considerations and constraints
 
@@ -418,3 +426,84 @@ public void GenericSolver_AlwaysSatisfiesConstraints(/* ... */)
     // ... property-based test logic ...
 }
 ```
+
+## See also
+
+### Parent Plan
+
+- **[WFC Completion Plan][parent-plan]** - Master implementation plan for WFC completion
+
+### Related Child Plans
+
+- **[Plugin Architecture][child-plugin]** - Phase 4: Pluggable provider system for WFC extensibility
+- **[Performance Analysis][child-performance]** - Phase 3: Optimization strategies and caching architecture
+- **[Property Testing][child-testing]** - Phase 5: Comprehensive property-based and performance regression tests
+
+### Related Documentation
+
+- **[WFC Algorithm Overview][doc-wfc]** - Core WFC algorithm explanation
+- **[Architecture Class Diagram][doc-architecture]** - System architecture overview
+
+### GitHub Tracking
+
+- **This Plan**: [Issue #12][issue-12] - Library Abstraction for Non-Tile Domains
+- **Meta Issue**: [#22 - WFC Implementation Completion][issue-22]
+
+### Implementation Files
+
+- **[WfcProvider.cs][impl-wfcprovider]** - Current tile-based WFC implementation
+- **[TileTypeRegistry.cs][impl-registry]** - Tile type management (domain-specific)
+- **[ChunkedTilemap.cs][impl-tilemap]** - Tilemap integration with WFC
+
+## References
+
+### Wave Function Collapse
+
+- **[WFC Original Paper][ref-wfc-original]** - Maxim Gumin's original WFC algorithm
+- **[WFC Explanation][ref-wfc-explained]** - Robert Heaton's WFC tutorial
+
+### Generic Programming
+
+- **[C# Generics][ref-csharp-generics]** - Microsoft documentation on C# generics
+- **[Generic Algorithms in .NET][ref-generic-algorithms]** - Best practices for generic algorithm design
+
+### Adapter Pattern
+
+- **[Adapter Pattern][ref-adapter]** - Gang of Four design pattern
+- **[Refactoring to Generics][ref-refactoring-generics]** - Martin Fowler on refactoring to generics
+
+### Testing
+
+- **[Property-Based Testing][ref-pbt]** - Introduction to property-based testing
+- **[FsCheck][ref-fscheck]** - F# property testing library for .NET
+
+<!-- Link References -->
+
+<!-- GitHub Issues -->
+[issue-12]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/12
+[issue-22]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/22
+
+<!-- Plans -->
+[parent-plan]: ../wfc-completion-plan.md
+[child-plugin]: plugin-architecture.md
+[child-performance]: performance-analysis.md
+[child-testing]: property-and-performance-tests.md
+
+<!-- Documentation -->
+[doc-wfc]: ../../map-generation/wfc/README.md
+[doc-architecture]: ../../architecture-class-diagram.md
+
+<!-- Implementation Files -->
+[impl-wfcprovider]: ../../../TerrainGeneration2D.Core/Mapping/WfcProvider.cs
+[impl-registry]: ../../../TerrainGeneration2D.Core/Mapping/TileTypeRegistry.cs
+[impl-tilemap]: ../../../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs
+
+<!-- External References -->
+[ref-wfc-original]: https://github.com/mxgmn/WaveFunctionCollapse
+[ref-wfc-explained]: https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/
+[ref-csharp-generics]: https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics
+[ref-generic-algorithms]: https://learn.microsoft.com/en-us/dotnet/standard/generics/
+[ref-adapter]: https://refactoring.guru/design-patterns/adapter
+[ref-refactoring-generics]: https://martinfowler.com/articles/refactoring-generics.html
+[ref-pbt]: https://hypothesis.works/articles/what-is-property-based-testing/
+[ref-fscheck]: https://fscheck.github.io/FsCheck/

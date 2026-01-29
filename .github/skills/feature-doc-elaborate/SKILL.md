@@ -42,3 +42,24 @@ Use this skill when the user wants to describe a new feature.
 
 When a feature grows too large for one file, or at the user's request, move sections to child features and link as described in
 the [provided template](../../../docs/templates/plan-template.md).
+
+### Link format
+
+Markdown links can be in 2 formats:
+
+- an inline link
+
+```markdown
+Please read the [provided template](../../../docs/templates/plan-template.md)
+```
+
+- a reference link
+
+```markdown
+Please read the [provided template][template]
+
+[template]: ../../../docs/templates/plan-template.md
+```
+
+A reference link is recommended when lists of long links are used, such as lists of github issues as they can make the content easier to
+read and manage in source / text mode.
