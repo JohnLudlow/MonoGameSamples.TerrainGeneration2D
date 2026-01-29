@@ -1,4 +1,4 @@
-﻿# Library Abstraction for Non-Tile Domains
+# Library Abstraction for Non-Tile Domains
 
 ## Overview
 

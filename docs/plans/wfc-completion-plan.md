@@ -314,6 +314,7 @@ This null-based design requires careful consideration when interfacing with comp
 
 ### Child Feature Plans
 
+- [Backtracking Robustness](wfc-completion-plan/backtracking-robustness.md) - Phase 1: Enhanced backtracking for singleton domains and propagation contradictions
 - [Plugin Architecture](wfc-completion-plan/plugin-architecture.md) - Phase 4: Pluggable entropy and constraint providers
 - [Library Abstraction for Non-Tile Domains](wfc-completion-plan/library-abstraction.md) - Phase 4: Generic WFC solver interface
 - [Performance Analysis](wfc-completion-plan/performance-analysis.md) - Phase 3: Constraint propagation, memory management, and diagnostics
