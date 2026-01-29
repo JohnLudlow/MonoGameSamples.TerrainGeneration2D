@@ -1,4 +1,4 @@
-/// <summary>
+﻿/// <summary>
 /// Exposes the current domain grid for testing and diagnostics.
 /// </summary>
 using System;
@@ -695,12 +695,12 @@ public class WfcProvider
 
   private bool Propagate(int startX, int startY) => Propagator.PropagateFrom(startX, startY, _output[startX][startY]);
 
-   private bool Propagate(int startX, int startY, ChangeLog log)
-   {
-     // Delegate to AC3Propagator for consistent constraint propagation with singleton validation.
-     // AC3Propagator now detects singleton contradictions and clears domains accordingly.
-     return Propagator.PropagateFrom(startX, startY, _output[startX][startY], log);
-   }
+  private bool Propagate(int startX, int startY, ChangeLog log)
+  {
+    // Delegate to AC3Propagator for consistent constraint propagation with singleton validation.
+    // AC3Propagator now detects singleton contradictions and clears domains accordingly.
+    return Propagator.PropagateFrom(startX, startY, _output[startX][startY], log);
+  }
 
   private bool ConstrainAndRecord(int x, int y, Direction directionToNeighbor, int neighborTileId, TilePoint neighborPosition, ChangeLog log)
   {

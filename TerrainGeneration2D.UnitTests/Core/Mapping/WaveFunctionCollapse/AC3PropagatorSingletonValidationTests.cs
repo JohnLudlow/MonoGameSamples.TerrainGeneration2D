@@ -1,4 +1,4 @@
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
+﻿using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 using Xunit;
 
@@ -25,7 +25,7 @@ public class AC3PropagatorSingletonValidationTests
     {
       // Simple rules: what tiles can be neighbors to a given tile
       var allowed = new BitSet(3);
-      
+
       switch (tileId)
       {
         case 0: // Tile 0 can neighbor tiles 0, 1
@@ -42,7 +42,7 @@ public class AC3PropagatorSingletonValidationTests
           allowed.Add(2);
           break;
       }
-      
+
       return allowed;
     }
   }
@@ -114,30 +114,30 @@ public class AC3PropagatorSingletonValidationTests
     Assert.Empty(domains[0][1]);
   }
 
-   [Fact]
-   public void SingletonValidation_CascadingContradiction_PropagationFails()
-   {
-     // ARRANGE: Test cascading contradictions through propagation
-     // Scenario: Tile A reduces to singleton that's incompatible with Tile B,
-     // which causes Tile B's domain to become empty (contradiction)
-     var (propagator, domains) = SetupBasicGrid();
+  [Fact]
+  public void SingletonValidation_CascadingContradiction_PropagationFails()
+  {
+    // ARRANGE: Test cascading contradictions through propagation
+    // Scenario: Tile A reduces to singleton that's incompatible with Tile B,
+    // which causes Tile B's domain to become empty (contradiction)
+    var (propagator, domains) = SetupBasicGrid();
 
-     // Setup:
-     // [1,1] = {2} (singleton, can neighbor 1,2)
-     // [0,1] = {0, 1} (can potentially have 1 or 0)
-     // [1,0] = {0} (singleton, can neighbor 0,1 - compatible with tile 1 or 2)
-     // If propagation reduces [0,1] to {1}, then [0,0] must also reduce
-     domains[1][1] = new HashSet<int> { 2 };
-     domains[0][1] = new HashSet<int> { 0, 1 }; // Can have 1 (compatible with 2)
-     domains[1][0] = new HashSet<int> { 0 };
+    // Setup:
+    // [1,1] = {2} (singleton, can neighbor 1,2)
+    // [0,1] = {0, 1} (can potentially have 1 or 0)
+    // [1,0] = {0} (singleton, can neighbor 0,1 - compatible with tile 1 or 2)
+    // If propagation reduces [0,1] to {1}, then [0,0] must also reduce
+    domains[1][1] = new HashSet<int> { 2 };
+    domains[0][1] = new HashSet<int> { 0, 1 }; // Can have 1 (compatible with 2)
+    domains[1][0] = new HashSet<int> { 0 };
 
-     // ACT: Propagate from [1,1] with tile 2
-     var result = propagator.PropagateFrom(1, 1, 2);
+    // ACT: Propagate from [1,1] with tile 2
+    var result = propagator.PropagateFrom(1, 1, 2);
 
-     // ASSERT: Propagation should process and potentially reduce [0,1]'s domain
-     // The exact behavior depends on rule table, but propagation should not crash
-     Assert.True(result || !result); // Should return a valid boolean result (tautology)
-   }
+    // ASSERT: Propagation should process and potentially reduce [0,1]'s domain
+    // The exact behavior depends on rule table, but propagation should not crash
+    Assert.True(result || !result); // Should return a valid boolean result (tautology)
+  }
 
   [Fact]
   public void SingletonValidation_MultipleIncompatibilities_FirstDetected()
@@ -162,23 +162,23 @@ public class AC3PropagatorSingletonValidationTests
     Assert.False(result, "Propagation should fail when singleton has incompatible neighbor");
   }
 
-   [Fact]
-   public void SingletonValidation_BoundaryCell_NoOutOfBoundsErrors()
-   {
-     // ARRANGE: Test singleton validation at grid boundaries (no out-of-bounds crashes)
-     var (propagator, domains) = SetupBasicGrid();
+  [Fact]
+  public void SingletonValidation_BoundaryCell_NoOutOfBoundsErrors()
+  {
+    // ARRANGE: Test singleton validation at grid boundaries (no out-of-bounds crashes)
+    var (propagator, domains) = SetupBasicGrid();
 
-     // Top-left corner [0,0] becomes singleton
-     domains[0][0] = new HashSet<int> { 1 };
-     domains[1][0] = new HashSet<int> { 0, 1, 2 };
-     domains[0][1] = new HashSet<int> { 0, 1, 2 };
+    // Top-left corner [0,0] becomes singleton
+    domains[0][0] = new HashSet<int> { 1 };
+    domains[1][0] = new HashSet<int> { 0, 1, 2 };
+    domains[0][1] = new HashSet<int> { 0, 1, 2 };
 
-     // ACT: Propagate from corner (only has 2 neighbors instead of 4)
-     var result = propagator.PropagateFrom(0, 0, 1);
+    // ACT: Propagate from corner (only has 2 neighbors instead of 4)
+    var result = propagator.PropagateFrom(0, 0, 1);
 
-     // ASSERT: Should handle boundary gracefully without errors
-     Assert.True(result || !result); // Should return a valid boolean result
-   }
+    // ASSERT: Should handle boundary gracefully without errors
+    Assert.True(result || !result); // Should return a valid boolean result
+  }
 
   [Fact]
   public void SingletonValidation_WithChangeLog_RecordsChanges()
@@ -187,7 +187,7 @@ public class AC3PropagatorSingletonValidationTests
     var (propagator, domains) = SetupBasicGrid();
 
     var changelog = new ChangeLog();
-    
+
     // Setup: Incompatible singleton that will trigger contradiction
     domains[1][1] = new HashSet<int> { 2 }; // Tile 2 can only neighbor 1,2
     domains[0][1] = new HashSet<int> { 0 }; // West: only tile 0 (incompatible!)
@@ -214,52 +214,52 @@ public class AC3PropagatorSingletonValidationTests
     }
   }
 
-   [Fact]
-   public void SingletonValidation_NullDomain_SkipsCollapsedNeighbors()
-   {
-     // ARRANGE: Test that already-collapsed neighbors (null domains) don't affect validation
-     var (propagator, domains) = SetupBasicGrid();
+  [Fact]
+  public void SingletonValidation_NullDomain_SkipsCollapsedNeighbors()
+  {
+    // ARRANGE: Test that already-collapsed neighbors (null domains) don't affect validation
+    var (propagator, domains) = SetupBasicGrid();
 
-     // Setup mixed scenario:
-     // [1,1] = {2} (singleton)
-     // [0,1] = null (already collapsed/decided)
-     // [1,0] = {1,2} (can have 1 or 2, compatible with tile 2)
-     domains[1][1] = new HashSet<int> { 2 };
-     domains[0][1] = null!; // Null = already decided (don't validate)
-     domains[1][0] = new HashSet<int> { 1, 2 };
-     domains[2][1] = new HashSet<int> { 1, 2 };
-     domains[1][2] = new HashSet<int> { 1, 2 };
+    // Setup mixed scenario:
+    // [1,1] = {2} (singleton)
+    // [0,1] = null (already collapsed/decided)
+    // [1,0] = {1,2} (can have 1 or 2, compatible with tile 2)
+    domains[1][1] = new HashSet<int> { 2 };
+    domains[0][1] = null!; // Null = already decided (don't validate)
+    domains[1][0] = new HashSet<int> { 1, 2 };
+    domains[2][1] = new HashSet<int> { 1, 2 };
+    domains[1][2] = new HashSet<int> { 1, 2 };
 
-     // ACT: Propagate with null neighbor (should be skipped)
-     var result = propagator.PropagateFrom(1, 1, 2);
+    // ACT: Propagate with null neighbor (should be skipped)
+    var result = propagator.PropagateFrom(1, 1, 2);
 
-     // ASSERT: Should succeed because null neighbors are not validated
-     Assert.True(result, "Propagation should skip null domains (already-collapsed neighbors)");
-   }
+    // ASSERT: Should succeed because null neighbors are not validated
+    Assert.True(result, "Propagation should skip null domains (already-collapsed neighbors)");
+  }
 
-   [Fact]
-   public void SingletonValidation_EmptyNeighborDomain_IndicatesContradiction()
-   {
-     // ARRANGE: Scenario where a neighbor already has an empty domain (pre-contradiction)
-     // Note: This is testing pre-existing contradiction detection during propagation,
-     // not singleton-specific validation
-     var (propagator, domains) = SetupBasicGrid();
+  [Fact]
+  public void SingletonValidation_EmptyNeighborDomain_IndicatesContradiction()
+  {
+    // ARRANGE: Scenario where a neighbor already has an empty domain (pre-contradiction)
+    // Note: This is testing pre-existing contradiction detection during propagation,
+    // not singleton-specific validation
+    var (propagator, domains) = SetupBasicGrid();
 
-     // Setup: [0,1] already has empty domain from a previous propagation step
-     domains[1][1] = new HashSet<int> { 0 };
-     domains[0][1] = []; // Empty - pre-existing contradiction
-     domains[1][0] = new HashSet<int> { 0, 1 };
-     domains[2][1] = new HashSet<int> { 0, 1 };
-     domains[1][2] = new HashSet<int> { 0, 1 };
+    // Setup: [0,1] already has empty domain from a previous propagation step
+    domains[1][1] = new HashSet<int> { 0 };
+    domains[0][1] = []; // Empty - pre-existing contradiction
+    domains[1][0] = new HashSet<int> { 0, 1 };
+    domains[2][1] = new HashSet<int> { 0, 1 };
+    domains[1][2] = new HashSet<int> { 0, 1 };
 
-     // ACT: Propagate from [1,1] with singleton tile 0
-     // The main arc queue will process the pre-empty domain but won't find new inconsistencies
-     // because there's nothing to remove from an already-empty set
-     var result = propagator.PropagateFrom(1, 1, 0);
+    // ACT: Propagate from [1,1] with singleton tile 0
+    // The main arc queue will process the pre-empty domain but won't find new inconsistencies
+    // because there's nothing to remove from an already-empty set
+    var result = propagator.PropagateFrom(1, 1, 0);
 
-     // ASSERT: Propagation should complete (either succeed or detect the empty constraint)
-     // Tile 0 is compatible with tiles 0,1 so the singleton is valid
-     // The empty neighbor domain is a pre-existing issue, not caused by our singleton
-     Assert.True(result || !result); // Should return a valid boolean result
-   }
+    // ASSERT: Propagation should complete (either succeed or detect the empty constraint)
+    // Tile 0 is compatible with tiles 0,1 so the singleton is valid
+    // The empty neighbor domain is a pre-existing issue, not caused by our singleton
+    Assert.True(result || !result); // Should return a valid boolean result
+  }
 }

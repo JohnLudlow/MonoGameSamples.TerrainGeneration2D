@@ -182,13 +182,13 @@ public class WfcProviderIntegrationTests
     var seed = 9999;
     var registry = TileTypeRegistry.CreateDefault(4, tileTypeConfig);
     var heightProvider = new TerrainGeneration2D.Core.Mapping.HeightMap.HeightMapGenerator(seed, heightConfig);
-    
+
     var wfc = new WfcProvider(
-      2, 
-      2, 
-      registry, 
-      new TestRandomProvider(), 
-      tileTypeConfig, 
+      2,
+      2,
+      registry,
+      new TestRandomProvider(),
+      tileTypeConfig,
       heightProvider,
       new Microsoft.Xna.Framework.Point(0, 0)
     );
@@ -199,7 +199,7 @@ public class WfcProviderIntegrationTests
 
     // [0,0]: choice point (Ocean or Beach)
     possibilities[0][0] = new HashSet<int> { TerrainTileIds.Ocean, TerrainTileIds.Beach };
-    
+
     // [1,0]: forced singleton Ocean
     possibilities[1][0] = new HashSet<int> { TerrainTileIds.Ocean };
     prefilledOutput[1][0] = TerrainTileIds.Ocean;
@@ -241,7 +241,7 @@ public class WfcProviderIntegrationTests
     // ASSERTIONS
     Assert.True(solved, "Backtracking should resolve the forced contradiction scenario");
     var finalOutput = wfc.GetOutput();
-    
+
     // [0,0] must be Ocean(1) to avoid contradiction with Ocean(1) neighbor [1,0]
     Assert.Equal(TerrainTileIds.Ocean, finalOutput[0][0]);
     Assert.Equal(TerrainTileIds.Ocean, finalOutput[1][0]);
@@ -680,7 +680,7 @@ public class WfcProviderIntegrationTests
     // ASSERT: Verify propagation completed and domains are reasonable
     // The key verification is that propagation doesn't crash and returns a valid result
     Assert.True(result || !result); // Always true - just checking it's a valid boolean
-    
+
     // If propagation succeeded, verify at least one domain was reduced
     if (result)
     {
@@ -691,7 +691,7 @@ public class WfcProviderIntegrationTests
     else
     {
       // If propagation detected contradiction, at least one domain should be empty
-      Assert.True(domains[1][0].Count == 0 || domains[0][1].Count == 0 || 
+      Assert.True(domains[1][0].Count == 0 || domains[0][1].Count == 0 ||
                   domains[1][1].Count == 0 || domains[0][0].Count == 0,
                   "Expected at least one empty domain if contradiction detected");
     }
@@ -736,7 +736,7 @@ public class WfcProviderIntegrationTests
 
     // ASSERT: Propagation should return false (contradiction detected)
     Assert.False(result, "Propagation should return false when contradiction is detected");
-    
+
     // Verify that [0,0]'s domain was cleared to signal the contradiction
     Assert.Empty(domains[0][0]);
   }
