@@ -1,4 +1,4 @@
-﻿
+
 # Wave Function Collapse Performance Analysis
 
 ## Overview
@@ -8,6 +8,7 @@ This document details the performance and architectural considerations for the W
 ## Table of contents
 
 - [Overview](#overview)
+- [Plan issue](#plan-issue)
 - [Feature status](#feature-status)
 - [Definition of terms](#definition-of-terms)
 - [Architectural considerations and constraints](#architectural-considerations-and-constraints)
@@ -18,6 +19,17 @@ This document details the performance and architectural considerations for the W
   - [Phase 3: Diagnostics and Time Budget Compliance](#phase-3-diagnostics-and-time-budget-compliance)
   - [Phase 4: Open Questions and Future Work](#phase-4-open-questions-and-future-work)
 - [Changelog](#changelog)
+- [See also](#see-also)
+- [References](#references)
+
+## Plan issue
+
+This plan is tracked by GitHub issue [#20][issue-20]:
+
+- **WFC Performance Optimization: Caching, Memory Management, and Time Budget Compliance**
+- Part of [WFC Completion Plan][parent-plan] Phase 3
+
+See [meta issue #22][issue-22] for overall WFC completion tracking.
 
 ## Feature status
 
@@ -49,7 +61,6 @@ This document details the performance and architectural considerations for the W
 
 ### Feature requirements
 
-```markdown
 - (Incomplete) AC-3 propagation implemented for constraint satisfaction
   - GIVEN the need for robust constraint propagation
   - WHEN AC-3 is used instead of forward checking
@@ -91,7 +102,6 @@ This document details the performance and architectural considerations for the W
   - THEN they are documented for future implementation
 
 > Ongoing. See Phase 4.
-```
 
 ### Phase 1: Constraint Propagation and Rule Evaluation
 
@@ -109,7 +119,6 @@ Implement robust constraint propagation (AC-3) and precomputed rule tables to im
 
 #### Phase requirements
 
-```markdown
 - (Incomplete) AC-3 propagation implemented for constraint satisfaction
   - GIVEN the need for robust constraint propagation
   - WHEN AC-3 is used instead of forward checking
@@ -123,7 +132,6 @@ Implement robust constraint propagation (AC-3) and precomputed rule tables to im
   - THEN rule lookup is 70% faster
 
 > Implementation not started.
-```
 
 #### Examples
 
@@ -156,14 +164,12 @@ Optimize memory usage and domain operations for large tile sets using BitSet and
 
 #### Phase requirements
 
-```markdown
 - (Incomplete) BitSet domain representation for large tile sets
   - GIVEN large tile sets (>32 tiles)
   - WHEN BitSet is used for domain representation
   - THEN domain operations are 60% faster
 
 > Implementation not started.
-```
 
 #### Examples
 
@@ -196,7 +202,6 @@ Integrate diagnostics for performance monitoring and enforce time budgets with a
 
 #### Phase requirements
 
-```markdown
 - (Incomplete) Diagnostics integration for performance monitoring
   - GIVEN WFC generation
   - WHEN diagnostics are enabled
@@ -210,7 +215,6 @@ Integrate diagnostics for performance monitoring and enforce time budgets with a
   - THEN fallback algorithms or early termination are used
 
 > Implementation not started.
-```
 
 #### Examples
 
@@ -244,23 +248,20 @@ Document open questions, technical debt, and future architectural directions.
 
 #### Phase requirements
 
-```markdown
 - (Incomplete) Open questions and future work documented
   - GIVEN architectural and performance trade-offs
   - WHEN open questions arise
   - THEN they are documented for future implementation
 
 > Ongoing.
-```
 
 #### Examples
 
-```markdown
 **Open Questions:**
+
 - Should chunk generation be parallel at chunk-level or cell-level?
 - How to handle seam consistency with concurrent generation?
 - How to support very large tilesets efficiently?
-```
 
 ## Changelog
 
@@ -271,3 +272,88 @@ Document open questions, technical debt, and future architectural directions.
 - **TBD**: Phase 4 completion - Library abstraction and plugin architecture
 - **TBD**: Phase 5 completion - Comprehensive testing suite
 - **TBD**: Phase 6 completion - Documentation and onboarding materials
+
+## See also
+
+### Parent Plan
+
+- **[WFC Completion Plan][parent-plan]** - Master implementation plan for WFC completion
+
+### Related Child Plans
+
+- **[Library Abstraction][child-library]** - Phase 4: Generic WFC solver for non-tile domains
+- **[Plugin Architecture][child-plugin]** - Phase 4: Pluggable provider system for WFC extensibility
+- **[Property Testing][child-testing]** - Phase 5: Comprehensive property-based and performance regression tests
+
+### Related Documentation
+
+- **[WFC Algorithm Overview][doc-wfc]** - Core WFC algorithm explanation
+- **[Performance Diagnostics][doc-diagnostics]** - EventSource and diagnostics integration
+
+### GitHub Tracking
+
+- **This Plan**: [Issue #20][issue-20] - WFC Performance Optimization
+- **Meta Issue**: [#22 - WFC Implementation Completion][issue-22]
+
+### Implementation Files
+
+- **[WfcProvider.cs][impl-wfcprovider]** - Current WFC implementation
+- **[Ac3Propagator.cs][impl-ac3]** - AC-3 constraint propagation
+- **[TerrainPerformanceEventSource.cs][impl-diagnostics]** - Performance diagnostics
+
+## References
+
+### Wave Function Collapse
+
+- **[WFC Original][ref-wfc-original]** - Maxim Gumin's original WFC algorithm
+- **[WFC Explanation][ref-wfc-explained]** - Robert Heaton's WFC tutorial
+
+### Constraint Satisfaction
+
+- **[AC-3 Algorithm][ref-ac3]** - Arc Consistency Algorithm #3
+- **[CSP Theory][ref-csp]** - Constraint satisfaction problem fundamentals
+- **[Forward Checking][ref-forward-checking]** - Alternative propagation technique
+
+### Performance
+
+- **[BenchmarkDotNet][ref-benchmark]** - .NET benchmarking framework
+- **[EventSource][ref-eventsource]** - .NET performance diagnostics with EventSource
+- **[Object Pooling][ref-pooling]** - Memory management patterns for .NET
+
+### Data Structures
+
+- **[BitSet][ref-bitset]** - Efficient bit array operations
+- **[HashSet Performance][ref-hashset]** - .NET HashSet best practices
+
+<!-- Link References -->
+
+<!-- GitHub Issues -->
+[issue-20]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/20
+[issue-22]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/22
+
+<!-- Plans -->
+[parent-plan]: ../wfc-completion-plan.md
+[child-library]: library-abstraction.md
+[child-plugin]: plugin-architecture.md
+[child-testing]: property-and-performance-tests.md
+
+<!-- Documentation -->
+[doc-wfc]: ../../map-generation/wfc/README.md
+[doc-diagnostics]: ../../../TerrainGeneration2D.Core/Diagnostics/README.md
+
+<!-- Implementation Files -->
+[impl-wfcprovider]: ../../../TerrainGeneration2D.Core/Mapping/WfcProvider.cs
+[impl-ac3]: ../../../TerrainGeneration2D.Core/Mapping/Ac3Propagator.cs
+[impl-diagnostics]: ../../../TerrainGeneration2D.Core/Diagnostics/TerrainPerformanceEventSource.cs
+
+<!-- External References -->
+[ref-wfc-original]: https://github.com/mxgmn/WaveFunctionCollapse
+[ref-wfc-explained]: https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/
+[ref-ac3]: https://en.wikipedia.org/wiki/AC-3_algorithm
+[ref-csp]: https://en.wikipedia.org/wiki/Constraint_satisfaction_problem
+[ref-forward-checking]: https://en.wikipedia.org/wiki/Constraint_satisfaction_problem#Forward_checking
+[ref-benchmark]: https://benchmarkdotnet.org/
+[ref-eventsource]: https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventsource
+[ref-pooling]: https://learn.microsoft.com/en-us/dotnet/api/system.buffers.arraypool-1
+[ref-bitset]: https://en.wikipedia.org/wiki/Bit_array
+[ref-hashset]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1

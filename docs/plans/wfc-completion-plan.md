@@ -1,4 +1,4 @@
-﻿
+
 # Wave Function Collapse Implementation Completion Plan
 
 ## Overview
@@ -56,6 +56,23 @@ into a standalone library for production strategy games.
   - [Phase 5: Comprehensive Testing](#phase-5-comprehensive-testing)
   - [Phase 6: Documentation and Onboarding](#phase-6-documentation-and-onboarding)
 
+## Plan issue
+
+This plan is tracked by GitHub issue [#22][issue-22]:
+
+- [**[META] Wave Function Collapse Implementation Completion**][issue-22]
+
+The meta issue tracks all 7 phases (0-6) with status indicators, dependencies, and links to child issues:
+
+- [#12 - Library Abstraction for Non-Tile Domains][issue-12]
+- [#16 - Comprehensive Property-Based and Performance Regression Tests][issue-16]
+- [#17 - Terrain Configuration User Interface][issue-17]
+- [#19 - Plugin Architecture for WFC Extensibility][issue-19]
+- [#20 - WFC Performance Optimization][issue-20]
+- [#21 - WFC Documentation and Developer Onboarding][issue-21]
+
+See the meta issue for current progress, critical path, and overall completion status (~50%).
+
 ## Feature status
 
 - In development
@@ -90,19 +107,19 @@ articles about the term
 
 | Term                       | Meaning                                                                                                                             | Reference                                                                                              |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Wave Function Collapse     | A constraint-solving algorithm that generates content by iteratively collapsing superposition states based on local adjacency rules | [WFC Original Paper](https://github.com/mxgmn/WaveFunctionCollapse)                                    |
+| Arc Consistency            | A constraint propagation algorithm that ensures all constraints between connected variables are satisfied                           | [AC-3 Algorithm](https://en.wikipedia.org/wiki/AC-3_algorithm)                                         |
+| Backtracking               | Rolling back decisions when contradictions occur and trying alternative choices                                                     | -                                                                                                      |
+| BitSet                     | A custom data structure wrapping .NET's BitArray to provide efficient set operations for tile ID collections                        | [System.Collections.BitArray](https://docs.microsoft.com/en-us/dotnet/api/system.collections.bitarray) |
+| Change Log                 | A data structure that records reversible changes to support backtracking                                                            | -                                                                                                      |
 | Domain                     | The set of possible tile types that can be placed at a given cell position                                                          | -                                                                                                      |
 | Entropy                    | A measure of uncertainty in a cell's domain; lower entropy cells have fewer possible tiles                                          | -                                                                                                      |
+| Most Constraining Variable | A heuristic that preferentially selects cells that will constrain the most neighboring cells                                        | [CSP Heuristics](https://en.wikipedia.org/wiki/Constraint_satisfaction_problem)                        |
 | Observation                | The act of selecting and placing a specific tile from a cell's domain                                                               | -                                                                                                      |
 | Propagation                | The process of updating neighboring cell domains based on adjacency constraints after an observation                                | -                                                                                                      |
-| Backtracking               | Rolling back decisions when contradictions occur and trying alternative choices                                                     | -                                                                                                      |
-| Arc Consistency            | A constraint propagation algorithm that ensures all constraints between connected variables are satisfied                           | [AC-3 Algorithm](https://en.wikipedia.org/wiki/AC-3_algorithm)                                         |
+| Rule Table                 | Precomputed adjacency constraints that define which tiles can be placed next to each other                                          | -                                                                                                      |
 | Seam Consistency           | Ensuring that adjacent chunks in the world have compatible tile placements at their boundaries                                      | -                                                                                                      |
 | Shannon Entropy            | An information-theoretic measure of entropy calculated as H = -Σ(pi × log(pi))                                                      | [Information Theory](https://en.wikipedia.org/wiki/Entropy_(information_theory))                       |
-| Most Constraining Variable | A heuristic that preferentially selects cells that will constrain the most neighboring cells                                        | [CSP Heuristics](https://en.wikipedia.org/wiki/Constraint_satisfaction_problem)                        |
-| Rule Table                 | Precomputed adjacency constraints that define which tiles can be placed next to each other                                          | -                                                                                                      |
-| Change Log                 | A data structure that records reversible changes to support backtracking                                                            | -                                                                                                      |
-| BitSet                     | A custom data structure wrapping .NET's BitArray to provide efficient set operations for tile ID collections                        | [System.Collections.BitArray](https://docs.microsoft.com/en-us/dotnet/api/system.collections.bitarray) |
+| Wave Function Collapse     | A constraint-solving algorithm that generates content by iteratively collapsing superposition states based on local adjacency rules | [WFC Original Paper](https://github.com/mxgmn/WaveFunctionCollapse)                                    |
 
 ## Architectural considerations and constraints
 
@@ -297,9 +314,10 @@ This null-based design requires careful consideration when interfacing with comp
 
 ### Child Feature Plans
 
-- [Plugin Architecture](wfc-completion-plan/plugin-architecture.md)
-- [Library Abstraction for Non-Tile Domains](wfc-completion-plan/library-abstraction.md)
-- [Comprehensive Property-Based and Performance Regression Tests](wfc-completion-plan/property-and-performance-tests.md)
+- [Plugin Architecture](wfc-completion-plan/plugin-architecture.md) - Phase 4: Pluggable entropy and constraint providers
+- [Library Abstraction for Non-Tile Domains](wfc-completion-plan/library-abstraction.md) - Phase 4: Generic WFC solver interface
+- [Performance Analysis](wfc-completion-plan/performance-analysis.md) - Phase 3: Constraint propagation, memory management, and diagnostics
+- [Comprehensive Property-Based and Performance Regression Tests](wfc-completion-plan/property-and-performance-tests.md) - Phase 5: Testing strategy
 
 Detailed step-by-step implementation guide following Test Driven Development principles where applicable, leading with minimal breaking tests, followed by minimal changes to fix tests, followed by refactor, repeating until the feature is complete.
 
@@ -1235,3 +1253,145 @@ public void BasicWfcSetup_Example()
     }
 }
 ```
+
+## See also
+
+### Child Feature Plans
+
+This plan is split across multiple documents for detailed feature specifications:
+
+- **[Plugin Architecture][child-plugin]** - Phase 4: Pluggable entropy and constraint provider system
+- **[Library Abstraction for Non-Tile Domains][child-library]** - Phase 4: Generic WFC solver interface supporting arbitrary domains
+- **[Performance Analysis][child-performance]** - Phase 3: Constraint propagation optimization, memory management, and diagnostics integration
+- **[Comprehensive Property-Based and Performance Regression Tests][child-testing]** - Phase 5: Testing strategy with property-based tests and regression detection
+
+### Related Documentation
+
+- **[Architecture Overview][doc-architecture]** - System-wide architecture and component relationships
+- **[Chunked Tilemap Design][impl-chunkedtilemap]** - Primary integration point for WFC terrain generation
+- **[Runtime Settings Panel][doc-settings]** - F10 configuration UI for WFC heuristics and parameters
+
+### GitHub Tracking
+
+- **Meta Issue**: [#22 - Wave Function Collapse Implementation Completion][issue-22]
+- **Child Issues**:
+  - [#12 - Library Abstraction for Non-Tile Domains][issue-12]
+  - [#16 - Comprehensive Property-Based and Performance Regression Tests][issue-16]
+  - [#17 - Terrain Configuration User Interface][issue-17]
+  - [#19 - Plugin Architecture for WFC Extensibility][issue-19]
+  - [#20 - WFC Performance Optimization][issue-20]
+  - [#21 - WFC Documentation and Developer Onboarding][issue-21]
+
+### Implementation Files
+
+Key implementation files referenced in this plan:
+
+- **[WfcProvider.cs][impl-wfcprovider]** - Core WFC solver implementation
+- **[AC3Propagator.cs][impl-ac3]** - Arc consistency propagation algorithm
+- **[PrecomputedRuleTable.cs][impl-ruletable]** - Optimized adjacency rule lookup
+- **[ChunkedTilemap.cs][impl-chunkedtilemap]** - Chunk management and WFC integration
+- **[GameScene.cs][impl-gamescene]** - Scene-level WFC configuration and initialization
+
+## References
+
+### Wave Function Collapse Algorithm
+
+- **[WFC Original Repository][ref-wfc-original]** - Maxim Gumin's reference implementation and research
+- **[WFC Explained][ref-wfc-tutorial]** - Robert Heaton's tutorial introduction
+- **[Wave Function Collapse Algorithm Deep Dive][ref-wfc-deepdive]** - Boris the Brave's comprehensive explanation
+- **[Constraint-Based Procedural Generation][ref-wfc-academic]** - Academic background on constraint-solving for PCG
+
+### Constraint Satisfaction Problems
+
+- **[AC-3 Algorithm][ref-ac3]** - Arc Consistency Algorithm #3 for constraint propagation
+- **[Constraint Satisfaction Problem][ref-csp]** - General CSP theory and heuristics
+- **[Backtracking Algorithm][ref-backtracking]** - Search space exploration through backtracking
+- **[CSP Heuristics][ref-csp-heuristics]** - Most Constraining Variable, Minimum Remaining Values, etc.
+
+### Information Theory
+
+- **[Shannon Entropy][ref-shannon]** - Information-theoretic entropy measure
+- **[Information Theory Primer][ref-infotheory-primer]** - Chris Olah's visual introduction to information theory
+- **[Entropy in Constraint Satisfaction][ref-entropy-csp]** - Research on entropy-based variable ordering
+
+### .NET Performance and Best Practices
+
+- **[System.Collections.BitArray][ref-bitarray]** - .NET BitArray documentation
+- **[CA1814: Prefer jagged arrays][ref-jagged-arrays]** - Performance guidance for array structures
+- **[EventSource Class][ref-eventsource]** - High-performance diagnostics and telemetry
+- **[Object Pooling in .NET][ref-objectpool]** - Memory optimization strategies
+
+### MonoGame Integration
+
+- **[MonoGame Documentation][ref-monogame]** - Official MonoGame framework documentation
+- **[SpriteBatch Performance][ref-spritebatch]** - Rendering optimization for tile-based games
+- **[Content Pipeline][ref-contentpipe]** - Asset management and loading
+
+### Testing and Quality
+
+- **[Property-Based Testing][ref-pbt]** - Introduction to property-based testing concepts
+- **[FsCheck Documentation][ref-fscheck]** - F# property-based testing library for .NET
+- **[Stryker.NET][ref-stryker]** - Mutation testing for C# to validate test effectiveness
+- **[BenchmarkDotNet][ref-benchmark]** - Performance benchmarking and regression detection
+
+<!-- Link References -->
+
+<!-- GitHub Issues -->
+[issue-12]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/12
+[issue-16]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/16
+[issue-17]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/17
+[issue-19]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/19
+[issue-20]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/20
+[issue-21]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/21
+[issue-22]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/22
+
+<!-- Child Plans -->
+[child-plugin]: wfc-completion-plan/plugin-architecture.md
+[child-library]: wfc-completion-plan/library-abstraction.md
+[child-performance]: wfc-completion-plan/performance-analysis.md
+[child-testing]: wfc-completion-plan/property-and-performance-tests.md
+
+<!-- Related Documentation -->
+[doc-architecture]: ../architecture-class-diagram.md
+[doc-settings]: ../features/ui/runtime-settings-panel.md
+
+<!-- Implementation Files -->
+[impl-wfcprovider]: ../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs
+[impl-ac3]: ../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/AC3Propagator.cs
+[impl-ruletable]: ../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/PrecomputedRuleTable.cs
+[impl-chunkedtilemap]: ../../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs
+[impl-gamescene]: ../../TerrainGeneration2D/Scenes/GameScene.cs
+
+<!-- WFC References -->
+[ref-wfc-original]: https://github.com/mxgmn/WaveFunctionCollapse
+[ref-wfc-tutorial]: https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/
+[ref-wfc-deepdive]: https://www.boristhebrave.com/2020/04/13/wave-function-collapse-explained/
+[ref-wfc-academic]: https://www.cs.unm.edu/~aaron/downloads/whitaker_dissertation.pdf
+
+<!-- CSP References -->
+[ref-ac3]: https://en.wikipedia.org/wiki/AC-3_algorithm
+[ref-csp]: https://en.wikipedia.org/wiki/Constraint_satisfaction_problem
+[ref-backtracking]: https://en.wikipedia.org/wiki/Backtracking
+[ref-csp-heuristics]: https://en.wikipedia.org/wiki/Constraint_satisfaction_problem#Heuristics
+
+<!-- Information Theory References -->
+[ref-shannon]: https://en.wikipedia.org/wiki/Entropy_(information_theory)
+[ref-infotheory-primer]: https://colah.github.io/posts/2015-09-Visual-Information/
+[ref-entropy-csp]: https://www.aaai.org/Papers/AAAI/2004/AAAI04-090.pdf
+
+<!-- .NET References -->
+[ref-bitarray]: https://docs.microsoft.com/en-us/dotnet/api/system.collections.bitarray
+[ref-jagged-arrays]: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1814
+[ref-eventsource]: https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventsource
+[ref-objectpool]: https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.objectpool
+
+<!-- MonoGame References -->
+[ref-monogame]: https://docs.monogame.net/
+[ref-spritebatch]: https://community.monogame.net/t/spritebatch-performance-guide/11510
+[ref-contentpipe]: https://docs.monogame.net/articles/content_pipeline/index.html
+
+<!-- Testing References -->
+[ref-pbt]: https://hypothesis.works/articles/what-is-property-based-testing/
+[ref-fscheck]: https://fscheck.github.io/FsCheck/
+[ref-stryker]: https://stryker-mutator.io/docs/stryker-net/introduction
+[ref-benchmark]: https://benchmarkdotnet.org/
