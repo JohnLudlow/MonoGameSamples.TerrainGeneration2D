@@ -9,7 +9,7 @@ public sealed class FoodResource : ResourceType
   {
   }
 
-  public static NullResourceType Instance { get; } = new();
+  public static FoodResource Instance { get; } = new();
 
   public override bool EvaluateRules(ResourceRuleContext context)
   {
