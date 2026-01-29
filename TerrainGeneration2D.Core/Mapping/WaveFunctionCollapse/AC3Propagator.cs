@@ -1,4 +1,4 @@
-﻿// TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/AC3Propagator.cs
+// TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/AC3Propagator.cs
 
 using System;
 using System.Collections.Generic;
@@ -141,49 +141,97 @@ public class AC3Propagator
     };
   }
 
-  private bool RemoveInconsistentValues(int x, int y, Direction direction, ChangeLog? log = null)
-  {
-    // Example rule check: if neighbor cell contains Ocean (ID=0),
-    // current cell can only contain Beach (ID=1)
-    var neighborPos = GetNeighborPosition(x, y, direction);
-    if (!IsValidCoordinate(neighborPos.x, neighborPos.y))
-      return false;
+   private bool RemoveInconsistentValues(int x, int y, Direction direction, ChangeLog? log = null)
+   {
+     // Example rule check: if neighbor cell contains Ocean (ID=0),
+     // current cell can only contain Beach (ID=1)
+     var neighborPos = GetNeighborPosition(x, y, direction);
+     if (!IsValidCoordinate(neighborPos.x, neighborPos.y))
+       return false;
 
-    var currentDomain = _domains[x][y];
-    var neighborDomain = _domains[neighborPos.x][neighborPos.y];
+     var currentDomain = _domains[x][y];
+     var neighborDomain = _domains[neighborPos.x][neighborPos.y];
 
-    // Handle null domains: null means collapsed cell, skip processing
-    if (currentDomain == null || neighborDomain == null)
-      return false;
+     // Handle null domains: null means collapsed cell, skip processing
+     if (currentDomain == null || neighborDomain == null)
+       return false;
 
-    var removed = false;
-    var tilesToRemove = new List<int>();
+     var removed = false;
+     var tilesToRemove = new List<int>();
 
-    foreach (var tileId in currentDomain.ToList())
-    {
-      var allowedNeighbors = _ruleTable.GetAllowedNeighbors(tileId, direction);
-      var hasSupport = neighborDomain.Any(n => allowedNeighbors.Contains(n));
+     foreach (var tileId in currentDomain.ToList())
+     {
+       var allowedNeighbors = _ruleTable.GetAllowedNeighbors(tileId, direction);
+       var hasSupport = neighborDomain.Any(n => allowedNeighbors.Contains(n));
 
-      if (!hasSupport)
-        tilesToRemove.Add(tileId);
-    }
+       if (!hasSupport)
+         tilesToRemove.Add(tileId);
+     }
 
-    foreach (var tile in tilesToRemove)
-    {
-      currentDomain.Remove(tile);
-      log?.RecordDomainRemoved(x, y, tile);
+     foreach (var tile in tilesToRemove)
+     {
+       currentDomain.Remove(tile);
+       log?.RecordDomainRemoved(x, y, tile);
 
 
-      removed = true;
-    }
+       removed = true;
+     }
 
-    if (currentDomain.Count == 1)
-    {
-      var chosenTile = currentDomain.First();
-      if (log != null) log.RecordCellCollapsed(x, y, currentDomain, chosenTile);
-      // ...existing code for cell collapse...
-    }
+     // SINGLETON CONTRADICTION DETECTION:
+     // After domain reduction, if domain becomes singleton (size 1), verify that the
+     // single tile is compatible with ALL four neighbors. If any neighbor has NO compatible
+     // tiles for this singleton, we have detected a contradiction.
+     if (currentDomain.Count == 1)
+     {
+       var singletonTile = currentDomain.First();
+       log?.RecordCellCollapsed(x, y, currentDomain, singletonTile);
 
-    return removed;
-  }
+       // Validate singleton tile against all four neighbors
+       if (!ValidateSingletonTile(x, y, singletonTile))
+       {
+         // Singleton is incompatible with at least one neighbor - contradiction!
+         currentDomain.Clear();
+         log?.RecordDomainRemoved(x, y, singletonTile);
+         return true; // Indicate a change was made (domain cleared)
+       }
+     }
+
+     return removed;
+   }
+
+   /// <summary>
+   /// Validates that a singleton tile at the given position is compatible with all neighbors.
+   /// If any neighbor has NO compatible tiles for this singleton, returns false (contradiction).
+   /// </summary>
+   private bool ValidateSingletonTile(int x, int y, int singletonTile)
+   {
+     var directions = new[] { Direction.North, Direction.East, Direction.South, Direction.West };
+
+     foreach (var direction in directions)
+     {
+       var neighborPos = GetNeighborPosition(x, y, direction);
+       if (!IsValidCoordinate(neighborPos.x, neighborPos.y))
+         continue;
+
+       var neighborDomain = _domains[neighborPos.x][neighborPos.y];
+
+       // Skip null domains (collapsed cells are compatible by definition)
+       if (neighborDomain == null)
+         continue;
+
+       // Get tiles that can be neighbors to our singleton tile in this direction
+       var allowedNeighbors = _ruleTable.GetAllowedNeighbors(singletonTile, direction);
+
+       // Check if the neighbor domain has ANY compatible tile
+       var hasCompatibleNeighbor = neighborDomain.Any(n => allowedNeighbors.Contains(n));
+
+       if (!hasCompatibleNeighbor)
+       {
+         // Neighbor domain has NO compatible tiles - contradiction!
+         return false;
+       }
+     }
+
+     return true; // All neighbors are compatible with this singleton
+   }
 }

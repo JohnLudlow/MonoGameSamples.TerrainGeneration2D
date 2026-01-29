@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 /// Exposes the current domain grid for testing and diagnostics.
 /// </summary>
 using System;
@@ -695,33 +695,12 @@ public class WfcProvider
 
   private bool Propagate(int startX, int startY) => Propagator.PropagateFrom(startX, startY, _output[startX][startY]);
 
-  private bool Propagate(int startX, int startY, ChangeLog log)
-  {
-    var queue = new Queue<(int x, int y)>();
-    queue.Enqueue((startX, startY));
-
-    while (queue.Count > 0)
-    {
-      var (x, y) = queue.Dequeue();
-      var currentTile = _output[x][y];
-      if (currentTile == -1)
-        continue;
-
-      var currentPoint = new TilePoint(x, y);
-
-      if (y > 0 && !ConstrainAndRecord(x, y - 1, Direction.South, currentTile, currentPoint, log)) return false;
-      if (y < _height - 1 && !ConstrainAndRecord(x, y + 1, Direction.North, currentTile, currentPoint, log)) return false;
-      if (x < _width - 1 && !ConstrainAndRecord(x + 1, y, Direction.West, currentTile, currentPoint, log)) return false;
-      if (x > 0 && !ConstrainAndRecord(x - 1, y, Direction.East, currentTile, currentPoint, log)) return false;
-
-      if (y > 0 && _possibilities[x][y - 1] != null) queue.Enqueue((x, y - 1));
-      if (y < _height - 1 && _possibilities[x][y + 1] != null) queue.Enqueue((x, y + 1));
-      if (x < _width - 1 && _possibilities[x + 1][y] != null) queue.Enqueue((x + 1, y));
-      if (x > 0 && _possibilities[x - 1][y] != null) queue.Enqueue((x - 1, y));
-    }
-
-    return true;
-  }
+   private bool Propagate(int startX, int startY, ChangeLog log)
+   {
+     // Delegate to AC3Propagator for consistent constraint propagation with singleton validation.
+     // AC3Propagator now detects singleton contradictions and clears domains accordingly.
+     return Propagator.PropagateFrom(startX, startY, _output[startX][startY], log);
+   }
 
   private bool ConstrainAndRecord(int x, int y, Direction directionToNeighbor, int neighborTileId, TilePoint neighborPosition, ChangeLog log)
   {
