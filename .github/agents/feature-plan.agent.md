@@ -5,7 +5,7 @@ tools: ['vscode/runCommand', 'execute/runInTerminal', 'read', 'edit', 'search', 
 model: Grok Code Fast 1 (copilot)
 handoffs:
   - label: Implement Plan
-    agent: feature-implement
+    agent: FeatureImplementer
     prompt: Implement the plan outlined above.
     send: false
 ---
