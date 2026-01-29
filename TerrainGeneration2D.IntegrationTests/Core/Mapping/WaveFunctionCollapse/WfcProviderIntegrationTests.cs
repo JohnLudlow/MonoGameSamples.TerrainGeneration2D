@@ -1,4 +1,4 @@
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
+﻿using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.Boundaries;
@@ -203,17 +203,17 @@ public class WfcProviderIntegrationTests
     // pre-propagate constraints from these fixed tiles before the main loop.
     var possibilities = wfc.GetPossibilities();
     var prefilledOutput = wfc.GetOutput();
-    
+
     // Cell [0][0]: choice point (will select 0 or 1)
     possibilities[0][0] = new HashSet<int> { 0, 1 };  // Domain: Water or Beach
-    
+
     // Cells [1-3][0]: forced singletons that will be pre-collapsed
     possibilities[1][0] = new HashSet<int> { 0 };     // Domain: Water only
     prefilledOutput[1][0] = 0;                        // Pre-fill output
-    
+
     possibilities[2][0] = new HashSet<int> { 2 };     // Domain: Grass only
     prefilledOutput[2][0] = 2;                        // Pre-fill output
-    
+
     possibilities[3][0] = new HashSet<int> { 3 };     // Domain: Mountain only
     prefilledOutput[3][0] = 3;                        // Pre-fill output
 

@@ -1,16 +1,15 @@
-using System.Collections.Generic;
-
-/// <summary>
+﻿/// <summary>
 /// Exposes the current domain grid for testing and diagnostics.
 /// </summary>
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
-using Microsoft.Xna.Framework;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.EntropyProviders;
+using Microsoft.Xna.Framework;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 
@@ -498,128 +497,128 @@ public class WfcProvider
   /// </summary>
   public int[][] GetOutput() => _output;
 
-   internal (int x, int y) FindLowestEntropy()
-   {
-     // Phase 1: Collect all candidate cells (undecided cells with non-empty domains)
-     var candidateCells = new List<(int x, int y, double kScore, double hScore, int influence)>();
+  internal (int x, int y) FindLowestEntropy()
+  {
+    // Phase 1: Collect all candidate cells (undecided cells with non-empty domains)
+    var candidateCells = new List<(int x, int y, double kScore, double hScore, int influence)>();
 
-     for (var y = 0; y < _height; y++)
-     {
-       for (var x = 0; x < _width; x++)
-       {
-         var poss = _possibilities[x][y];
-         // Select cells with domain size >= 1 and not yet assigned (null = collapsed)
-         if (poss == null || poss.Count == 0) continue;
+    for (var y = 0; y < _height; y++)
+    {
+      for (var x = 0; x < _width; x++)
+      {
+        var poss = _possibilities[x][y];
+        // Select cells with domain size >= 1 and not yet assigned (null = collapsed)
+        if (poss == null || poss.Count == 0) continue;
 
-         // Compute entropy scores based on enabled heuristics
-         var k = _heuristicsConfig.UseDomainEntropy ? _domainEntropy.GetScore(x, y, _possibilities, _output, _weightConfig) : double.PositiveInfinity;
-         var h = _heuristicsConfig.UseShannonEntropy ? _shannonEntropy.GetScore(x, y, _possibilities, _output, _weightConfig) : double.PositiveInfinity;
+        // Compute entropy scores based on enabled heuristics
+        var k = _heuristicsConfig.UseDomainEntropy ? _domainEntropy.GetScore(x, y, _possibilities, _output, _weightConfig) : double.PositiveInfinity;
+        var h = _heuristicsConfig.UseShannonEntropy ? _shannonEntropy.GetScore(x, y, _possibilities, _output, _weightConfig) : double.PositiveInfinity;
 
-         // Calculate influence: count how many undecided neighbors this cell has
-         // Higher influence = cell constrains more neighbors = better choice for early propagation
-         var influence = 0;
-         if (y > 0 && _possibilities[x][y - 1] != null) influence++;
-         if (y < _height - 1 && _possibilities[x][y + 1] != null) influence++;
-         if (x > 0 && _possibilities[x - 1][y] != null) influence++;
-         if (x < _width - 1 && _possibilities[x + 1][y] != null) influence++;
+        // Calculate influence: count how many undecided neighbors this cell has
+        // Higher influence = cell constrains more neighbors = better choice for early propagation
+        var influence = 0;
+        if (y > 0 && _possibilities[x][y - 1] != null) influence++;
+        if (y < _height - 1 && _possibilities[x][y + 1] != null) influence++;
+        if (x > 0 && _possibilities[x - 1][y] != null) influence++;
+        if (x < _width - 1 && _possibilities[x + 1][y] != null) influence++;
 
-         candidateCells.Add((x, y, k, h, influence));
-       }
-     }
+        candidateCells.Add((x, y, k, h, influence));
+      }
+    }
 
-     if (candidateCells.Count == 0)
-       return (-1, -1);
+    if (candidateCells.Count == 0)
+      return (-1, -1);
 
-     // Phase 2: Apply entropy-based filtering to create initial shortlist
-     // WFC principle: select cells with minimum entropy first for most constrained choices
-     List<(int x, int y, double k, double h, int influence)> shortlist;
+    // Phase 2: Apply entropy-based filtering to create initial shortlist
+    // WFC principle: select cells with minimum entropy first for most constrained choices
+    List<(int x, int y, double k, double h, int influence)> shortlist;
 
-     if (!_heuristicsConfig.UseDomainEntropy && !_heuristicsConfig.UseShannonEntropy)
-       throw new InvalidOperationException("No entropy heuristic enabled: enable DomainEntropy and/or ShannonEntropy.");
+    if (!_heuristicsConfig.UseDomainEntropy && !_heuristicsConfig.UseShannonEntropy)
+      throw new InvalidOperationException("No entropy heuristic enabled: enable DomainEntropy and/or ShannonEntropy.");
 
-     if (_heuristicsConfig.UseDomainEntropy && _heuristicsConfig.UseShannonEntropy)
-     {
-       // Both heuristics enabled: prefer cells with minimum in BOTH scores (intersection)
-       var minK = candidateCells.Min(c => c.kScore);
-       var minH = candidateCells.Min(c => c.hScore);
-       var setK = candidateCells.Where(c => Math.Abs(c.kScore - minK) < 1e-9).ToList();
-       var setH = candidateCells.Where(c => Math.Abs(c.hScore - minH) < 1e-9).ToList();
-       var intersect = setK.Where(k => setH.Any(h => h.x == k.x && h.y == k.y)).ToList();
-       shortlist = intersect.Count > 0 ? intersect : setK.Concat(setH).ToList();
-     }
-     else if (_heuristicsConfig.UseDomainEntropy)
-     {
-       // Only domain entropy: select cells with minimum domain size
-       var minK = candidateCells.Min(c => c.kScore);
-       shortlist = candidateCells.Where(c => Math.Abs(c.kScore - minK) < 1e-9).ToList();
-     }
-     else
-     {
-       // Only Shannon entropy: select cells with minimum Shannon entropy
-       var minH = candidateCells.Min(c => c.hScore);
-       shortlist = candidateCells.Where(c => Math.Abs(c.hScore - minH) < 1e-9).ToList();
-     }
+    if (_heuristicsConfig.UseDomainEntropy && _heuristicsConfig.UseShannonEntropy)
+    {
+      // Both heuristics enabled: prefer cells with minimum in BOTH scores (intersection)
+      var minK = candidateCells.Min(c => c.kScore);
+      var minH = candidateCells.Min(c => c.hScore);
+      var setK = candidateCells.Where(c => Math.Abs(c.kScore - minK) < 1e-9).ToList();
+      var setH = candidateCells.Where(c => Math.Abs(c.hScore - minH) < 1e-9).ToList();
+      var intersect = setK.Where(k => setH.Any(h => h.x == k.x && h.y == k.y)).ToList();
+      shortlist = intersect.Count > 0 ? intersect : setK.Concat(setH).ToList();
+    }
+    else if (_heuristicsConfig.UseDomainEntropy)
+    {
+      // Only domain entropy: select cells with minimum domain size
+      var minK = candidateCells.Min(c => c.kScore);
+      shortlist = candidateCells.Where(c => Math.Abs(c.kScore - minK) < 1e-9).ToList();
+    }
+    else
+    {
+      // Only Shannon entropy: select cells with minimum Shannon entropy
+      var minH = candidateCells.Min(c => c.hScore);
+      shortlist = candidateCells.Where(c => Math.Abs(c.hScore - minH) < 1e-9).ToList();
+    }
 
-     if (shortlist.Count == 0)
-       return (-1, -1);
+    if (shortlist.Count == 0)
+      return (-1, -1);
 
-     TerrainPerformanceEventSource.Log.ReportWfcShortlistSize(shortlist.Count);
+    TerrainPerformanceEventSource.Log.ReportWfcShortlistSize(shortlist.Count);
 
-     // Phase 3: Apply tie-breakers when multiple cells have same entropy
-     // This helps reduce backtracking by choosing cells that constrain the most neighbors
-     var applyInfluenceTieBreak = _heuristicsConfig.UseMostConstrainingTieBreak &&
-       (
-         (_heuristicsConfig.UseDomainEntropy && _heuristicsConfig.UseShannonEntropy) ||
-         _heuristicsConfig.ApplyInfluenceTieBreakForSingleHeuristic
-       );
+    // Phase 3: Apply tie-breakers when multiple cells have same entropy
+    // This helps reduce backtracking by choosing cells that constrain the most neighbors
+    var applyInfluenceTieBreak = _heuristicsConfig.UseMostConstrainingTieBreak &&
+      (
+        (_heuristicsConfig.UseDomainEntropy && _heuristicsConfig.UseShannonEntropy) ||
+        _heuristicsConfig.ApplyInfluenceTieBreakForSingleHeuristic
+      );
 
-     if (applyInfluenceTieBreak)
-     {
-       if (_heuristicsConfig.MostConstrainingBias > 0)
-       {
-         // Soft bias: weighted random selection biased by influence (probabilistic)
-         var weights = shortlist.Select(c => 1.0 + _heuristicsConfig.MostConstrainingBias * c.influence).ToArray();
-         var total = weights.Sum();
-         var roll = _random.NextDouble() * total;
-         double acc = 0;
-         for (int i = 0; i < shortlist.Count; i++)
-         {
-           acc += weights[i];
-           if (roll <= acc)
-           {
-             TerrainPerformanceEventSource.Log.WfcTieBreakInfluenceApplied(shortlist.Count);
-             var chosenBiased = shortlist[i];
-             return (chosenBiased.x, chosenBiased.y);
-           }
-         }
-       }
-       else
-       {
-         // Hard filter: deterministic selection - keep only cells with maximum influence
-         var maxInf = shortlist.Max(c => c.influence);
-         shortlist = shortlist.Where(c => c.influence == maxInf).ToList();
-         TerrainPerformanceEventSource.Log.WfcTieBreakInfluenceApplied(shortlist.Count);
-       }
-     }
+    if (applyInfluenceTieBreak)
+    {
+      if (_heuristicsConfig.MostConstrainingBias > 0)
+      {
+        // Soft bias: weighted random selection biased by influence (probabilistic)
+        var weights = shortlist.Select(c => 1.0 + _heuristicsConfig.MostConstrainingBias * c.influence).ToArray();
+        var total = weights.Sum();
+        var roll = _random.NextDouble() * total;
+        double acc = 0;
+        for (int i = 0; i < shortlist.Count; i++)
+        {
+          acc += weights[i];
+          if (roll <= acc)
+          {
+            TerrainPerformanceEventSource.Log.WfcTieBreakInfluenceApplied(shortlist.Count);
+            var chosenBiased = shortlist[i];
+            return (chosenBiased.x, chosenBiased.y);
+          }
+        }
+      }
+      else
+      {
+        // Hard filter: deterministic selection - keep only cells with maximum influence
+        var maxInf = shortlist.Max(c => c.influence);
+        shortlist = shortlist.Where(c => c.influence == maxInf).ToList();
+        TerrainPerformanceEventSource.Log.WfcTieBreakInfluenceApplied(shortlist.Count);
+      }
+    }
 
-     // Phase 4: Apply spatial preference tie-breaker
-     // When entropy and influence are tied, prefer cells closer to map center (helps stability)
-     if (_heuristicsConfig.PreferCentralCellTieBreak && shortlist.Count > 1)
-     {
-       var centerX = _width / 2;
-       var centerY = _height / 2;
-       int Distance((int x, int y, double k, double h, int influence) c)
-         => Math.Abs(c.x - centerX) + Math.Abs(c.y - centerY);
+    // Phase 4: Apply spatial preference tie-breaker
+    // When entropy and influence are tied, prefer cells closer to map center (helps stability)
+    if (_heuristicsConfig.PreferCentralCellTieBreak && shortlist.Count > 1)
+    {
+      var centerX = _width / 2;
+      var centerY = _height / 2;
+      int Distance((int x, int y, double k, double h, int influence) c)
+        => Math.Abs(c.x - centerX) + Math.Abs(c.y - centerY);
 
-       var minDist = shortlist.Min(Distance);
-       shortlist = shortlist.Where(c => Distance(c) == minDist).ToList();
-       TerrainPerformanceEventSource.Log.WfcTieBreakCentralApplied(shortlist.Count);
-     }
+      var minDist = shortlist.Min(Distance);
+      shortlist = shortlist.Where(c => Distance(c) == minDist).ToList();
+      TerrainPerformanceEventSource.Log.WfcTieBreakCentralApplied(shortlist.Count);
+    }
 
-     // Phase 5: Final random selection from tied candidates
-     var choice = shortlist[_random.NextInt(shortlist.Count)];
-     return (choice.x, choice.y);
-   }
+    // Phase 5: Final random selection from tied candidates
+    var choice = shortlist[_random.NextInt(shortlist.Count)];
+    return (choice.x, choice.y);
+  }
 
   internal bool CollapseCell(int x, int y)
   {

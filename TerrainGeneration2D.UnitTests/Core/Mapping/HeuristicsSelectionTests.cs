@@ -26,18 +26,19 @@ public sealed class HeuristicsSelectionTests
     // the WFC algorithm applies the "most constraining variable" heuristic to break ties
     // by preferring cells that can influence the most undecided neighbors.
     //
-    // SETUP: Create a 3x3 grid with specific domain states:
-    //
-    //   (0,0): [1,2]      (1,0): [1]      (2,0): DECIDED
-    //    ╔═══════╦═══════╦═══════╗
-    //    ║  ●    ║  ●    ║       ║
-    //    ╠═══════╬═══════╬═══════╣
-    //   (0,1): [1] (1,1): [1,2]  (2,1): [1]     [●] = undecided, [number] = domain
-    //    ║  ●    ║  ●●   ║  ●    ║
-    //    ╠═══════╬═══════╬═══════╣
-    //   (0,2): DECIDED (1,2): [1] (2,2): DECIDED
-    //    ║       ║  ●    ║       ║
-    //    ╚═══════╩═══════╩═══════╝
+     // SETUP: Create a 3x3 grid with specific domain states:
+     //
+     //    ╔═══════╦═══════╦═══════╗
+     //    ║ [1,2] ║  [1]  ║decided║   ← Row y=0: (0,0), (1,0), (2,0)
+     //    ║   ●   ║   ●   ║       ║
+     //    ╠═══════╬═══════╬═══════╣
+     //    ║ [1]   ║[1,2]  ║ [1]   ║   ← Row y=1: (0,1), (1,1), (2,1)
+     //    ║   ●   ║  ●●   ║   ●   ║
+     //    ╠═══════╬═══════╬═══════╣
+     //    ║decided║ [1]   ║decided║   ← Row y=2: (0,2), (1,2), (2,2)
+     //    ║       ║   ●   ║       ║
+     //    ╚═══════╩═══════╩═══════╝
+     //    Col x:    0       1       2   [●] = undecided, [number] = domain
     //
     // KEY OBSERVATION: Both (0,0) and (1,1) have domain size 2 (lowest entropy among undecided cells).
     // However, (1,1) has 4 undecided neighbors: (1,0), (1,2), (0,1), (2,1)
