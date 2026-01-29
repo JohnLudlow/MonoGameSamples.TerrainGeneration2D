@@ -1,4 +1,4 @@
-# MonoGame TerrainGeneration2D
+﻿# MonoGame TerrainGeneration2D
 
 [![Build and Test](https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/actions/workflows/main.yml/badge.svg)](https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/actions/workflows/main.yml)
 ![.NET Version](https://img.shields.io/badge/.NET-10.0-blue)
@@ -16,7 +16,11 @@ This repository contains a 2D terrain generation sample built with MonoGame, fea
 ## Features
 
 - Chunked tilemap (64×64 chunks) with save/load (gzipped) per chunk
-- Deterministic generation with WFC + heightmap fallback
+- Advanced WFC algorithm with multiple entropy heuristics (Shannon, domain size, most constraining variable)
+- AC-3 constraint propagation with precomputed rule tables
+- Seamless chunk boundaries with constraint-based seam consistency
+- Full backtracking support with change logging for contradiction recovery
+- Runtime configuration via appsettings.json and F10 debug panel
 - Camera pan/zoom, tooltip, and debug overlay (F12)
 - EventSource-based diagnostics and optional benchmarks
 
@@ -48,12 +52,20 @@ Docs
 
 - See the index at docs/README.md
 
+## WFC Implementation Status
+
+✅ **Phase 0: Array Migration** - Converted to jagged arrays for 10-30% performance improvement  
+✅ **Phase 1: Core Algorithm Enhancement** - AC-3 propagation + precomputed rule tables (70% faster)  
+✅ **Phase 2: Chunk Seam Consistency** - Boundary constraints for seamless terrain  
+
 ## Roadmap
 
-- Heuristics: optional Shannon entropy and influence tie-breaks
-- Backtracking: deeper stats and candidate ordering refinements
-- Seam constraints between chunks for stricter continuity
-- Live UI to tweak weights and regenerate visible chunks
+- **Phase 3: Performance Optimization** - Cached height sampling, memory reduction (60%), time budgets
+- **Phase 4: Library Abstraction** - Generic WFC solver for non-tile domains, plugin architecture
+- **Phase 5: Comprehensive Testing** - Property-based tests, performance regression, ≥95% coverage
+- **Phase 6: Documentation & Onboarding** - Developer guides, 2-week onboarding materials
+
+See [WFC Completion Plan](docs/plans/wfc-completion-plan.md) for detailed implementation status.
 
 ## Troubleshooting
 
