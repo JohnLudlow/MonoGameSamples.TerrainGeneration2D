@@ -1,4 +1,4 @@
-# WFC Implementation Roadmap
+﻿# WFC Implementation Roadmap
 
 This page outlines the staged approach to implementing Wave Function Collapse (WFC) in this repository and points to the canonical sub-wiki under the Map Generation area.
 
@@ -18,6 +18,7 @@ This page outlines the staged approach to implementing Wave Function Collapse (W
 See the sub-wiki for detailed sections (01–07) covering overview, domains, propagation, backtracking, heuristics, integration, and performance.
 
 **Generic Domains Roadmap:**
+
 - Refactor WFC core to use generic types for cells and values
 - Create generic configuration and rule table interfaces
 - Move terrain-specific logic to adapters

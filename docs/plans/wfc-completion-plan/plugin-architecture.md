@@ -1,4 +1,4 @@
-# Plugin Architecture for WFC
+﻿# Plugin Architecture for WFC
 
 ## Overview
 
@@ -7,31 +7,35 @@ Enable a plugin architecture for the Wave Function Collapse (WFC) system, allowi
 ## Table of contents
 
 - [Overview](#overview)
-- [Feature requirements](#feature-requirements)
-- [Feature status](#feature-status)
+- [Plan issue](#plan-issue)
+- [Plan status](#plan-status)
 - [Definition of terms](#definition-of-terms)
 - [Architectural considerations and constraints](#architectural-considerations-and-constraints)
 - [Implementation guide](#implementation-guide)
+  - [Plan requirements](#plan-requirements)
+- [See also](#see-also)
+- [References](#references)
 
-## Feature requirements
+## Plan issue
 
-- Support for custom entropy providers (cell selection heuristics)
-- Support for custom constraint providers (adjacency, domain restrictions)
-- Runtime selection and configuration of plugins
-- Backward compatibility with existing WFC configuration
-- Minimal performance overhead for plugin dispatch
+This plan is tracked by GitHub issue [#19][issue-19]:
 
-## Feature status
+- **Plugin Architecture for WFC Extensibility**
+- Part of [WFC Completion Plan][parent-plan] Phase 4
+
+See [meta issue #22][issue-22] for overall WFC completion tracking.
+
+## Plan status
 
 - Not started
 
 ## Definition of terms
 
-| Term | Meaning | Reference |
-| ---- | ------- | --------- |
-| Entropy Provider | Component that selects the next cell to observe in WFC | |
-| Constraint Provider | Component that enforces adjacency or domain rules | |
-| Plugin | Dynamically loaded or registered component implementing a WFC interface | |
+| Term                | Meaning                                                                 | Reference |
+| ------------------- | ----------------------------------------------------------------------- | --------- |
+| Constraint Provider | Component that enforces adjacency or domain rules                       |           |
+| Entropy Provider    | Component that selects the next cell to observe in WFC                  |           |
+| Plugin              | Dynamically loaded or registered component implementing a WFC interface |           |
 
 ## Architectural considerations and constraints
 
@@ -58,6 +62,43 @@ classDiagram
 ```
 
 ## Implementation guide
+
+### Plan requirements
+
+- (Incomplete) Support for custom entropy providers (cell selection heuristics)
+  - GIVEN a need for custom cell selection
+  - WHEN a plugin is registered and selected
+  - THEN the WFC system uses the custom entropy provider
+
+> Implementation not started. See Phase 1 below.
+
+- (Incomplete) Support for custom constraint providers (adjacency, domain restrictions)
+  - GIVEN a need for custom adjacency or domain rules
+  - WHEN a plugin is registered and selected
+  - THEN the WFC system uses the custom constraint provider
+
+> Implementation not started. See Phase 1 below.
+
+- (Incomplete) Runtime selection and configuration of plugins
+  - GIVEN multiple plugins are available
+  - WHEN the user selects a plugin at runtime or via config
+  - THEN the WFC system uses the selected plugin without restart
+
+> Implementation not started. See Phase 3/4 below.
+
+- (Incomplete) Backward compatibility with existing WFC configuration
+  - GIVEN existing WFC configuration files and code
+  - WHEN the plugin system is enabled
+  - THEN existing configurations continue to work without modification
+
+> Implementation not started. See Phase 2 below.
+
+- (Incomplete) Minimal performance overhead for plugin dispatch
+  - GIVEN the plugin system is in use
+  - WHEN running WFC generation
+  - THEN plugin dispatch does not introduce significant overhead
+
+> Implementation not started. See Phase 2/5 below.
 
 ### Phase 1: Define Plugin Interfaces
 
@@ -274,3 +315,77 @@ public void WfcProvider_FallsBackToBuiltInLogic_WhenPluginMissing()
     // ... further assertions ...
 }
 ```
+
+## See also
+
+### Parent Plan
+
+- **[WFC Completion Plan][parent-plan]** - Master implementation plan for WFC completion
+
+### Related Child Plans
+
+- **[Library Abstraction][child-library]** - Phase 4: Generic WFC solver for non-tile domains
+- **[Performance Analysis][child-performance]** - Phase 3: Optimization strategies and caching architecture
+- **[Property Testing][child-testing]** - Phase 5: Comprehensive property-based and performance regression tests
+
+### Related Documentation
+
+- **[WFC Algorithm Overview][doc-wfc]** - Core WFC algorithm explanation
+- **[Architecture Class Diagram][doc-architecture]** - System architecture overview
+
+### GitHub Tracking
+
+- **This Plan**: [Issue #19][issue-19] - Plugin Architecture for WFC Extensibility
+- **Meta Issue**: [#22 - WFC Implementation Completion][issue-22]
+
+### Implementation Files
+
+- **[WfcProvider.cs][impl-wfcprovider]** - Current WFC implementation (to be refactored)
+- **[ChunkedTilemap.cs][impl-tilemap]** - Tilemap integration with WFC
+
+## References
+
+### Wave Function Collapse
+
+- **[WFC Original][ref-wfc-original]** - Maxim Gumin's original WFC algorithm
+- **[WFC Explanation][ref-wfc-explained]** - Robert Heaton's WFC tutorial
+
+### Plugin Architecture
+
+- **[Plugin Pattern][ref-plugin]** - Martin Fowler on plugin architectures
+- **[Dependency Injection][ref-di]** - Microsoft documentation on DI in .NET
+- **[Strategy Pattern][ref-strategy]** - Gang of Four design pattern for pluggable algorithms
+
+### Testing
+
+- **[Testing Plugins][ref-testing-plugins]** - Best practices for testing plugin systems
+- **[Mock Objects][ref-mocking]** - Martin Fowler on mocking for tests
+
+<!-- Link References -->
+
+<!-- GitHub Issues -->
+[issue-19]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/19
+[issue-22]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/22
+
+<!-- Plans -->
+[parent-plan]: ../wfc-completion-plan.md
+[child-library]: library-abstraction.md
+[child-performance]: performance-analysis.md
+[child-testing]: property-and-performance-tests.md
+
+<!-- Documentation -->
+[doc-wfc]: ../../map-generation/wfc/README.md
+[doc-architecture]: ../../architecture-class-diagram.md
+
+<!-- Implementation Files -->
+[impl-wfcprovider]: ../../../TerrainGeneration2D.Core/Mapping/WfcProvider.cs
+[impl-tilemap]: ../../../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs
+
+<!-- External References -->
+[ref-wfc-original]: https://github.com/mxgmn/WaveFunctionCollapse
+[ref-wfc-explained]: https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/
+[ref-plugin]: https://martinfowler.com/articles/plugins.html
+[ref-di]: https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection
+[ref-strategy]: https://refactoring.guru/design-patterns/strategy
+[ref-testing-plugins]: https://martinfowler.com/articles/mocksArentStubs.html
+[ref-mocking]: https://martinfowler.com/articles/mocksArentStubs.html

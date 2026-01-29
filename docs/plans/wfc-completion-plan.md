@@ -1,3 +1,4 @@
+
 # Wave Function Collapse Implementation Completion Plan
 
 ## Overview
@@ -38,31 +39,39 @@ into a standalone library for production strategy games.
 - Developer Onboarding: Clear interfaces and comprehensive documentation for teams
   unfamiliar with constraint satisfaction
 
-## Table of Contents
+## Table of contents
 
 - [Overview](#overview)
-- [Feature requirements](#feature-requirements)
 - [Feature status](#feature-status)
 - [Definition of terms](#definition-of-terms)
 - [Architectural considerations and constraints](#architectural-considerations-and-constraints)
 - [Implementation guide](#implementation-guide)
+  - [Feature requirements](#feature-requirements)
+  - [Child Feature Plans](#child-feature-plans)
+  - [Phase 0: Array Migration (Prerequisite)](#phase-0-array-migration-prerequisite)
+  - [Phase 1: Core Algorithm Enhancement](#phase-1-core-algorithm-enhancement)
+  - [Phase 2: Chunk Seam Consistency](#phase-2-chunk-seam-consistency)
+  - [Phase 3: Performance Optimization](#phase-3-performance-optimization)
+  - [Phase 4: Library Abstraction](#phase-4-library-abstraction)
+  - [Phase 5: Comprehensive Testing](#phase-5-comprehensive-testing)
+  - [Phase 6: Documentation and Onboarding](#phase-6-documentation-and-onboarding)
 
-## Feature requirements
+## Plan issue
 
-- **AC-3 Constraint Propagation**: Replace current propagation with proper arc
-  consistency algorithm for 40% reduction in contradictions
-- **Precomputed Rule Tables**: Achieve 70% performance improvement in rule evaluation
-  through lookup tables
-- **Boundary Constraint System**: Ensure 100% consistency between adjacent chunk
-  boundaries with no visual seams
-- **Performance Optimization**: 60% reduction in memory allocations and 80% reduction
-  in height-related computations
-- **Library Abstraction**: Generic WFC solver interface supporting non-tile domains
-  and plugin architecture
-- **Comprehensive Testing**: ≥95% code coverage with unit, integration,
-  property-based, and performance regression tests
-- **Developer Documentation**: Complete onboarding materials enabling productivity
-  within 2 weeks for WFC newcomers
+This plan is tracked by GitHub issue [#22][issue-22]:
+
+- [**[META] Wave Function Collapse Implementation Completion**][issue-22]
+
+The meta issue tracks all 7 phases (0-6) with status indicators, dependencies, and links to child issues:
+
+- [#12 - Library Abstraction for Non-Tile Domains][issue-12]
+- [#16 - Comprehensive Property-Based and Performance Regression Tests][issue-16]
+- [#17 - Terrain Configuration User Interface][issue-17]
+- [#19 - Plugin Architecture for WFC Extensibility][issue-19]
+- [#20 - WFC Performance Optimization][issue-20]
+- [#21 - WFC Documentation and Developer Onboarding][issue-21]
+
+See the meta issue for current progress, critical path, and overall completion status (~50%).
 
 ## Feature status
 
@@ -72,6 +81,25 @@ The WFC implementation is currently partial with basic functionality in place, b
 requires significant completion work to meet production requirements for strategy game
 integration.
 
+**Current Implementation Status:**
+
+- ✅ Complete jagged array structure (`HashSet<int>?[][]`) for domains and outputs
+- ✅ Comprehensive `Generate()` methods (with and without backtracking)
+- ✅ Advanced entropy-based cell selection with multiple heuristics (domain size, Shannon entropy, most constraining variable, etc.)
+- ✅ Weighted tile selection with neighbor matching and configurable weights
+- ✅ Change logging and full backtracking support for contradiction recovery
+- ✅ AC3Propagator integration: arc consistency propagation is fully implemented and used for all constraint propagation
+- ✅ ChangeLog support in AC3Propagator: reversible propagation and backtracking are correctly supported
+- ✅ PrecomputedRuleTable implemented and used for all adjacency checks; all components requiring adjacency checks receive the shared instance, eliminating duplicate or legacy rule table construction
+- ✅ Chunk boundary constraints: interfaces and partial implementation for seamless chunk seaming
+- ✅ Runtime configuration via `appsettings.json` and F10 panel (heuristics, weights, time budget)
+- ✅ Diagnostics: performance event source, chunk save/load counters, and debug overlay
+- ✅ Extensive XML documentation for public APIs and non-trivial methods
+- ✅ Unit and integration tests for core WFC and chunking logic
+- ❌ **Missing: [Full plugin architecture for entropy/constraint providers](wfc-completion-plan/plugin-architecture.md)** (interfaces present, not fully pluggable)
+- ❌ **Missing: [Library abstraction for non-tile domains](wfc-completion-plan/library-abstraction.md)** (currently terrain-specific)
+- ❌ **Missing: [Comprehensive property-based and performance regression tests](wfc-completion-plan/property-and-performance-tests.md)** (coverage improving, not at target)
+
 ## Definition of terms
 
 Detailed list of terms not considered 'common english'. Include references to
@@ -79,19 +107,19 @@ articles about the term
 
 | Term                       | Meaning                                                                                                                             | Reference                                                                                              |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Wave Function Collapse     | A constraint-solving algorithm that generates content by iteratively collapsing superposition states based on local adjacency rules | [WFC Original Paper](https://github.com/mxgmn/WaveFunctionCollapse)                                    |
+| Arc Consistency            | A constraint propagation algorithm that ensures all constraints between connected variables are satisfied                           | [AC-3 Algorithm](https://en.wikipedia.org/wiki/AC-3_algorithm)                                         |
+| Backtracking               | Rolling back decisions when contradictions occur and trying alternative choices                                                     | -                                                                                                      |
+| BitSet                     | A custom data structure wrapping .NET's BitArray to provide efficient set operations for tile ID collections                        | [System.Collections.BitArray](https://docs.microsoft.com/en-us/dotnet/api/system.collections.bitarray) |
+| Change Log                 | A data structure that records reversible changes to support backtracking                                                            | -                                                                                                      |
 | Domain                     | The set of possible tile types that can be placed at a given cell position                                                          | -                                                                                                      |
 | Entropy                    | A measure of uncertainty in a cell's domain; lower entropy cells have fewer possible tiles                                          | -                                                                                                      |
+| Most Constraining Variable | A heuristic that preferentially selects cells that will constrain the most neighboring cells                                        | [CSP Heuristics](https://en.wikipedia.org/wiki/Constraint_satisfaction_problem)                        |
 | Observation                | The act of selecting and placing a specific tile from a cell's domain                                                               | -                                                                                                      |
 | Propagation                | The process of updating neighboring cell domains based on adjacency constraints after an observation                                | -                                                                                                      |
-| Backtracking               | Rolling back decisions when contradictions occur and trying alternative choices                                                     | -                                                                                                      |
-| Arc Consistency            | A constraint propagation algorithm that ensures all constraints between connected variables are satisfied                           | [AC-3 Algorithm](https://en.wikipedia.org/wiki/AC-3_algorithm)                                         |
+| Rule Table                 | Precomputed adjacency constraints that define which tiles can be placed next to each other                                          | -                                                                                                      |
 | Seam Consistency           | Ensuring that adjacent chunks in the world have compatible tile placements at their boundaries                                      | -                                                                                                      |
 | Shannon Entropy            | An information-theoretic measure of entropy calculated as H = -Σ(pi × log(pi))                                                      | [Information Theory](https://en.wikipedia.org/wiki/Entropy_(information_theory))                       |
-| Most Constraining Variable | A heuristic that preferentially selects cells that will constrain the most neighboring cells                                        | [CSP Heuristics](https://en.wikipedia.org/wiki/Constraint_satisfaction_problem)                        |
-| Rule Table                 | Precomputed adjacency constraints that define which tiles can be placed next to each other                                          | -                                                                                                      |
-| Change Log                 | A data structure that records reversible changes to support backtracking                                                            | -                                                                                                      |
-| BitSet                     | A custom data structure wrapping .NET's BitArray to provide efficient set operations for tile ID collections                        | [System.Collections.BitArray](https://docs.microsoft.com/en-us/dotnet/api/system.collections.bitarray) |
+| Wave Function Collapse     | A constraint-solving algorithm that generates content by iteratively collapsing superposition states based on local adjacency rules | [WFC Original Paper](https://github.com/mxgmn/WaveFunctionCollapse)                                    |
 
 ## Architectural considerations and constraints
 
@@ -204,15 +232,98 @@ This null-based design requires careful consideration when interfacing with comp
 
 ## Implementation guide
 
+### Feature requirements
+
+- (Incomplete) Map generation produces seamless, deterministic terrain
+  - GIVEN a valid configuration and tile rules
+  - WHEN the WFC algorithm runs
+  - THEN the WFC algorithm produces a seamless, deterministic terrain map with no visual seams between chunks
+
+> Implementation in progress. See Implementation guide Phases 1–3.
+
+- (Incomplete) Chunk generation completes within time budget
+  - GIVEN a time budget constraint
+  - WHEN chunk generation is triggered
+  - THEN chunk generation completes within the specified time budget
+
+> Implementation in progress. See Implementation guide Phase 3.
+
+- (Incomplete) Solver supports extension without core changes
+  - GIVEN a new tile type or rule system
+  - WHEN extending the WFC solver
+  - THEN the WFC solver supports extension without core changes
+
+> Implementation not started. See Implementation guide Phase 4.
+
+- (Incomplete) AC-3 constraint propagation reduces contradictions
+  - GIVEN the current propagation algorithm
+  - WHEN AC-3 is implemented
+  - THEN contradictions are reduced by 40%
+
+> Implementation not started. See Implementation guide Phase 1.
+
+- (Incomplete) Precomputed rule tables improve performance
+  - GIVEN rule evaluation in the WFC algorithm
+  - WHEN precomputed lookup tables are used
+  - THEN rule evaluation performance improves by 70%
+
+> Implementation not started. See Implementation guide Phase 2.
+
+- (Incomplete) Boundary constraint system ensures chunk consistency
+  - GIVEN adjacent chunk boundaries
+  - WHEN boundary constraint system is implemented
+  - THEN 100% consistency is achieved between adjacent chunk boundaries
+
+> Implementation not started. See Implementation guide Phase 2.
+
+- (Incomplete) Performance optimization reduces allocations and computation
+  - GIVEN current memory and computation profile
+  - WHEN optimizations are applied
+  - THEN memory allocations are reduced by 60% and height-related computations by 80%
+
+> Implementation not started. See Implementation guide Phase 3.
+
+- (Incomplete) Library abstraction supports non-tile domains and plugins
+  - GIVEN the WFC solver
+  - WHEN library abstraction is implemented
+  - THEN the solver supports non-tile domains and plugin architecture
+
+> Implementation not started. See Implementation guide Phase 4.
+
+- (Incomplete) Comprehensive testing achieves ≥95% code coverage
+  - GIVEN the WFC implementation
+  - WHEN unit, integration, property-based, and performance regression tests are run
+  - THEN code coverage is ≥95%
+
+> Implementation not started. See Implementation guide Phase 5.
+
+- (Incomplete) Developer documentation enables onboarding in 2 weeks
+  - GIVEN onboarding materials
+  - WHEN new developers join
+  - THEN productivity is achieved within 2 weeks
+
+> Implementation not started. See Implementation guide Phase 6.
+
+- AC-3 Constraint Propagation: Replace current propagation with proper arc consistency algorithm for 40% reduction in contradictions
+- Precomputed Rule Tables: Achieve 70% performance improvement in rule evaluation through lookup tables
+- Boundary Constraint System: Ensure 100% consistency between adjacent chunk boundaries with no visual seams
+- Performance Optimization: 60% reduction in memory allocations and 80% reduction in height-related computations
+- Library Abstraction: Generic WFC solver interface supporting non-tile domains and plugin architecture
+- Comprehensive Testing: ≥95% code coverage with unit, integration, property-based, and performance regression tests
+- Developer Documentation: Complete onboarding materials enabling productivity within 2 weeks for WFC newcomers
+
 ### Child Feature Plans
 
-- [Plugin Architecture](wfc-completion-plan/plugin-architecture.md)
-- [Library Abstraction for Non-Tile Domains](wfc-completion-plan/library-abstraction.md)
-- [Comprehensive Property-Based and Performance Regression Tests](wfc-completion-plan/property-and-performance-tests.md)
+- [Plugin Architecture](wfc-completion-plan/plugin-architecture.md) - Phase 4: Pluggable entropy and constraint providers
+- [Library Abstraction for Non-Tile Domains](wfc-completion-plan/library-abstraction.md) - Phase 4: Generic WFC solver interface
+- [Performance Analysis](wfc-completion-plan/performance-analysis.md) - Phase 3: Constraint propagation, memory management, and diagnostics
+- [Comprehensive Property-Based and Performance Regression Tests](wfc-completion-plan/property-and-performance-tests.md) - Phase 5: Testing strategy
 
 Detailed step-by-step implementation guide following Test Driven Development principles where applicable, leading with minimal breaking tests, followed by minimal changes to fix tests, followed by refactor, repeating until the feature is complete.
 
 ### Phase 0: Array Migration (Prerequisite)
+
+***COMPLETE***
 
 #### Objective
 
@@ -230,42 +341,16 @@ This foundational phase converts array declarations and access patterns througho
 
 **Breaking Changes**: This phase introduces breaking changes to public interfaces. All entropy providers, rule tables, and diagnostic utilities must be updated simultaneously.
 
+#### Phase requirements
+
+- (***COMPLETE***) Array migration to jagged arrays
+  - GIVEN a partial WFC implementation
+  - WHEN array migration is performed
+  - THEN domain access is 10-30% faster and CA1814 warnings are eliminated
+
 #### Examples
 
 **Array Migration Comparison:** This example demonstrates the conversion from multidimensional to jagged arrays for WFC domains, showing the syntax changes required and performance benefits achieved.
-
-```csharp
-// Before: Multidimensional array declaration and access
-private readonly HashSet<int>?[,] _possibilities;
-private readonly int[,] _output;
-
-// Initialize
-_possibilities = new HashSet<int>?[width, height];
-_output = new int[width, height];
-
-// Access
-var domain = _possibilities[x, y];
-_output[x, y] = selectedTile;
-```
-
-```csharp
-// After: Jagged array declaration and access  
-private readonly HashSet<int>?[][] _possibilities;
-private readonly int[][] _output;
-
-// Initialize
-_possibilities = new HashSet<int>?[width][];
-_output = new int[width][];
-for (int x = 0; x < width; x++)
-{
-    _possibilities[x] = new HashSet<int>?[height];
-    _output[x] = new int[height];
-}
-
-// Access
-var domain = _possibilities[x][y];
-_output[x][y] = selectedTile;
-```
 
 **Interface Signature Updates:** This example shows how entropy provider interfaces need to be updated to use jagged arrays instead of multidimensional arrays for domain parameters.
 
@@ -285,11 +370,11 @@ public interface ICellEntropyProvider
 
 ### Phase 1: Core Algorithm Enhancement
 
+***COMPLETE***
+
 #### Objective
 
 Replace runtime rule evaluation with precomputed tables and implement proper AC-3 constraint propagation to achieve 70% performance improvement in rule evaluation and proper arc consistency with reduced contradiction rates.
-
-**Prerequisites: Array Migration** - Before implementing AC-3, convert all WFC data structures from multidimensional arrays (`[,]`) to jagged arrays (`[][]`) for optimal performance in hot-path domain operations.
 
 #### Technical details
 
@@ -304,6 +389,18 @@ Key architectural changes:
 - **Arc queue management**: Efficient queue processing with neighbor enumeration and direction mapping
 - **Contradiction detection**: Early termination when domains become empty, triggering backtracking
 - **Performance optimization**: Use jagged arrays (`HashSet<int>[][]`) instead of multidimensional arrays (`HashSet<int>[,]`) for 10-30% faster domain access in tight WFC loops
+
+#### Phase requirements
+
+- (***COMPLETE***) AC-3 constraint propagation implemented
+  - GIVEN the current propagation algorithm
+  - WHEN AC-3 is implemented
+  - THEN contradictions are reduced by 40%
+
+- (***COMPLETE***) Precomputed rule tables for performance
+  - GIVEN rule evaluation in the WFC algorithm
+  - WHEN precomputed lookup tables are used
+  - THEN rule evaluation performance improves by 70%
 
 #### Examples
 
@@ -560,7 +657,7 @@ The AC3Propagator integrates into the existing WFC architecture by replacing the
 3. **Constraint propagation**: Use AC-3 algorithm instead of simple neighbor checks
 4. **Backtracking integration**: Ensure AC3Propagator state resets properly during backtrack operations
 
-#### Examples
+##### Examples
 
 **WfcProvider Integration:** This example demonstrates how the AC3Propagator would integrate into the existing WFC solver. **Note: The actual WfcProvider.cs already contains a comprehensive implementation - this shows the key integration points for AC-3 rather than the complete existing codebase.**
 
@@ -642,26 +739,9 @@ public class WfcProvider
 }
 ```
 
-**Current Implementation Status:**
-
-- ✅ Complete jagged array structure (`HashSet<int>?[][]`) for domains and outputs
-- ✅ Comprehensive `Generate()` methods (with and without backtracking)
-- ✅ Advanced entropy-based cell selection with multiple heuristics (domain size, Shannon entropy, most constraining variable, etc.)
-- ✅ Weighted tile selection with neighbor matching and configurable weights
-- ✅ Change logging and full backtracking support for contradiction recovery
-- ✅ AC3Propagator integration: arc consistency propagation is fully implemented and used for all constraint propagation
-- ✅ ChangeLog support in AC3Propagator: reversible propagation and backtracking are correctly supported
-- ✅ PrecomputedRuleTable implemented and used for all adjacency checks; all components requiring adjacency checks receive the shared instance, eliminating duplicate or legacy rule table construction
-- ✅ Chunk boundary constraints: interfaces and partial implementation for seamless chunk seaming
-- ✅ Runtime configuration via `appsettings.json` and F10 panel (heuristics, weights, time budget)
-- ✅ Diagnostics: performance event source, chunk save/load counters, and debug overlay
-- ✅ Extensive XML documentation for public APIs and non-trivial methods
-- ✅ Unit and integration tests for core WFC and chunking logic
-- ❌ **Missing: [Full plugin architecture for entropy/constraint providers](wfc-completion-plan/plugin-architecture.md)** (interfaces present, not fully pluggable)
-- ❌ **Missing: [Library abstraction for non-tile domains](wfc-completion-plan/library-abstraction.md)** (currently terrain-specific)
-- ❌ **Missing: [Comprehensive property-based and performance regression tests](wfc-completion-plan/property-and-performance-tests.md)** (coverage improving, not at target)
-
 ### Phase 2: Chunk Seam Consistency
+
+***COMPLETE***
 
 #### Objective
 
@@ -684,6 +764,13 @@ Key technical considerations:
 - **Memory efficiency**: Constraint objects are lightweight structs to minimize allocation overhead
 - **Flexible boundaries**: Support for incomplete neighbor sets during initial world generation
 - **Rule compatibility**: Boundary constraints work seamlessly with existing adjacency rule system
+
+#### Phase requirements
+
+- (***COMPLETE***) Chunk seam consistency
+  - GIVEN adjacent chunks with boundary constraints
+  - WHEN chunk generation completes
+  - THEN boundaries are visually and logically consistent
 
 #### Examples
 
@@ -850,6 +937,13 @@ Memory optimization strategies:
 - **Struct optimization**: Use value types for frequently allocated objects like coordinates
 - **Lazy initialization**: Defer expensive computations until actually needed
 
+#### Phase requirements
+
+- Performance optimization:
+  - GIVEN a set of unit, integration, and property tests
+  - WHEN the WFC implementation is updated
+  - THEN code coverage remains ≥95%
+
 #### Examples
 
 **Performance Optimization Classes:** These classes demonstrate caching strategies and time budget management for optimizing WFC performance, including chunk-scoped height sample caching and adaptive time allocation.
@@ -981,11 +1075,20 @@ public interface IEntropyProviderPlugin
 
 ### Phase 5: Comprehensive Testing
 
+(Incomplete)
+
 #### Objective
 
 Achieve ≥95% code coverage with comprehensive unit, integration, property-based, and performance regression testing to ensure production readiness.
 
 #### Technical details
+
+#### Phase requirements
+
+- (Incomplete) Comprehensive testing achieves ≥95% code coverage
+  - GIVEN the WFC implementation
+  - WHEN unit, integration, property-based, and performance regression tests are run
+  - THEN code coverage is ≥95%
 
 Comprehensive testing strategy validates both algorithmic correctness and performance characteristics across the entire WFC implementation. Testing architecture covers multiple validation levels from unit-level algorithm verification to end-to-end integration scenarios.
 
@@ -1071,11 +1174,20 @@ public void ChunkGeneration_CompletesWithinTimeBudget_Under95PercentOfCases()
 
 ### Phase 6: Documentation and Onboarding
 
+(Incomplete)
+
 #### Objective
 
 Provide comprehensive documentation enabling developers unfamiliar with WFC to become productive within 2 weeks, with systematic performance tuning guidance.
 
 #### Technical details
+
+#### Phase requirements
+
+- (Incomplete) Developer documentation enables onboarding in 2 weeks
+  - GIVEN onboarding materials
+  - WHEN new developers join
+  - THEN productivity is achieved within 2 weeks
 
 Documentation strategy targets multiple developer skill levels and use cases, from newcomers learning constraint satisfaction concepts to experienced developers optimizing performance for production deployments.
 
@@ -1141,3 +1253,145 @@ public void BasicWfcSetup_Example()
     }
 }
 ```
+
+## See also
+
+### Child Feature Plans
+
+This plan is split across multiple documents for detailed feature specifications:
+
+- **[Plugin Architecture][child-plugin]** - Phase 4: Pluggable entropy and constraint provider system
+- **[Library Abstraction for Non-Tile Domains][child-library]** - Phase 4: Generic WFC solver interface supporting arbitrary domains
+- **[Performance Analysis][child-performance]** - Phase 3: Constraint propagation optimization, memory management, and diagnostics integration
+- **[Comprehensive Property-Based and Performance Regression Tests][child-testing]** - Phase 5: Testing strategy with property-based tests and regression detection
+
+### Related Documentation
+
+- **[Architecture Overview][doc-architecture]** - System-wide architecture and component relationships
+- **[Chunked Tilemap Design][impl-chunkedtilemap]** - Primary integration point for WFC terrain generation
+- **[Runtime Settings Panel][doc-settings]** - F10 configuration UI for WFC heuristics and parameters
+
+### GitHub Tracking
+
+- **Meta Issue**: [#22 - Wave Function Collapse Implementation Completion][issue-22]
+- **Child Issues**:
+  - [#12 - Library Abstraction for Non-Tile Domains][issue-12]
+  - [#16 - Comprehensive Property-Based and Performance Regression Tests][issue-16]
+  - [#17 - Terrain Configuration User Interface][issue-17]
+  - [#19 - Plugin Architecture for WFC Extensibility][issue-19]
+  - [#20 - WFC Performance Optimization][issue-20]
+  - [#21 - WFC Documentation and Developer Onboarding][issue-21]
+
+### Implementation Files
+
+Key implementation files referenced in this plan:
+
+- **[WfcProvider.cs][impl-wfcprovider]** - Core WFC solver implementation
+- **[AC3Propagator.cs][impl-ac3]** - Arc consistency propagation algorithm
+- **[PrecomputedRuleTable.cs][impl-ruletable]** - Optimized adjacency rule lookup
+- **[ChunkedTilemap.cs][impl-chunkedtilemap]** - Chunk management and WFC integration
+- **[GameScene.cs][impl-gamescene]** - Scene-level WFC configuration and initialization
+
+## References
+
+### Wave Function Collapse Algorithm
+
+- **[WFC Original Repository][ref-wfc-original]** - Maxim Gumin's reference implementation and research
+- **[WFC Explained][ref-wfc-tutorial]** - Robert Heaton's tutorial introduction
+- **[Wave Function Collapse Algorithm Deep Dive][ref-wfc-deepdive]** - Boris the Brave's comprehensive explanation
+- **[Constraint-Based Procedural Generation][ref-wfc-academic]** - Academic background on constraint-solving for PCG
+
+### Constraint Satisfaction Problems
+
+- **[AC-3 Algorithm][ref-ac3]** - Arc Consistency Algorithm #3 for constraint propagation
+- **[Constraint Satisfaction Problem][ref-csp]** - General CSP theory and heuristics
+- **[Backtracking Algorithm][ref-backtracking]** - Search space exploration through backtracking
+- **[CSP Heuristics][ref-csp-heuristics]** - Most Constraining Variable, Minimum Remaining Values, etc.
+
+### Information Theory
+
+- **[Shannon Entropy][ref-shannon]** - Information-theoretic entropy measure
+- **[Information Theory Primer][ref-infotheory-primer]** - Chris Olah's visual introduction to information theory
+- **[Entropy in Constraint Satisfaction][ref-entropy-csp]** - Research on entropy-based variable ordering
+
+### .NET Performance and Best Practices
+
+- **[System.Collections.BitArray][ref-bitarray]** - .NET BitArray documentation
+- **[CA1814: Prefer jagged arrays][ref-jagged-arrays]** - Performance guidance for array structures
+- **[EventSource Class][ref-eventsource]** - High-performance diagnostics and telemetry
+- **[Object Pooling in .NET][ref-objectpool]** - Memory optimization strategies
+
+### MonoGame Integration
+
+- **[MonoGame Documentation][ref-monogame]** - Official MonoGame framework documentation
+- **[SpriteBatch Performance][ref-spritebatch]** - Rendering optimization for tile-based games
+- **[Content Pipeline][ref-contentpipe]** - Asset management and loading
+
+### Testing and Quality
+
+- **[Property-Based Testing][ref-pbt]** - Introduction to property-based testing concepts
+- **[FsCheck Documentation][ref-fscheck]** - F# property-based testing library for .NET
+- **[Stryker.NET][ref-stryker]** - Mutation testing for C# to validate test effectiveness
+- **[BenchmarkDotNet][ref-benchmark]** - Performance benchmarking and regression detection
+
+<!-- Link References -->
+
+<!-- GitHub Issues -->
+[issue-12]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/12
+[issue-16]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/16
+[issue-17]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/17
+[issue-19]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/19
+[issue-20]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/20
+[issue-21]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/21
+[issue-22]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/22
+
+<!-- Child Plans -->
+[child-plugin]: wfc-completion-plan/plugin-architecture.md
+[child-library]: wfc-completion-plan/library-abstraction.md
+[child-performance]: wfc-completion-plan/performance-analysis.md
+[child-testing]: wfc-completion-plan/property-and-performance-tests.md
+
+<!-- Related Documentation -->
+[doc-architecture]: ../architecture-class-diagram.md
+[doc-settings]: ../features/ui/runtime-settings-panel.md
+
+<!-- Implementation Files -->
+[impl-wfcprovider]: ../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs
+[impl-ac3]: ../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/AC3Propagator.cs
+[impl-ruletable]: ../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/PrecomputedRuleTable.cs
+[impl-chunkedtilemap]: ../../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs
+[impl-gamescene]: ../../TerrainGeneration2D/Scenes/GameScene.cs
+
+<!-- WFC References -->
+[ref-wfc-original]: https://github.com/mxgmn/WaveFunctionCollapse
+[ref-wfc-tutorial]: https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/
+[ref-wfc-deepdive]: https://www.boristhebrave.com/2020/04/13/wave-function-collapse-explained/
+[ref-wfc-academic]: https://www.cs.unm.edu/~aaron/downloads/whitaker_dissertation.pdf
+
+<!-- CSP References -->
+[ref-ac3]: https://en.wikipedia.org/wiki/AC-3_algorithm
+[ref-csp]: https://en.wikipedia.org/wiki/Constraint_satisfaction_problem
+[ref-backtracking]: https://en.wikipedia.org/wiki/Backtracking
+[ref-csp-heuristics]: https://en.wikipedia.org/wiki/Constraint_satisfaction_problem#Heuristics
+
+<!-- Information Theory References -->
+[ref-shannon]: https://en.wikipedia.org/wiki/Entropy_(information_theory)
+[ref-infotheory-primer]: https://colah.github.io/posts/2015-09-Visual-Information/
+[ref-entropy-csp]: https://www.aaai.org/Papers/AAAI/2004/AAAI04-090.pdf
+
+<!-- .NET References -->
+[ref-bitarray]: https://docs.microsoft.com/en-us/dotnet/api/system.collections.bitarray
+[ref-jagged-arrays]: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1814
+[ref-eventsource]: https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventsource
+[ref-objectpool]: https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.objectpool
+
+<!-- MonoGame References -->
+[ref-monogame]: https://docs.monogame.net/
+[ref-spritebatch]: https://community.monogame.net/t/spritebatch-performance-guide/11510
+[ref-contentpipe]: https://docs.monogame.net/articles/content_pipeline/index.html
+
+<!-- Testing References -->
+[ref-pbt]: https://hypothesis.works/articles/what-is-property-based-testing/
+[ref-fscheck]: https://fscheck.github.io/FsCheck/
+[ref-stryker]: https://stryker-mutator.io/docs/stryker-net/introduction
+[ref-benchmark]: https://benchmarkdotnet.org/

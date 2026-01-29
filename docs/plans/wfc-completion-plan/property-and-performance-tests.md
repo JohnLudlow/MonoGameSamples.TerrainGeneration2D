@@ -1,4 +1,4 @@
-# Comprehensive Property-Based and Performance Regression Tests for WFC
+﻿# Comprehensive Property-Based and Performance Regression Tests for WFC
 
 ## Overview
 
@@ -7,20 +7,25 @@ Achieve comprehensive property-based and performance regression testing for the 
 ## Table of contents
 
 - [Overview](#overview)
-- [Feature requirements](#feature-requirements)
-- [Feature status](#feature-status)
+- [Plan issue](#plan-issue)
+- [Plan status](#plan-status)
 - [Definition of terms](#definition-of-terms)
 - [Architectural considerations and constraints](#architectural-considerations-and-constraints)
 - [Implementation guide](#implementation-guide)
+  - [Plan requirements](#plan-requirements)
+- [See also](#see-also)
+- [References](#references)
 
-## Feature requirements
+## Plan issue
 
-- Property-based tests for constraint satisfaction, determinism, and completeness
-- Performance regression tests for chunk generation time and memory usage
-- Automated test integration with CI pipeline
-- Statistical analysis of test results (e.g., 95th percentile timing)
+This plan is tracked by GitHub issue [#16][issue-16]:
 
-## Feature status
+- **Comprehensive Property-Based and Performance Regression Tests for WFC**
+- Part of [WFC Completion Plan][parent-plan] Phase 5
+
+See [meta issue #22][issue-22] for overall WFC completion tracking.
+
+## Plan status
 
 - Not started
 
@@ -28,8 +33,8 @@ Achieve comprehensive property-based and performance regression testing for the 
 
 | Term                   | Meaning                                                     | Reference |
 | ---------------------- | ----------------------------------------------------------- | --------- |
-| Property-based testing | Testing by generating random inputs and checking invariants |           |
 | Performance regression | Detecting slowdowns or increased resource usage over time   |           |
+| Property-based testing | Testing by generating random inputs and checking invariants |           |
 
 ## Architectural considerations and constraints
 
@@ -38,6 +43,36 @@ Achieve comprehensive property-based and performance regression testing for the 
 - Document how to interpret and act on test failures
 
 ## Implementation guide
+
+### Plan requirements
+
+- (Incomplete) Property-based tests for constraint satisfaction, determinism, and completeness
+  - GIVEN the WFC system and a range of random inputs
+  - WHEN property-based tests are run
+  - THEN all outputs satisfy constraints, are deterministic, and complete
+
+> Implementation not started. See Phase 1 below.
+
+- (Incomplete) Performance regression tests for chunk generation time and memory usage
+  - GIVEN the WFC system and chunk generation benchmarks
+  - WHEN performance tests are run
+  - THEN chunk generation time and memory usage are within budget
+
+> Implementation not started. See Phase 2 below.
+
+- (Incomplete) Automated test integration with CI pipeline
+  - GIVEN property-based and performance tests
+  - WHEN the CI pipeline runs
+  - THEN all tests are executed and results are reported
+
+> Implementation not started. See Phase 3 below.
+
+- (Incomplete) Statistical analysis of test results (e.g., 95th percentile timing)
+  - GIVEN test results from property and performance tests
+  - WHEN analyzing results
+  - THEN statistical metrics (e.g., 95th percentile) are reported and tracked
+
+> Implementation not started. See Phase 3 below.
 
 ### Phase 1: Property-Based Test Suites
 
@@ -141,3 +176,86 @@ Example workflow step for running performance benchmarks:
  run: |
   dotnet run --project TerrainGeneration2D.Benchmarks
 ```
+
+## See also
+
+### Parent Plan
+
+- **[WFC Completion Plan][parent-plan]** - Master implementation plan for WFC completion
+
+### Related Child Plans
+
+- **[Library Abstraction][child-library]** - Phase 4: Generic WFC solver for non-tile domains
+- **[Plugin Architecture][child-plugin]** - Phase 4: Pluggable provider system for WFC extensibility
+- **[Performance Analysis][child-performance]** - Phase 3: Optimization strategies and caching architecture
+
+### Related Documentation
+
+- **[WFC Algorithm Overview][doc-wfc]** - Core WFC algorithm explanation
+- **[Testing Strategy][doc-testing]** - Overall testing approach and guidelines
+
+### GitHub Tracking
+
+- **This Plan**: [Issue #16][issue-16] - Comprehensive Property-Based and Performance Regression Tests
+- **Meta Issue**: [#22 - WFC Implementation Completion][issue-22]
+
+### Implementation Files
+
+- **[TerrainGeneration2D.Tests][impl-tests]** - Unit test project
+- **[TerrainGeneration2D.Benchmarks][impl-benchmarks]** - Performance benchmarking project
+
+## References
+
+### Property-Based Testing
+
+- **[Property-Based Testing Introduction][ref-pbt]** - Introduction to property-based testing
+- **[FsCheck][ref-fscheck]** - F# property testing library for .NET
+- **[QuickCheck][ref-quickcheck]** - Original Haskell property testing library
+
+### Performance Testing
+
+- **[BenchmarkDotNet][ref-benchmark]** - .NET benchmarking framework
+- **[Performance Best Practices][ref-perf-practices]** - Microsoft .NET performance guidelines
+- **[Statistical Analysis][ref-stats]** - Understanding benchmark statistics
+
+### Mutation Testing
+
+- **[Stryker.NET][ref-stryker]** - Mutation testing for .NET
+- **[Mutation Testing Concepts][ref-mutation]** - Introduction to mutation testing
+
+### CI/CD Integration
+
+- **[GitHub Actions][ref-github-actions]** - GitHub Actions documentation
+- **[CI Test Strategies][ref-ci-testing]** - Best practices for CI testing
+
+<!-- Link References -->
+
+<!-- GitHub Issues -->
+[issue-16]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/16
+[issue-22]: https://github.com/JohnLudlow/MonoGameSamples.TerrainGeneration2D/issues/22
+
+<!-- Plans -->
+[parent-plan]: ../wfc-completion-plan.md
+[child-library]: library-abstraction.md
+[child-plugin]: plugin-architecture.md
+[child-performance]: performance-analysis.md
+
+<!-- Documentation -->
+[doc-wfc]: ../../map-generation/wfc/README.md
+[doc-testing]: ../../testing-strategy.md
+
+<!-- Implementation Files -->
+[impl-tests]: ../../../TerrainGeneration2D.Tests/
+[impl-benchmarks]: ../../../TerrainGeneration2D.Benchmarks/
+
+<!-- External References -->
+[ref-pbt]: https://hypothesis.works/articles/what-is-property-based-testing/
+[ref-fscheck]: https://fscheck.github.io/FsCheck/
+[ref-quickcheck]: https://hackage.haskell.org/package/QuickCheck
+[ref-benchmark]: https://benchmarkdotnet.org/
+[ref-perf-practices]: https://learn.microsoft.com/en-us/dotnet/framework/performance/performance-tips
+[ref-stats]: https://benchmarkdotnet.org/articles/overview.html#statistics
+[ref-stryker]: https://stryker-mutator.io/docs/stryker-net/introduction/
+[ref-mutation]: https://en.wikipedia.org/wiki/Mutation_testing
+[ref-github-actions]: https://docs.github.com/en/actions
+[ref-ci-testing]: https://martinfowler.com/articles/continuousIntegration.html
