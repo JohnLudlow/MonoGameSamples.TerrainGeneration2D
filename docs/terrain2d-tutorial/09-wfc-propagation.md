@@ -98,7 +98,7 @@ Proceed to backtracking in the next phase.
 
 > Try It
 >
-> - Deterministic tests: implement a test-only `IRandomProvider` that returns fixed values and pass it to `WfcProvider` to make collapse choices predictable. See the example in [TerrainGeneration2D.Tests/MappingTests.cs](../../TerrainGeneration2D.Tests/MappingTests.cs).
+> - Deterministic tests: implement a test-only `IRandomProvider` that returns fixed values and pass it to `WfcProvider` to make collapse choices predictable. See the example in [TerrainGeneration2D.UnitTests/Core/Mapping/MappingTests.cs.cs](../../TerrainGeneration2D.UnitTests/Core/Mapping/MappingTests.cs).
 > - Runtime tuning idea: add a config value (e.g., `WfcWeights.NeighborMatchBoost`) in appsettings and thread it into `WfcProvider` to scale the neighbor-match multiplier. Start small (e.g., 1–3) and observe contradictions/backtracks via diagnostics.
 
 ## See also
