@@ -9,7 +9,7 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UnitTests.Core.Mapping;
 
 public sealed class HeuristicsSelectionTests
 {
-  public object? NappingTestHelpers { get; private set; }
+  public object? MappingTestHelpers { get; private set; }
 
   private sealed class DeterministicRandomProvider : IRandomProvider
   {
