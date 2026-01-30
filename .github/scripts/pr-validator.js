@@ -1,7 +1,12 @@
 // Node script to validate agent changes in a PR context.
 // Designed for dry-run mode: logs warnings instead of failing the workflow.
 
-const github = require('@actions/github');
+let github = null;
+try {
+  github = require('@actions/github');
+} catch (e) {
+  console.warn('Optional dependency @actions/github not available; running in limited dry-run mode.');
+}
 const fs = require('fs');
 const path = require('path');
 
@@ -24,7 +29,7 @@ async function run() {
     console.warn('No GITHUB_TOKEN provided; will run in read-only dry-run mode.');
   }
 
-  const octokit = token ? new github.GitHub(token) : null;
+  const octokit = (token && github) ? new github.GitHub(token) : null;
 
   // Fetch changed files
   let files = [];
