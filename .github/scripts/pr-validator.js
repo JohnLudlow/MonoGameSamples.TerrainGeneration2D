@@ -56,14 +56,19 @@ async function run() {
   console.log('Loaded agent manifests:', Object.keys(manifests));
 
   // Validate changed files
+  const issues = [];
   for (const f of files){
     if (f.startsWith('.github/agents/')) continue;
     if (f.endsWith('.cs')){
-      console.warn('C# source files must not be changed by agents: ' + f);
+      const msg = 'C# source files must not be changed by agents: ' + f;
+      console.warn(msg);
+      issues.push(msg);
       continue;
     }
     if (!f.startsWith('docs/') && !f.startsWith('.github/')){
-      console.warn('Agents may only modify files under docs/ or .github/: ' + f);
+      const msg = 'Agents may only modify files under docs/ or .github/: ' + f;
+      console.warn(msg);
+      issues.push(msg);
       continue;
     }
     let content='';
@@ -73,7 +78,11 @@ async function run() {
     }
   }
 
-  console.log('PR validation (dry-run) completed for PR #' + pr.number);
+  if (issues.length === 0) {
+    console.log('PR validation (dry-run) passed — no issues found for PR #' + pr.number);
+  } else {
+    console.log('PR validation (dry-run) completed with issues for PR #' + pr.number + ':\n' + issues.join('\n'));
+  }
 }
 
 run().catch(err => {
