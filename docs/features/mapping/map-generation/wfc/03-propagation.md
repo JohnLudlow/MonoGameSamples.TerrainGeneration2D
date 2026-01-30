@@ -1,5 +1,18 @@
 # Propagation
 
+## Table of contents
+
+- [Selection and Collapse](#selection-and-collapse)
+- [BFS Propagation](#bfs-propagation)
+- [Applying neighbor constraints](#applying-neighbor-constraints)
+
+## Definition of terms
+
+| Term | Meaning |
+| ---- | ------- |
+| Propagation queue | FIFO of cells to process when domains change |
+| Contradiction | When a domain becomes empty during propagation |
+
 Purpose: detail candidate selection, neighbor pruning, and BFS-style propagation until stability or contradiction.
 
 ## Selection and Collapse

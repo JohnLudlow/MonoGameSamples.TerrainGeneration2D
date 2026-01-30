@@ -1,5 +1,26 @@
 # Chunked Tilemap
 
+## Table of contents
+
+- [Overview](#overview)
+- [Intent & Use-Cases](#intent--use-cases)
+- [Architecture & Data Flow](#architecture--data-flow)
+- [Domain Terms](#domain-terms)
+- [Configuration](#configuration)
+- [Algorithms & Math](#algorithms--math)
+- [Examples](#examples)
+- [Performance Notes](#performance-notes)
+- [Follow-ups / Decisions](#follow-ups--decisions)
+- [Changelog](#changelog)
+
+## Definition of terms
+
+| Term | Meaning |
+| ---- | ------- |
+| Chunk | fixed-size tile block (64×64) with a world tile origin |
+| Active buffer | expanded set of chunks kept in memory around the viewport |
+| Dirty chunk | chunk with unsaved changes |
+
 ## Overview
 
 - Manages a large 2D map by dividing it into fixed-size chunks to balance memory
@@ -92,8 +113,16 @@ public void RegenerateChunksInView(Rectangle viewportWorldBounds, bool overwrite
 ## Changelog
 
 - 2026-01-09: Initial feature doc added.
+- 2026-01-30: Clarified runtime behavior: WFC backtracking, fallback generation, time budget, and save/regeneration behavior.
 
 ---
+
+Implementation notes
+
+- The runtime implementation (ChunkedTilemap) enables WFC backtracking during chunk generation and will fall back to randomized generation if WFC fails for a chunk; generated chunks are marked dirty and saved via SaveChunk.
+- WFC work is bounded by the WfcTimeBudgetMs property (default 50 ms) to avoid long frame stalls.
+- RegenerateChunksInView(viewportWorldBounds, overwriteSaves = true) regenerates the expanded viewport region and will overwrite existing saved chunk files when overwriteSaves is true.
+- ClearAllSavedChunks removes saved files matching the pattern `map_*_*.dat` in the configured save directory to force regeneration on next load.
 
 Validation
 

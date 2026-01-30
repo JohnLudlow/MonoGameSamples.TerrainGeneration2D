@@ -1,5 +1,18 @@
 # Performance
 
+## Table of contents
+
+- [Hot paths](#hot-paths)
+- [Practical tips](#practical-tips)
+- [Diagnostics with EventSource](#diagnostics-with-eventsource)
+
+## Definition of terms
+
+| Term | Meaning |
+| ---- | ------- |
+| Hot path | Frequently executed code path sensitive to performance |
+| EventSource | .NET EventSource used for diagnostics and tracing |
+
 Purpose: discuss hotspots and diagnostics for WFC and chunk generation.
 
 ## Hot paths

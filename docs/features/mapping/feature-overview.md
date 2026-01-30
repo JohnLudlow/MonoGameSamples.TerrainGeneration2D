@@ -4,6 +4,23 @@
 
 This document provides a high-level, developer-focused introduction to the mapping subsystem in MonoGameSamples.TerrainGeneration2D. It complements the detailed component and API docs by explaining the big picture, extensibility points, and practical workflow for contributing to or debugging the terrain generation pipeline.
 
+## Table of contents
+
+- [What is the Mapping System?](#what-is-the-mapping-system)
+- [Key Concepts](#key-concepts)
+- [Extending or Debugging the Mapping System](#extending-or-debugging-the-mapping-system)
+- [Key Files & Entry Points](#key-files--entry-points)
+- [Best Practices](#best-practices)
+- [Further Reading](#further-reading)
+
+## Definition of terms
+
+| Term | Meaning |
+| ---- | ------- |
+| Chunk | 64×64 tile region loaded/unloaded as a unit |
+| WFC | Wave Function Collapse — constraint-based procedural generation |
+| HeightMap | Noise-based elevation map used as context for rules |
+
 ## What is the Mapping System?
 
 - The mapping system is responsible for generating, storing, and rendering large 2D worlds using chunked tilemaps, procedural algorithms (notably Wave Function Collapse), and runtime-tunable heuristics.

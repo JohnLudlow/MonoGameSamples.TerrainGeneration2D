@@ -1,5 +1,19 @@
 # Backtracking
 
+## Table of contents
+
+- [Data Structures](#data-structures)
+- [Generate() Flow With Backtracking](#generate-flow-with-backtracking)
+- [Diagnostics](#diagnostics)
+- [Integration](#integration)
+
+## Definition of terms
+
+| Term | Meaning |
+| ---- | ------- |
+| DecisionFrame | A captured branching point with ordered candidates and rollback bookmark |
+| ChangeLog | Append-only log of reversible mutations used to rollback state |
+
 Purpose: introduce decision points and reversible state so contradictions can be resolved by trying alternate candidates.
 
 ## Data Structures

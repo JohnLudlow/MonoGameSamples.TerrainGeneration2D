@@ -15,6 +15,9 @@ This wiki covers the terrain generation system: chunked maps, persistence, and a
   - [WFC Heuristics and Tie-Breaking](wfc/05-heuristics.md)
   - [Chunk Save/Load Format](../chunked-tilemap.md#save-format)
   - [Performance Diagnostics](../../../performance-and-debugging.md)
+  - [TileTypeRegistry](tile-type-registry.md): registry of tile types and adjacency rules
+  - [Terrain Rules](terrain-rules.md): per-tile placement thresholds and noise parameters
+  - [WFC Rule Examples](wfc/09-rule-examples.md): concrete mapping and adjacency snippets
 - **Architecture & Index:**
   - [Architecture Class Diagram](../../../architecture-class-diagram.md)
   - [Mapping Area Index](../README.md)

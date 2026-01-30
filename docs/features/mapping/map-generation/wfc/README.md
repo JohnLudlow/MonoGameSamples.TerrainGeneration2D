@@ -17,5 +17,6 @@ Sections:
 - [05 — Heuristics](05-heuristics.md)
 - [06 — Integration](06-integration.md)
 - [07 — Performance](07-performance.md)
+- [08 — Deep Dive](08-deep-dive.md)
 
 Up: [Map Generation overview](../README.md)
