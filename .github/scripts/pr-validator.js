@@ -78,11 +78,37 @@ async function run() {
     }
   }
 
+  let report = [];
+  report.push('# Agent PR Validation Report');
+  report.push('\n');
+  report.push('PR: ' + pr.html_url + ' (number ' + pr.number + ')');
+  report.push('\n');
+  report.push('Mode: dry-run');
+  report.push('\n');
   if (issues.length === 0) {
-    console.log('PR validation (dry-run) passed — no issues found for PR #' + pr.number);
+    const msg = 'PR validation (dry-run) passed — no issues found for PR #' + pr.number;
+    console.log(msg);
+    report.push('\n');
+    report.push('**Status: PASS**');
+    report.push('\n');
+    report.push('No issues were detected.');
   } else {
-    console.log('PR validation (dry-run) completed with issues for PR #' + pr.number + ':\n' + issues.join('\n'));
+    const msg = 'PR validation (dry-run) completed with issues for PR #' + pr.number + ':';
+    console.log(msg + '\n' + issues.join('\n'));
+    report.push('\n');
+    report.push('**Status: WARNINGS DETECTED**');
+    report.push('\n');
+    report.push('Issues:');
+    report.push('\n');
+    for (const it of issues) report.push('- ' + it);
   }
+
+  // Write report to artifact file
+  const outDir = './test-results';
+  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+  const outPath = path.join(outDir, 'agent-pr-validation.md');
+  fs.writeFileSync(outPath, report.join('\n'), 'utf8');
+  console.log('Wrote validation report to', outPath);
 }
 
 run().catch(err => {
