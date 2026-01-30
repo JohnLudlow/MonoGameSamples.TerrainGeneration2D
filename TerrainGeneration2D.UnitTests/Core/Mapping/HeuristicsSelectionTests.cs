@@ -71,7 +71,7 @@ public sealed class HeuristicsSelectionTests
       Point.Zero,
       new WfcWeightConfiguration(),
       heuristics);
-      
+
     var poss = MappingTestHelpers.GetPrivateField<HashSet<int>?[][]>(wfc, "_possibilities");
     var output = MappingTestHelpers.GetPrivateField<int[][]>(wfc, "_output");
     Assert.NotNull(poss);
