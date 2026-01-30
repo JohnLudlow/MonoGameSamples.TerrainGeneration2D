@@ -24,7 +24,7 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-            const {context, github} = require('@actions/github');
+            const core = require('@actions/core');
             const pr = context.payload.pull_request;
             if (!pr) throw new Error('No PR found');
             const changedFiles = await github.paginate(github.rest.pulls.listFiles, {owner: context.repo.owner, repo: context.repo.repo, pull_number: pr.number});
