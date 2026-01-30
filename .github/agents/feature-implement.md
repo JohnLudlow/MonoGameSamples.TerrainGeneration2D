@@ -2,13 +2,6 @@
 description: Take a planned feature and implement it
 name: FeatureImplementer
 tools: ['read', 'edit', 'search', 'todo', 'execute/runInTerminal']
-allowed_write_paths:
- - docs/**
- - docs/samples/**
-forbidden_paths:
- - '**/*.cs'
- - 'TerrainGeneration2D.Core/**'
-commit_allowed: false
 ---
 # Planning instructions
 

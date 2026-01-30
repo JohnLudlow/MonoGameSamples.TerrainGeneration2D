@@ -2,13 +2,6 @@
 description: Generate an implementation plan for new features or refactoring existing code.
 name: FeaturePlanner
 tools: ['read', 'search', 'edit', 'todo', 'execute/runInTerminal']
-allowed_write_paths:
- - docs/plans/**
- - docs/samples/**
-forbidden_paths:
- - '**/*.cs'
- - TerrainGeneration2D.Core/**
-commit_allowed: false
 ---
 # Planning instructions
 

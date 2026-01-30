@@ -42,21 +42,44 @@ async function run() {
     console.warn('Cannot list changed files without token; skipping file checks.');
   }
 
-  // Load agent manifests
+  // Load agent manifests and scan for unsupported fields
   const manifestsDir = path.join(process.cwd(), '.github', 'agents');
   const manifests = {};
+  const allowedFields = new Set(['description','name','tools','forbidden_paths','commit_allowed']);
+  const unsupportedFieldIssues = [];
   if (fs.existsSync(manifestsDir)){
     for (const mf of fs.readdirSync(manifestsDir)){
       if (!mf.endsWith('.md')) continue;
-      const content = fs.readFileSync(path.join(manifestsDir, mf), 'utf8');
+      const p = path.join(manifestsDir, mf);
+      const content = fs.readFileSync(p, 'utf8');
       const nameMatch = content.match(/name:\s*(.*)/);
       if (nameMatch) manifests[nameMatch[1].trim()] = content;
+
+      // Parse front-matter (very simple YAML-ish parser for keys before first blank line)
+      const lines = content.split(/\r?\n/);
+      let inFront = false;
+      for (const ln of lines){
+        if (ln.trim() === '---'){
+          inFront = !inFront;
+          continue;
+        }
+        if (!inFront) break;
+        const m = ln.match(/^([a-zA-Z0-9_]+):/);
+        if (m){
+          const key = m[1];
+          if (!allowedFields.has(key)){
+            const msg = `Unsupported agent manifest field in ${mf}: ${key}`;
+            console.warn(msg);
+            unsupportedFieldIssues.push(msg);
+          }
+        }
+      }
     }
   }
   console.log('Loaded agent manifests:', Object.keys(manifests));
 
   // Validate changed files
-  const issues = [];
+  const issues = unsupportedFieldIssues.slice();
   for (const f of files){
     if (f.startsWith('.github/agents/')) continue;
     if (f.endsWith('.cs')){

@@ -2,13 +2,6 @@
 description: Generate documentation based on a current implementation in existing code.
 name: ImplementationDocumenter
 tools: ['read', 'search', 'edit', 'todo', 'execute/runInTerminal']
-allowed_write_paths:
- - docs/features/**
- - docs/samples/**
-forbidden_paths:
- - '**/*.cs'
- - 'TerrainGeneration2D.Core/**'
-commit_allowed: false
 ---
 # Planning instructions
 

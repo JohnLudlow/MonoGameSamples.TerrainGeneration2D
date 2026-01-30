@@ -2,10 +2,6 @@
 description: Run unit tests and validation in an isolated environment
 name: FeatureTester
 tools: ['execute/runInTerminal', 'read']
-allowed_write_paths: []
-forbidden_paths:
- - '**/*'
-commit_allowed: false
 ---
 
 # FeatureTester
