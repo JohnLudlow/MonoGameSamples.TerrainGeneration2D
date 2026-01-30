@@ -3,6 +3,7 @@ Agent Safety and Enforcement Policies
 
 Purpose
 -------
+
 This document describes practical, enforceable patterns to prevent interactive or automated agents (Copilot CLI agents, Copilot in-editor assistants, or other LLM agents) from making unauthorized repository changes. It focuses on two goals:
 
 1. Preventing agents from writing or modifying files outside approved patterns.
@@ -10,11 +11,13 @@ This document describes practical, enforceable patterns to prevent interactive o
 
 Threat model
 ------------
+
 - Agents may be configured with guidance (front-matter) such as `forbidden_paths` or `allowed_write_paths` but these are advisory and not always enforced by every client (CLI vs IDE vs service).
 - The authoritative enforcement layer is CI/workflow permissions and repository policy (branch protection, required reviewers, limited GITHUB_TOKEN scopes).
 
 Recommended patterns (summary)
 ------------------------------
+
 1. Treat front-matter (for example `forbidden_paths`) as documentation and guidance only. Do not rely on it as the only control.
 2. Always enforce write/commit restrictions in CI using a validator (for example `.github/scripts/pr-validator.js`) and fail the run when violations are found (strict mode).
 3. Run agents in dry-run mode by default. Configure workflows to upload artifacts (reports, proposed edits) rather than committing automatically.
@@ -24,6 +27,7 @@ Recommended patterns (summary)
 
 Concrete enforcement recipe
 --------------------------
+
 - Agent configuration: keep `forbidden_paths` in front-matter to communicate intent to humans and IDEs, but expect the CLI or service to ignore unknown keys. Example front-matter keys supported by GitHub docs: `name`, `description`, `tools`, `mcp-servers`, `forbidden_paths`.
 
 - CI validator (recommended):
@@ -52,6 +56,7 @@ Concrete enforcement recipe
 
 How to move from dry-run to enforcement
 ---------------------------------------
+
 1. Run the validator in dry-run and inspect reports (artifacts + step summary).
 2. Once confident, flip the validator to strict mode:
    - Remove `|| true` from workflow steps that call the validator.
@@ -60,17 +65,20 @@ How to move from dry-run to enforcement
 
 Operational notes
 -----------------
+
 - Copilot/CLI differences: some clients (CLI) may be stricter about manifest fields and unknown keys; keep manifests conformant to the official schema to avoid runtime errors.
 - Human-in-the-loop: always prefer a reviewable PR when production code is affected. Use documentation and artifact reports to make agent output easy to review.
 
 Example quick checklist for repo owners
 --------------------------------------
+
 - [ ] Add `pr-validator.js` to `.github/scripts/` and wire it into `pull_request` workflows.
 - [ ] Make the validator produce a Markdown artifact and append to `$GITHUB_STEP_SUMMARY`.
 - [ ] Start with dry-run (warnings only) until behavior is stable.
 - [ ] After validation, switch validator to fail the job on issues and enable branch protections.
 - [ ] Implement an opt-in `workflow_dispatch` job that can create PRs with a scoped token and requires manual approval to merge.
 
-If you’d like, can add: 
+If you’d like, can add:
+
 - a sample strict-enforcement variant of the validator and workflow steps, and
 - a sample `workflow_dispatch` YAML that demonstrates safe PR creation with a scoped token and required human approval.
