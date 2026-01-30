@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping;
 

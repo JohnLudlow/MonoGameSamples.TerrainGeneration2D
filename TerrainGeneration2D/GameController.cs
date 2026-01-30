@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;

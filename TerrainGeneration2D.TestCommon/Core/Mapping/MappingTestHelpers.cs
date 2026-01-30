@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.TestCommon.Core.Mapping;
 

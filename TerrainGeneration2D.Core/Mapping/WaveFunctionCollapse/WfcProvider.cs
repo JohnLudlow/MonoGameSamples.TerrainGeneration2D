@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 /// Exposes the current domain grid for testing and diagnostics.
 /// </summary>
 using System;

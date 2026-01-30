@@ -1,4 +1,4 @@
-﻿// TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/IRuleTable.cs
+// TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/IRuleTable.cs
 
 
 // TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/IRuleTable.cs

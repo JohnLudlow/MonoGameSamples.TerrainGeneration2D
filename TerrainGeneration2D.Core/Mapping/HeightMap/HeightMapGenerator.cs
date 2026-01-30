@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;

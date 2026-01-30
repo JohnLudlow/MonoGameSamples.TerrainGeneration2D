@@ -1,4 +1,4 @@
-﻿// Placeholder for future generic WFC domain tests
+// Placeholder for future generic WFC domain tests
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UnitTests.Core.Mapping.WaveFunctionCollapse;
 
 public class WfcGenericTests

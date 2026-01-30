@@ -1,4 +1,4 @@
-﻿// Integration with boundary constraints for chunk seaming
+// Integration with boundary constraints for chunk seaming
 using System;
 using System.Collections.Generic;
 using System.Linq;

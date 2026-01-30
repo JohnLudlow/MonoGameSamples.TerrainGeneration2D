@@ -1,4 +1,4 @@
-﻿using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
+using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Tests;
 using Microsoft.Xna.Framework;

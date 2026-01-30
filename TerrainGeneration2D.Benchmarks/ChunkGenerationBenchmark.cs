@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnosers;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;

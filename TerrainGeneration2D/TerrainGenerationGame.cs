@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Gum.Forms;
 using Gum.Forms.Controls;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Scenes;

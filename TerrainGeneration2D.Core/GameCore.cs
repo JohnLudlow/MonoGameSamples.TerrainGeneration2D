@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Audio;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Input;
