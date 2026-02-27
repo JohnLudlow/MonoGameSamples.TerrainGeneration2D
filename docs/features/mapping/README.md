@@ -14,6 +14,10 @@ This directory contains documentation for the mapping subsystem, including chunk
   - [Wave Function Collapse (WFC)](map-generation/wfc/README.md): Constraint-based procedural generation
   - [Heightmap](map-generation/README.md): Noise-based terrain shaping
   - [TileTypeRegistry](map-generation/README.md): Tile rules and types
+  - [API Reference](api-reference.md): Quick reference for ChunkedTilemap, WfcProvider, TileTypeRegistry, HeightMapGenerator
+  - [AppSettings / Configuration](appsettings.md): Mapping-related appsettings.json keys and examples
+  - [WFC Config Examples](wfc-config-examples.md): Concrete parameter examples and trade-offs
+  - [Runtime UI & Operations](runtime-ui-operations.md): F10/F12 and save/regenerate workflows
 - **Related UI Features:**
   - [Tooltip Manager](../ui/tooltip-manager.md)
   - [Runtime Settings Panel](../ui/runtime-settings-panel.md)

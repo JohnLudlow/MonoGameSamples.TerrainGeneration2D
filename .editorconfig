@@ -1,6 +1,6 @@
-
+﻿
 [*]
-charset = utf-8-bom
+charset = utf-8
 end_of_line = crlf
 trim_trailing_whitespace = false
 insert_final_newline = false
@@ -73,3 +73,6 @@ tab_width = 2
 
 # IDE0160: Convert to block scoped namespace
 csharp_style_namespace_declarations = block_scoped
+
+[.github/agents/*]
+end_of_line = lf

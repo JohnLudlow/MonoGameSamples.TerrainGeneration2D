@@ -1,4 +1,4 @@
-﻿namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
+namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 
 public class Tileset
 {

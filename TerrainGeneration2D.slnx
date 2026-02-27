@@ -1,5 +1,8 @@
 <Solution>
-  <Project Path="TerrainGeneration2D.Tests/TerrainGeneration2D.Tests.csproj" />
+  <Project Path="TerrainGeneration2D.TestCommon/TerrainGeneration2D.TestCommon.csproj" />
+  <Project Path="TerrainGeneration2D.UnitTests/TerrainGeneration2D.UnitTests.csproj" />
+  <Project Path="TerrainGeneration2D.IntegrationTests/TerrainGeneration2D.IntegrationTests.csproj" />
+  <Project Path="TerrainGeneration2D.PropertyTests/TerrainGeneration2D.PropertyTests.csproj" />
   <Project Path="TerrainGeneration2D/TerrainGeneration2D.csproj" />
   <Project Path="TerrainGeneration2D.Core/TerrainGeneration2D.Core.csproj" />
   <Project Path="TerrainGeneration2D.Content/TerrainGeneration2D.Content.csproj" />

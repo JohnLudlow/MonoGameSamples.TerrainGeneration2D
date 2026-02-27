@@ -1,16 +1,15 @@
-﻿using System.Collections.Generic;
-
 /// <summary>
 /// Exposes the current domain grid for testing and diagnostics.
 /// </summary>
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
-using Microsoft.Xna.Framework;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse.EntropyProviders;
+using Microsoft.Xna.Framework;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 
@@ -42,7 +41,7 @@ public class WfcProvider
   private readonly HashSet<int>?[][] _possibilities;
   private readonly int[][] _output;
   private readonly MappingInformationService _mappingService;
-  private readonly TerrainRuleConfiguration _config;
+  private readonly TileTypeRuleConfiguration _tileTypeRuleConfig;
   private readonly IHeightProvider _heightProvider;
   private readonly Point _chunkOrigin;
 #pragma warning disable CA1859 // Use concrete types when possible for improved performance
@@ -57,27 +56,40 @@ public class WfcProvider
   /// <param name="height">Number of tiles in Y for this solve.</param>
   /// <param name="tileRegistry">Tile registry and rules.</param>
   /// <param name="randomProvider">Random provider for deterministic generation.</param>
-  /// <param name="config">Terrain rule configuration.</param>
+  /// <param name="tileTypeRuleConfig">Terrain rule configuration.</param>
   /// <param name="heightProvider">Height/biome sampler for contextual rules.</param>
   /// <param name="chunkOrigin">World-space origin of this chunk, used for sampling.</param>
   /// <param name="weightConfig">WFC weight configuration for tile selection.</param>
   /// <param name="heuristicsConfig">Heuristics configuration for cell selection.</param>
-  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, IRandomProvider randomProvider,
-    TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin,
-    WfcWeightConfiguration? weightConfig = null, HeuristicsConfiguration? heuristicsConfig = null)
+  public WfcProvider(
+    int width,
+    int height,
+    TileTypeRegistry tileRegistry,
+    IRandomProvider randomProvider,
+    TileTypeRuleConfiguration tileTypeRuleConfig,
+    IHeightProvider heightProvider,
+    Point chunkOrigin,
+    WfcWeightConfiguration? weightConfig = null,
+    HeuristicsConfiguration? heuristicsConfig = null
+  )
   {
+    ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
+    ArgumentNullException.ThrowIfNull(heightProvider);
+    ArgumentNullException.ThrowIfNull(tileRegistry);
+    ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
+
     _width = width;
     _height = height;
     _tileRegistry = tileRegistry ?? throw new ArgumentNullException(nameof(tileRegistry));
     _random = randomProvider ?? throw new ArgumentNullException(nameof(randomProvider));
-    _config = config ?? throw new ArgumentNullException(nameof(config));
+    _tileTypeRuleConfig = tileTypeRuleConfig ?? throw new ArgumentNullException(nameof(tileTypeRuleConfig));
     _heightProvider = heightProvider ?? throw new ArgumentNullException(nameof(heightProvider));
     _chunkOrigin = chunkOrigin;
 
     _weightConfig = weightConfig ?? new WfcWeightConfiguration();
     _heuristicsConfig = heuristicsConfig ?? new HeuristicsConfiguration();
 
-    _ruleTable = new PrecomputedRuleTable(tileRegistry);
+    _ruleTable = new PrecomputedTileTypeRuleTable(tileRegistry);
     _possibilities = new HashSet<int>?[_width][];
 
     // Initialize domains with all possible tile types
@@ -122,12 +134,27 @@ public class WfcProvider
   /// <param name="height">Number of tiles in Y for this solve.</param>
   /// <param name="tileRegistry">Tile registry and rules.</param>
   /// <param name="random">Deterministic random source (seeded per-chunk).</param>
-  /// <param name="config">Terrain rule configuration.</param>
+  /// <param name="tileTypeRuleConfig">Terrain rule configuration.</param>
   /// <param name="heightProvider">Height/biome sampler for contextual rules.</param>
   /// <param name="chunkOrigin">World-space origin of this chunk, used for sampling.</param>
-  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, Random random,
-    TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin)
-    : this(width, height, tileRegistry, new RandomAdapter(random), config, heightProvider, chunkOrigin)
+  public WfcProvider(
+    int width,
+    int height,
+    TileTypeRegistry tileRegistry,
+    Random random,
+    TileTypeRuleConfiguration tileTypeRuleConfig,
+    IHeightProvider heightProvider,
+    Point chunkOrigin
+  )
+    : this(
+        width,
+        height,
+        tileRegistry,
+        new RandomAdapter(random),
+        tileTypeRuleConfig,
+        heightProvider,
+        chunkOrigin
+      )
   {
     ArgumentNullException.ThrowIfNull(random);
   }
@@ -135,18 +162,52 @@ public class WfcProvider
   /// <summary>
   /// Create a WFC solver using a custom random provider and weight configuration.
   /// </summary>
-  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, IRandomProvider randomProvider,
-    TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin, WfcWeightConfiguration weightConfig)
-    : this(width, height, tileRegistry, randomProvider, config, heightProvider, chunkOrigin, weightConfig, null)
+  public WfcProvider(
+    int width,
+    int height,
+    TileTypeRegistry tileRegistry,
+    IRandomProvider randomProvider,
+    TileTypeRuleConfiguration tileTypeRuleConfig,
+    IHeightProvider heightProvider,
+    Point chunkOrigin,
+    WfcWeightConfiguration weightConfig)
+    : this(
+        width,
+        height,
+        tileRegistry,
+        randomProvider,
+        tileTypeRuleConfig,
+        heightProvider,
+        chunkOrigin,
+        weightConfig,
+        null
+      )
   {
   }
 
   /// <summary>
   /// Create a WFC solver using System.Random and weight configuration.
   /// </summary>
-  public WfcProvider(int width, int height, TileTypeRegistry tileRegistry, Random random,
-    TerrainRuleConfiguration config, IHeightProvider heightProvider, Point chunkOrigin, WfcWeightConfiguration weightConfig)
-    : this(width, height, tileRegistry, new RandomAdapter(random), config, heightProvider, chunkOrigin, weightConfig, null)
+  public WfcProvider(
+    int width,
+    int height,
+    TileTypeRegistry tileRegistry,
+    Random random,
+    TileTypeRuleConfiguration tileTypeRuleConfig,
+    IHeightProvider heightProvider,
+    Point chunkOrigin,
+    WfcWeightConfiguration weightConfig)
+    : this(
+        width,
+        height,
+        tileRegistry,
+        new RandomAdapter(random),
+        tileTypeRuleConfig,
+        heightProvider,
+        chunkOrigin,
+        weightConfig,
+        null
+      )
   {
     ArgumentNullException.ThrowIfNull(random);
   }
@@ -184,9 +245,9 @@ public class WfcProvider
   {
 
     // Pre-collapse any pre-filled output cells and propagate constraints
-    for (int x = 0; x < _width; x++)
+    for (var x = 0; x < _width; x++)
     {
-      for (int y = 0; y < _height; y++)
+      for (var y = 0; y < _height; y++)
       {
         if (_output[x][y] != -1)
         {
@@ -201,6 +262,8 @@ public class WfcProvider
         }
       }
     }
+
+    // (Removed: collapse singleton domains before main loop)
 
     if (!enableBacktracking)
     {
@@ -242,6 +305,7 @@ public class WfcProvider
         if (x > 0 && _output[x - 1][y] != -1) neighborTiles.Add(_output[x - 1][y]);
         if (x < _width - 1 && _output[x + 1][y] != -1) neighborTiles.Add(_output[x + 1][y]);
 
+        // Always push the selected cell onto the stack, even if singleton domain
         var weighted = poss.Select(tile => new { Tile = tile, Weight = _weightConfig.Base + neighborTiles.Count(n => n == tile) * _weightConfig.NeighborMatchBoost }).ToList();
         var ordered = weighted
           .OrderByDescending(w => w.Weight)
@@ -320,14 +384,7 @@ public class WfcProvider
           break;
         }
 
-        if (advanced)
-        {
-          context.iterations++;
-        }
-        else
-        {
-          context.iterations++;
-        }
+        context.iterations++;
       }
 
       context.success = false;
@@ -442,7 +499,7 @@ public class WfcProvider
 
   internal (int x, int y) FindLowestEntropy()
   {
-    // Collect candidate cells and compute both scores when enabled
+    // Phase 1: Collect all candidate cells (undecided cells with non-empty domains)
     var candidateCells = new List<(int x, int y, double kScore, double hScore, int influence)>();
 
     for (var y = 0; y < _height; y++)
@@ -450,12 +507,15 @@ public class WfcProvider
       for (var x = 0; x < _width; x++)
       {
         var poss = _possibilities[x][y];
-        if (poss == null || poss.Count <= 1) continue;
+        // Select cells with domain size >= 1 and not yet assigned (null = collapsed)
+        if (poss == null || poss.Count == 0) continue;
 
+        // Compute entropy scores based on enabled heuristics
         var k = _heuristicsConfig.UseDomainEntropy ? _domainEntropy.GetScore(x, y, _possibilities, _output, _weightConfig) : double.PositiveInfinity;
         var h = _heuristicsConfig.UseShannonEntropy ? _shannonEntropy.GetScore(x, y, _possibilities, _output, _weightConfig) : double.PositiveInfinity;
 
-        // Influence: how many undecided neighbors this cell may constrain
+        // Calculate influence: count how many undecided neighbors this cell has
+        // Higher influence = cell constrains more neighbors = better choice for early propagation
         var influence = 0;
         if (y > 0 && _possibilities[x][y - 1] != null) influence++;
         if (y < _height - 1 && _possibilities[x][y + 1] != null) influence++;
@@ -469,13 +529,16 @@ public class WfcProvider
     if (candidateCells.Count == 0)
       return (-1, -1);
 
+    // Phase 2: Apply entropy-based filtering to create initial shortlist
+    // WFC principle: select cells with minimum entropy first for most constrained choices
+    List<(int x, int y, double k, double h, int influence)> shortlist;
+
     if (!_heuristicsConfig.UseDomainEntropy && !_heuristicsConfig.UseShannonEntropy)
       throw new InvalidOperationException("No entropy heuristic enabled: enable DomainEntropy and/or ShannonEntropy.");
 
-    // Selection
-    List<(int x, int y, double k, double h, int influence)> shortlist;
     if (_heuristicsConfig.UseDomainEntropy && _heuristicsConfig.UseShannonEntropy)
     {
+      // Both heuristics enabled: prefer cells with minimum in BOTH scores (intersection)
       var minK = candidateCells.Min(c => c.kScore);
       var minH = candidateCells.Min(c => c.hScore);
       var setK = candidateCells.Where(c => Math.Abs(c.kScore - minK) < 1e-9).ToList();
@@ -485,11 +548,13 @@ public class WfcProvider
     }
     else if (_heuristicsConfig.UseDomainEntropy)
     {
+      // Only domain entropy: select cells with minimum domain size
       var minK = candidateCells.Min(c => c.kScore);
       shortlist = candidateCells.Where(c => Math.Abs(c.kScore - minK) < 1e-9).ToList();
     }
     else
     {
+      // Only Shannon entropy: select cells with minimum Shannon entropy
       var minH = candidateCells.Min(c => c.hScore);
       shortlist = candidateCells.Where(c => Math.Abs(c.hScore - minH) < 1e-9).ToList();
     }
@@ -499,6 +564,8 @@ public class WfcProvider
 
     TerrainPerformanceEventSource.Log.ReportWfcShortlistSize(shortlist.Count);
 
+    // Phase 3: Apply tie-breakers when multiple cells have same entropy
+    // This helps reduce backtracking by choosing cells that constrain the most neighbors
     var applyInfluenceTieBreak = _heuristicsConfig.UseMostConstrainingTieBreak &&
       (
         (_heuristicsConfig.UseDomainEntropy && _heuristicsConfig.UseShannonEntropy) ||
@@ -509,7 +576,7 @@ public class WfcProvider
     {
       if (_heuristicsConfig.MostConstrainingBias > 0)
       {
-        // Soft bias: weighted random by influence
+        // Soft bias: weighted random selection biased by influence (probabilistic)
         var weights = shortlist.Select(c => 1.0 + _heuristicsConfig.MostConstrainingBias * c.influence).ToArray();
         var total = weights.Sum();
         var roll = _random.NextDouble() * total;
@@ -527,13 +594,15 @@ public class WfcProvider
       }
       else
       {
-        // Hard filter: prefer maximum influence
+        // Hard filter: deterministic selection - keep only cells with maximum influence
         var maxInf = shortlist.Max(c => c.influence);
         shortlist = shortlist.Where(c => c.influence == maxInf).ToList();
         TerrainPerformanceEventSource.Log.WfcTieBreakInfluenceApplied(shortlist.Count);
       }
     }
 
+    // Phase 4: Apply spatial preference tie-breaker
+    // When entropy and influence are tied, prefer cells closer to map center (helps stability)
     if (_heuristicsConfig.PreferCentralCellTieBreak && shortlist.Count > 1)
     {
       var centerX = _width / 2;
@@ -546,6 +615,7 @@ public class WfcProvider
       TerrainPerformanceEventSource.Log.WfcTieBreakCentralApplied(shortlist.Count);
     }
 
+    // Phase 5: Final random selection from tied candidates
     var choice = shortlist[_random.NextInt(shortlist.Count)];
     return (choice.x, choice.y);
   }
@@ -627,30 +697,9 @@ public class WfcProvider
 
   private bool Propagate(int startX, int startY, ChangeLog log)
   {
-    var queue = new Queue<(int x, int y)>();
-    queue.Enqueue((startX, startY));
-
-    while (queue.Count > 0)
-    {
-      var (x, y) = queue.Dequeue();
-      var currentTile = _output[x][y];
-      if (currentTile == -1)
-        continue;
-
-      var currentPoint = new TilePoint(x, y);
-
-      if (y > 0 && !ConstrainAndRecord(x, y - 1, Direction.South, currentTile, currentPoint, log)) return false;
-      if (y < _height - 1 && !ConstrainAndRecord(x, y + 1, Direction.North, currentTile, currentPoint, log)) return false;
-      if (x < _width - 1 && !ConstrainAndRecord(x + 1, y, Direction.West, currentTile, currentPoint, log)) return false;
-      if (x > 0 && !ConstrainAndRecord(x - 1, y, Direction.East, currentTile, currentPoint, log)) return false;
-
-      if (y > 0 && _possibilities[x][y - 1] != null) queue.Enqueue((x, y - 1));
-      if (y < _height - 1 && _possibilities[x][y + 1] != null) queue.Enqueue((x, y + 1));
-      if (x < _width - 1 && _possibilities[x + 1][y] != null) queue.Enqueue((x + 1, y));
-      if (x > 0 && _possibilities[x - 1][y] != null) queue.Enqueue((x - 1, y));
-    }
-
-    return true;
+    // Delegate to AC3Propagator for consistent constraint propagation with singleton validation.
+    // AC3Propagator now detects singleton contradictions and clears domains accordingly.
+    return Propagator.PropagateFrom(startX, startY, _output[startX][startY], log);
   }
 
   private bool ConstrainAndRecord(int x, int y, Direction directionToNeighbor, int neighborTileId, TilePoint neighborPosition, ChangeLog log)
@@ -679,10 +728,11 @@ public class WfcProvider
           neighborPosition,
           neighborTileId,
           directionToNeighbor,
-          _config,
+          _tileTypeRuleConfig,
           candidateSample,
           neighborSample,
-          _mappingService);
+          _mappingService
+        );
 
       var allowedNeighborsNorth = _ruleTable.GetAllowedNeighbors(tileId, Direction.North);
       var allowedNeighborsSouth = _ruleTable.GetAllowedNeighbors(tileId, Direction.South);
@@ -758,7 +808,7 @@ public class WfcProvider
           neighborPosition,
           neighborTileId,
           directionToNeighbor,
-          _config,
+          _tileTypeRuleConfig,
           candidateSample,
           neighborSample,
           _mappingService);

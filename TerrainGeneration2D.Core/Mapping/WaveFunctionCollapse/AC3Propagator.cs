@@ -1,4 +1,4 @@
-﻿// TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/AC3Propagator.cs
+// TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/AC3Propagator.cs
 
 using System;
 using System.Collections.Generic;
@@ -177,13 +177,61 @@ public class AC3Propagator
       removed = true;
     }
 
+    // SINGLETON CONTRADICTION DETECTION:
+    // After domain reduction, if domain becomes singleton (size 1), verify that the
+    // single tile is compatible with ALL four neighbors. If any neighbor has NO compatible
+    // tiles for this singleton, we have detected a contradiction.
     if (currentDomain.Count == 1)
     {
-      var chosenTile = currentDomain.First();
-      if (log != null) log.RecordCellCollapsed(x, y, currentDomain, chosenTile);
-      // ...existing code for cell collapse...
+      var singletonTile = currentDomain.First();
+      log?.RecordCellCollapsed(x, y, currentDomain, singletonTile);
+
+      // Validate singleton tile against all four neighbors
+      if (!ValidateSingletonTile(x, y, singletonTile))
+      {
+        // Singleton is incompatible with at least one neighbor - contradiction!
+        currentDomain.Clear();
+        log?.RecordDomainRemoved(x, y, singletonTile);
+        return true; // Indicate a change was made (domain cleared)
+      }
     }
 
     return removed;
+  }
+
+  /// <summary>
+  /// Validates that a singleton tile at the given position is compatible with all neighbors.
+  /// If any neighbor has NO compatible tiles for this singleton, returns false (contradiction).
+  /// </summary>
+  private bool ValidateSingletonTile(int x, int y, int singletonTile)
+  {
+    var directions = new[] { Direction.North, Direction.East, Direction.South, Direction.West };
+
+    foreach (var direction in directions)
+    {
+      var neighborPos = GetNeighborPosition(x, y, direction);
+      if (!IsValidCoordinate(neighborPos.x, neighborPos.y))
+        continue;
+
+      var neighborDomain = _domains[neighborPos.x][neighborPos.y];
+
+      // Skip null domains (collapsed cells are compatible by definition)
+      if (neighborDomain == null)
+        continue;
+
+      // Get tiles that can be neighbors to our singleton tile in this direction
+      var allowedNeighbors = _ruleTable.GetAllowedNeighbors(singletonTile, direction);
+
+      // Check if the neighbor domain has ANY compatible tile
+      var hasCompatibleNeighbor = neighborDomain.Any(n => allowedNeighbors.Contains(n));
+
+      if (!hasCompatibleNeighbor)
+      {
+        // Neighbor domain has NO compatible tiles - contradiction!
+        return false;
+      }
+    }
+
+    return true; // All neighbors are compatible with this singleton
   }
 }

@@ -1,4 +1,4 @@
-﻿namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
+namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 
 public sealed class SnowTileType : TileType
 {
@@ -9,11 +9,11 @@ public sealed class SnowTileType : TileType
 
   public override bool EvaluateRules(TileRuleContext context)
   {
-    if (context.CandidateHeight.Altitude < context.Config.SnowHeightMin)
+    var rule = context.Config.GetRuleForType(TileId);
+    if (rule != null && context.CandidateHeight.Altitude < rule.ElevationMin)
     {
       return false;
     }
-
     return MatchesNeighbor(context, TerrainTileIds.Forest, TerrainTileIds.Snow, TerrainTileIds.Mountain);
   }
 }

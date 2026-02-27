@@ -1,5 +1,18 @@
 # Integration
 
+## Table of contents
+
+- [Chunk pipeline in practice](#chunk-pipeline-in-practice)
+- [Seams and boundary constraints](#seams-and-boundary-constraints)
+- [Saves and reproducibility](#saves-and-reproducibility)
+
+## Definition of terms
+
+| Term | Meaning |
+| ---- | ------- |
+| Seam | Visible mismatch at chunk borders caused by inconsistent generation |
+| Seed | Deterministic input to pseudo-random generators ensuring reproducibility |
+
 Purpose: show how WFC results populate chunks, persist, and render.
 
 ## Chunk pipeline in practice

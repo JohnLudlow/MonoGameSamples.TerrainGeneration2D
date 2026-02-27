@@ -25,3 +25,7 @@ This section organizes the repository’s implementation into functional areas a
 - Map Generation Wiki: [docs/features/mapping/map-generation/README.md](mapping/map-generation/README.md)
 - WFC (Child of Map Generation): [docs/features/mapping/map-generation/wfc/README.md](mapping/map-generation/wfc/README.md)
 - Map Generation Wiki: [docs/map-generation/README.md](mapping/map-generation/README.md)
+- [Mapping API Reference](mapping/api-reference.md)
+- [Mapping AppSettings](mapping/appsettings.md)
+- [WFC Config Examples](mapping/wfc-config-examples.md)
+- [Mapping Runtime UI](mapping/runtime-ui-operations.md)

@@ -1,3 +1,3 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("TerrainGeneration2D.Tests")]
+[assembly: InternalsVisibleTo("TerrainGeneration2D.UnitTests")]

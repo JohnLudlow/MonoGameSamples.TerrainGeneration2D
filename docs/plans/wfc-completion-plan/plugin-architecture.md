@@ -8,11 +8,11 @@ Enable a plugin architecture for the Wave Function Collapse (WFC) system, allowi
 
 - [Overview](#overview)
 - [Plan issue](#plan-issue)
-- [Feature requirements](#feature-requirements)
-- [Feature status](#feature-status)
+- [Plan status](#plan-status)
 - [Definition of terms](#definition-of-terms)
 - [Architectural considerations and constraints](#architectural-considerations-and-constraints)
 - [Implementation guide](#implementation-guide)
+  - [Plan requirements](#plan-requirements)
 - [See also](#see-also)
 - [References](#references)
 
@@ -25,46 +25,7 @@ This plan is tracked by GitHub issue [#19][issue-19]:
 
 See [meta issue #22][issue-22] for overall WFC completion tracking.
 
-## Feature requirements
-
-### Feature requirements
-
-- (Incomplete) Support for custom entropy providers (cell selection heuristics)
-  - GIVEN a need for custom cell selection
-  - WHEN a plugin is registered and selected
-  - THEN the WFC system uses the custom entropy provider
-
-> Implementation not started. See Implementation guide Phase 1.
-
-- (Incomplete) Support for custom constraint providers (adjacency, domain restrictions)
-  - GIVEN a need for custom adjacency or domain rules
-  - WHEN a plugin is registered and selected
-  - THEN the WFC system uses the custom constraint provider
-
-> Implementation not started. See Implementation guide Phase 1.
-
-- (Incomplete) Runtime selection and configuration of plugins
-  - GIVEN multiple plugins are available
-  - WHEN the user selects a plugin at runtime or via config
-  - THEN the WFC system uses the selected plugin without restart
-
-> Implementation not started. See Implementation guide Phase 3/4.
-
-- (Incomplete) Backward compatibility with existing WFC configuration
-  - GIVEN existing WFC configuration files and code
-  - WHEN the plugin system is enabled
-  - THEN existing configurations continue to work without modification
-
-> Implementation not started. See Implementation guide Phase 2.
-
-- (Incomplete) Minimal performance overhead for plugin dispatch
-  - GIVEN the plugin system is in use
-  - WHEN running WFC generation
-  - THEN plugin dispatch does not introduce significant overhead
-
-> Implementation not started. See Implementation guide Phase 2/5.
-
-## Feature status
+## Plan status
 
 - Not started
 
@@ -101,6 +62,43 @@ classDiagram
 ```
 
 ## Implementation guide
+
+### Plan requirements
+
+- (Incomplete) Support for custom entropy providers (cell selection heuristics)
+  - GIVEN a need for custom cell selection
+  - WHEN a plugin is registered and selected
+  - THEN the WFC system uses the custom entropy provider
+
+> Implementation not started. See Phase 1 below.
+
+- (Incomplete) Support for custom constraint providers (adjacency, domain restrictions)
+  - GIVEN a need for custom adjacency or domain rules
+  - WHEN a plugin is registered and selected
+  - THEN the WFC system uses the custom constraint provider
+
+> Implementation not started. See Phase 1 below.
+
+- (Incomplete) Runtime selection and configuration of plugins
+  - GIVEN multiple plugins are available
+  - WHEN the user selects a plugin at runtime or via config
+  - THEN the WFC system uses the selected plugin without restart
+
+> Implementation not started. See Phase 3/4 below.
+
+- (Incomplete) Backward compatibility with existing WFC configuration
+  - GIVEN existing WFC configuration files and code
+  - WHEN the plugin system is enabled
+  - THEN existing configurations continue to work without modification
+
+> Implementation not started. See Phase 2 below.
+
+- (Incomplete) Minimal performance overhead for plugin dispatch
+  - GIVEN the plugin system is in use
+  - WHEN running WFC generation
+  - THEN plugin dispatch does not introduce significant overhead
+
+> Implementation not started. See Phase 2/5 below.
 
 ### Phase 1: Define Plugin Interfaces
 

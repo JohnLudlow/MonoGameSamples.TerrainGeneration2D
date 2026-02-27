@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics.Tracing;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;

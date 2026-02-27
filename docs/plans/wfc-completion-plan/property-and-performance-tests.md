@@ -8,11 +8,11 @@ Achieve comprehensive property-based and performance regression testing for the 
 
 - [Overview](#overview)
 - [Plan issue](#plan-issue)
-- [Feature requirements](#feature-requirements)
-- [Feature status](#feature-status)
+- [Plan status](#plan-status)
 - [Definition of terms](#definition-of-terms)
 - [Architectural considerations and constraints](#architectural-considerations-and-constraints)
 - [Implementation guide](#implementation-guide)
+  - [Plan requirements](#plan-requirements)
 - [See also](#see-also)
 - [References](#references)
 
@@ -25,39 +25,7 @@ This plan is tracked by GitHub issue [#16][issue-16]:
 
 See [meta issue #22][issue-22] for overall WFC completion tracking.
 
-## Feature requirements
-
-### Feature requirements
-
-- (Incomplete) Property-based tests for constraint satisfaction, determinism, and completeness
-  - GIVEN the WFC system and a range of random inputs
-  - WHEN property-based tests are run
-  - THEN all outputs satisfy constraints, are deterministic, and complete
-
-> Implementation not started. See Implementation guide Phase 1.
-
-- (Incomplete) Performance regression tests for chunk generation time and memory usage
-  - GIVEN the WFC system and chunk generation benchmarks
-  - WHEN performance tests are run
-  - THEN chunk generation time and memory usage are within budget
-
-> Implementation not started. See Implementation guide Phase 2.
-
-- (Incomplete) Automated test integration with CI pipeline
-  - GIVEN property-based and performance tests
-  - WHEN the CI pipeline runs
-  - THEN all tests are executed and results are reported
-
-> Implementation not started. See Implementation guide Phase 3.
-
-- (Incomplete) Statistical analysis of test results (e.g., 95th percentile timing)
-  - GIVEN test results from property and performance tests
-  - WHEN analyzing results
-  - THEN statistical metrics (e.g., 95th percentile) are reported and tracked
-
-> Implementation not started. See Implementation guide Phase 3.
-
-## Feature status
+## Plan status
 
 - Not started
 
@@ -75,6 +43,36 @@ See [meta issue #22][issue-22] for overall WFC completion tracking.
 - Document how to interpret and act on test failures
 
 ## Implementation guide
+
+### Plan requirements
+
+- (Incomplete) Property-based tests for constraint satisfaction, determinism, and completeness
+  - GIVEN the WFC system and a range of random inputs
+  - WHEN property-based tests are run
+  - THEN all outputs satisfy constraints, are deterministic, and complete
+
+> Implementation not started. See Phase 1 below.
+
+- (Incomplete) Performance regression tests for chunk generation time and memory usage
+  - GIVEN the WFC system and chunk generation benchmarks
+  - WHEN performance tests are run
+  - THEN chunk generation time and memory usage are within budget
+
+> Implementation not started. See Phase 2 below.
+
+- (Incomplete) Automated test integration with CI pipeline
+  - GIVEN property-based and performance tests
+  - WHEN the CI pipeline runs
+  - THEN all tests are executed and results are reported
+
+> Implementation not started. See Phase 3 below.
+
+- (Incomplete) Statistical analysis of test results (e.g., 95th percentile timing)
+  - GIVEN test results from property and performance tests
+  - WHEN analyzing results
+  - THEN statistical metrics (e.g., 95th percentile) are reported and tracked
+
+> Implementation not started. See Phase 3 below.
 
 ### Phase 1: Property-Based Test Suites
 

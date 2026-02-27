@@ -1,18 +1,18 @@
-﻿# Library Abstraction for Non-Tile Domains
+# Library Abstraction for Non-Tile Domains
 
 ## Overview
 
-Abstract the WFC library to support non-tile domains, enabling procedural generation for a wide range of applications (e.g., building layouts, resource placement). Intended for teams needing WFC for domains beyond terrain tiles.
+Document the current WFC implementation and clarify the path to abstraction for non-tile domains. The current codebase supports tile-based terrain generation only; generic domain support is a future goal.
 
 ## Table of contents
 
 - [Overview](#overview)
 - [Plan issue](#plan-issue)
-- [Feature requirements](#feature-requirements)
-- [Feature status](#feature-status)
+- [Plan status](#plan-status)
 - [Definition of terms](#definition-of-terms)
 - [Architectural considerations and constraints](#architectural-considerations-and-constraints)
 - [Implementation guide](#implementation-guide)
+  - [Plan requirements](#plan-requirements)
 - [See also](#see-also)
 - [References](#references)
 
@@ -25,13 +25,68 @@ This plan is tracked by GitHub issue [#12][issue-12]:
 
 See [meta issue #22][issue-22] for overall WFC completion tracking.
 
-## Feature requirements
-
-## Feature status
+## Plan status
 
 - Not started
+- Generic abstraction: Not started
 
-### Feature requirements
+### Current Implementation
+
+The current WFC implementation is tightly coupled to tile-based terrain generation:
+
+- All domains, rules, and propagation logic operate on tile IDs (`int`) and grid coordinates (`x, y`).
+- The main entry point is `WfcProvider`, which exposes methods for chunk-sized grid solving, backtracking, and diagnostics.
+- Rule evaluation is performed via `TileTypeRegistry`, `TileTypeRuleConfiguration`, and contextual inputs (height, biome, config).
+- Propagation and constraint logic are not generic; all APIs expect tile IDs and terrain-specific context.
+
+## Definition of terms
+
+| Term    | Meaning                                                                              | Reference                                                                                    |
+| ------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| Adapter | (Planned) A component that would translate between generic and domain-specific logic |                                                                                              |
+| Domain  | The set of possible tile IDs for a cell                                              | [WfcProvider](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs) |
+
+## Architectural considerations and constraints
+
+### Current Constraints
+
+- All code paths (domain, rule, propagation, output) are hardcoded for terrain tile IDs and grid coordinates.
+- No generic interfaces for cell/value types; all APIs use `int` for tile IDs and `int x, int y` for coordinates.
+- Rule evaluation is performed by terrain-specific classes (`TileType`, `TileTypeRegistry`, `TileRuleContext`).
+- Propagation and backtracking are implemented for tile domains only.
+- Diagnostics and performance counters are tied to terrain generation events.
+
+```mermaid
+classDiagram
+    class WfcProvider {
+        +bool Generate(...)
+        +int[][] GetOutput()
+        +HashSet<int>?[][] GetPossibilities()
+    }
+    class TileTypeRegistry {
+        +TileType GetTileType(int)
+        +int TileCount
+    }
+    class TileTypeRuleConfiguration {
+        +List<GroupRuleConfiguration> Rules
+    }
+    class TileRuleContext {
+        +TilePoint Candidate
+        +int TileId
+        +TilePoint Neighbor
+        +int NeighborTileId
+        +Direction Direction
+        +HeightSample CandidateSample
+        +HeightSample NeighborSample
+    }
+    WfcProvider --> TileTypeRegistry
+    WfcProvider --> TileTypeRuleConfiguration
+    WfcProvider --> TileRuleContext
+```
+
+## Implementation guide
+
+### Plan requirements
 
 - (***COMPLETE***) Generic WFC solver interfaces support arbitrary cell/value types
   - GIVEN a need to support non-tile domains
@@ -43,66 +98,50 @@ See [meta issue #22][issue-22] for overall WFC completion tracking.
   - WHEN refactoring for generic support
   - THEN all terrain-specific logic is moved to adapters or shims
 
-> Implementation not started. See Implementation guide Phase 1.
+> Implementation not started. See Phase 1 below.
 
 - (Incomplete) Support for custom rule and constraint systems
   - GIVEN a new domain with unique constraints
   - WHEN configuring the WFC solver
   - THEN custom rule and constraint systems can be injected or implemented
 
-> Implementation not started. See Implementation guide Phase 2.
+> Implementation not started. See Phase 2 below.
 
 - (Incomplete) Maintain performance and determinism
   - GIVEN the generic WFC implementation
   - WHEN running on large or complex domains
   - THEN performance and determinism are not degraded compared to the legacy implementation
 
-> Implementation not started. See Implementation guide Phase 4.
+> Implementation not started. See Phase 4 below.
 
-## Definition of terms
+### Extension Points
 
-| Term    | Meaning                                                               | Reference |
-| ------- | --------------------------------------------------------------------- | --------- |
-| Adapter | A component that translates between generic and domain-specific logic |           |
-| Domain  | The set of possible values for a cell                                 |           |
-
-## Architectural considerations and constraints
-
-- Backward compatibility for terrain generation
-  - The generic WFC abstraction must preserve support for all existing terrain generation features and APIs.
-  - Existing code using tile-based WFC (e.g., `WfcProvider`, `TileTypeRegistry`, `ChunkedTilemap`) should continue to work without modification.
-  - Provide adapter classes or shims that map the legacy tile-based interfaces to the new generic interfaces.
-  - Migration should be incremental: legacy and generic APIs can coexist, allowing gradual adoption.
-  - All tests and benchmarks for terrain generation must pass after migration.
-- Plugin system must support generic domains
-- Test coverage for new abstractions
-
-```mermaid
-classDiagram
-    class IWfcSolver_TCell_TValue_ {
-        +Solve(WfcConfiguration_TCell_TValue_)
-    }
-    class Adapter {
-        +Translate(...)
-    }
-    IWfcSolver_TCell_TValue_ <|.. Adapter
-```
-
-## Implementation guide
-
-### Phase 1: Refactor WFC Core to Generics (Backward Compatibility Phase)
-
-**Phase status:** Not started
+- To support non-tile domains, the following refactorings are required:
+  - Introduce generic interfaces for domain, rule, and propagation logic (e.g., `IWfcSolver<TCell, TValue>`, `IRuleTable<TValue>`)
+  - Decouple terrain-specific logic from the WFC core
+  - Provide adapters for legacy terrain APIs
+  - Ensure all tests and benchmarks for terrain generation pass after migration
 
 #### Objective
 
-Refactor WFC core to use generic types for cells and values, while preserving backward compatibility for all existing terrain generation code and APIs.
+### Planned Refactoring Steps
 
-#### Technical details
+1. Refactor WFC core to use generic types for cells and values
+2. Create generic configuration and rule table interfaces
+3. Move terrain-specific logic to adapters
+4. Update propagator and constraint logic to support generic domains
+5. Provide sample adapters for non-tile domains (e.g., resource placement)
 
-- Change class and method signatures to use type parameters. Move terrain-specific logic to adapters.
-- Provide adapter classes or shims that allow legacy tile-based APIs (e.g., WfcProvider, TileTypeRegistry) to work with the new generic core without modification.
-- Ensure all existing terrain generation tests and benchmarks pass after migration.
+### Sample API (Current)
+
+```csharp
+// Terrain-only WFC API
+var wfc = new WfcProvider(width, height, tileRegistry, randomProvider, tileTypeRuleConfig, heightProvider, chunkOrigin);
+bool ok = wfc.Generate(enableBacktracking: true, maxIterations: 10000);
+var output = wfc.GetOutput(); // int[][] of tile IDs
+```
+
+### Sample Generic API and Adapter (Planned)
 
 #### Phase requirements
 
@@ -146,12 +185,63 @@ public interface IWfcSolver<TCell, TValue>
 }
 
 /// <summary>
+/// Generic rule table interface for WFC constraints.
+/// </summary>
+/// <typeparam name="TValue">Value type for which constraints are defined</typeparam>
+public interface IRuleTable<TValue>
+{
+    /// <summary>
+    /// Gets allowed neighboring values for a given value in a specific direction.
+    /// </summary>
+    /// <param name="value">The source value to check neighbors for</param>
+    /// <param name="direction">The direction to check (North, South, East, West)</param>
+    /// <returns>Enumeration of allowed neighboring values</returns>
+    IEnumerable<TValue> GetAllowedNeighbors(TValue value, Direction direction);
+}
+
+/// <summary>
+/// Generic configuration for WFC solver, holding settings, domains, and constraints.
+/// </summary>
+/// <typeparam name="TCell">Cell coordinate type</typeparam>
+/// <typeparam name="TValue">Value type</typeparam>
+public class WfcConfiguration<TCell, TValue>
+{
+    /// <summary>
+    /// Gets or sets the initial domain for each cell (possible values).
+    /// </summary>
+    public IReadOnlyDictionary<TCell, ISet<TValue>> InitialDomains { get; set; }
+
+    /// <summary>
+    /// Gets or sets the rule table defining allowed neighbor relationships.
+    /// </summary>
+    public IRuleTable<TValue> RuleTable { get; set; }
+
+    /// <summary>
+    /// Gets or sets heuristic settings for cell selection.
+    /// </summary>
+    public HeuristicsConfiguration Heuristics { get; set; } = new HeuristicsConfiguration();
+
+    /// <summary>
+    /// Gets or sets the time budget for solving (in milliseconds).
+    /// </summary>
+    public int TimeBudgetMs { get; set; } = 50;
+}
+
+/// <summary>
 /// Adapter for legacy tile-based WFC API, preserving backward compatibility.
 /// </summary>
 public class LegacyTileWfcAdapter : IWfcSolver<(int x, int y), int>
 {
     private readonly WfcProvider _legacyProvider;
+
+    /// <summary>
+    /// Initializes a new instance of the LegacyTileWfcAdapter class.
+    /// </summary>
+    /// <param name="legacyProvider">The legacy WFC provider to adapt</param>
     public LegacyTileWfcAdapter(WfcProvider legacyProvider) => _legacyProvider = legacyProvider;
+
+    /// <inheritdoc />
+    /// <param name="config">Configuration for the WFC solve (may be partially used or ignored for legacy compatibility)</param>
     public WfcSolution<(int x, int y), int>? Solve(WfcConfiguration<(int x, int y), int> config)
     {
         // Bridge call to legacy provider
@@ -159,51 +249,16 @@ public class LegacyTileWfcAdapter : IWfcSolver<(int x, int y), int>
         if (!success) return null;
         // Convert legacy output to generic solution
         // ...implementation omitted...
-        return new WfcSolution<(int x, int y), int>();
+        // Example: Extract assignments from legacy provider's output
+        var assignments = new Dictionary<(int x, int y), int>(); // Populate from legacy output
+        return new WfcSolution<(int x, int y), int>(assignments);
     }
 }
 ```
 
-The following test demonstrates that legacy terrain generation continues to work after migration to the generic WFC core. It verifies that the adapter correctly bridges the legacy and generic APIs and that the output is still valid.
+### Example usage: Resource placement in a grid (Planned)
 
 ```csharp
-/// <summary>
-/// Test: Legacy terrain generation still works after migration.
-/// </summary>
-[Fact]
-public void LegacyTerrainGeneration_ProducesSameOutput_AfterMigration()
-{
-    // Arrange: set up legacy provider and config
-    var legacyProvider = new WfcProvider(/* ... legacy args ... */);
-    var adapter = new LegacyTileWfcAdapter(legacyProvider);
-    var config = new WfcConfiguration<(int x, int y), int> { /* ... */ };
-    // Act
-    var solution = adapter.Solve(config);
-    // Assert
-    Assert.NotNull(solution);
-    // Optionally compare output to known-good legacy result
-}
-```
-
-```csharp
-/// <summary>
-/// Adapter for translating between generic and domain-specific logic.
-/// </summary>
-public class BuildingLayoutAdapter : IWfcSolver<(int x, int y), string>
-{
-    /// <inheritdoc />
-    public WfcSolution<(int x, int y), string>? Solve(WfcConfiguration<(int x, int y), string> config)
-    {
-        // Example: Use WFC to generate a building layout with room types as strings
-        // ("Office", "Hallway", "Restroom", etc.)
-        // ...implementation omitted...
-        return null;
-    }
-}
-
-/// <summary>
-/// Example usage: Resource placement in a grid.
-/// </summary>
 public void ResourcePlacementExample()
 {
     // Define possible resources
@@ -222,20 +277,19 @@ public void ResourcePlacementExample()
 }
 ```
 
-### Phase 2: Rule Table and Propagator Abstraction
+### Testing (Current)
 
 **Phase status:** Not started
 
 #### Objective
 
-Update the rule table and propagator to support generic constraints, enabling the WFC core to operate on any cell/value type, not just tile IDs.
+### Planned Generic Domain Tests
 
-#### Technical details
+To validate generic WFC abstractions, the following test types should be implemented:
 
-- Refactor the rule table interface to use type parameters for cell and value types.
-- Update the propagator (e.g., AC3Propagator) to work with generic domains and constraints.
-- Provide adapters for terrain (legacy) and new non-tile domains.
-- Ensure all constraint logic (adjacency, domain reduction) is type-agnostic and extensible.
+- **Unit tests** for generic solver interfaces:
+  - Verify that `IWfcSolver<TCell, TValue>` can solve simple constraint satisfaction problems for arbitrary types (e.g., string, enum, custom class).
+  - Test `IRuleTable<TValue>` for correct neighbor constraints in non-tile domains.
 
 #### Phase requirements
 
@@ -408,22 +462,32 @@ Ensure correctness, robustness, and maintainability of the generic WFC abstracti
 [Fact]
 public void GenericSolver_SolvesSimpleDomain()
 {
-    // Arrange: create a simple domain and configuration
-    var config = new WfcConfiguration<(int, int), string> { /* ... */ };
-    var solver = new BuildingLayoutAdapter();
-    // Act
-    var solution = solver.Solve(config);
-    // Assert
-    Assert.NotNull(solution);
+        // Arrange: create a simple domain and configuration
+        var config = new WfcConfiguration<(int, int), string> { /* ... */ };
+        var solver = new ResourcePlacementAdapter();
+        // Act
+        var solution = solver.Solve(config);
+        // Assert
+        Assert.NotNull(solution);
 }
 
-/// <summary>
-/// Property-based test for constraint satisfaction.
-/// </summary>
+[Fact]
+public void Adapter_ProducesSameOutput_AsLegacy()
+{
+        // Arrange: set up legacy provider and adapter
+        var legacyProvider = new WfcProvider(/* ... */);
+        var adapter = new LegacyTileWfcAdapter(legacyProvider);
+        var config = new WfcConfiguration<(int x, int y), int> { /* ... */ };
+        // Act
+        var solution = adapter.Solve(config);
+        // Assert
+        // Compare output to known-good legacy result
+}
+
 [Property]
 public void GenericSolver_AlwaysSatisfiesConstraints(/* ... */)
 {
-    // ... property-based test logic ...
+        // ... property-based test logic ...
 }
 ```
 

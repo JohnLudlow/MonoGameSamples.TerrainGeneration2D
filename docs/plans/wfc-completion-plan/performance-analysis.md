@@ -9,11 +9,11 @@ This document details the performance and architectural considerations for the W
 
 - [Overview](#overview)
 - [Plan issue](#plan-issue)
-- [Feature status](#feature-status)
+- [Plan status](#plan-status)
 - [Definition of terms](#definition-of-terms)
 - [Architectural considerations and constraints](#architectural-considerations-and-constraints)
 - [Implementation guide](#implementation-guide)
-  - [Feature requirements](#feature-requirements)
+  - [Plan requirements](#plan-requirements)
   - [Phase 1: Constraint Propagation and Rule Evaluation](#phase-1-constraint-propagation-and-rule-evaluation)
   - [Phase 2: Memory Management and Optimization](#phase-2-memory-management-and-optimization)
   - [Phase 3: Diagnostics and Time Budget Compliance](#phase-3-diagnostics-and-time-budget-compliance)
@@ -31,7 +31,7 @@ This plan is tracked by GitHub issue [#20][issue-20]:
 
 See [meta issue #22][issue-22] for overall WFC completion tracking.
 
-## Feature status
+## Plan status
 
 - In design
 - In development
@@ -59,7 +59,7 @@ See [meta issue #22][issue-22] for overall WFC completion tracking.
 
 ## Implementation guide
 
-### Feature requirements
+### Plan requirements
 
 - (Incomplete) AC-3 propagation implemented for constraint satisfaction
   - GIVEN the need for robust constraint propagation

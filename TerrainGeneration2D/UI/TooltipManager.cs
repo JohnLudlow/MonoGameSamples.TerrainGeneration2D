@@ -1,4 +1,4 @@
-﻿using Gum.DataTypes;
+using Gum.DataTypes;
 using Gum.Forms.Controls;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 using Microsoft.Xna.Framework;

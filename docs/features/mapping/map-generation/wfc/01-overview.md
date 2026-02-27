@@ -1,5 +1,20 @@
 # WFC Overview
 
+## Table of contents
+
+- [Concepts](#concepts)
+- [Solve Loop at a Glance](#solve-loop-at-a-glance)
+- [References](#references)
+
+## Definition of terms
+
+| Term | Meaning |
+| ---- | ------- |
+| Domain | Set of candidate tile IDs for a cell |
+| Entropy | Measure of uncertainty used to select the next cell |
+
+## Concepts
+
 Purpose: explain tiles, adjacency rules, entropy-based selection, and the high-level solve loop used to synthesize terrain.
 
 ## Concepts
@@ -43,7 +58,7 @@ private bool Generate(int maxIterations = 10000)
 }
 ```
 
-References:
+## References
 
 - Algorithm: see [Map Generation overview](../README.md)
 - Integration: [Chunked Tilemap](../../chunked-tilemap.md)

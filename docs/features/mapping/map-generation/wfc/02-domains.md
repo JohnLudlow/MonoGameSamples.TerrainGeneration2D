@@ -1,5 +1,20 @@
 # Domains
 
+## Table of contents
+
+- [Representation](#representation)
+- [Initialization](#initialization)
+- [Context for Rule Evaluation](#context-for-rule-evaluation)
+
+## Definition of terms
+
+| Term | Meaning |
+| ---- | ------- |
+| Domain | Set of possible tile IDs for a cell |
+| TileRuleContext | Context passed to rule evaluators including height samples and config |
+
+## Representation
+
 Purpose: describe how domains and outputs are represented and initialized.
 
 ## Representation

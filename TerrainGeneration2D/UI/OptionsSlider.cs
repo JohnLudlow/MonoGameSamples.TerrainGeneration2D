@@ -1,9 +1,7 @@
-﻿using System;
+using System;
 using Gum.DataTypes;
 using Gum.DataTypes.Variables;
 using Gum.Forms.Controls;
-using Gum.Managers;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 using Microsoft.Xna.Framework;
 using MonoGameGum.GueDeriving;
 
@@ -14,111 +12,44 @@ namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.UI;
 /// </summary>
 internal sealed class OptionsSlider : Slider
 {
-  // Reference to the text label that displays the slider's title
-  private TextRuntime _textInstance;
 
   // Reference to the rectangle that visually represents the current value
   private ColoredRectangleRuntime _fillRectangle;
 
   /// <summary>
-  /// Gets or sets the text label for this slider.
+  /// Event raised when the value changes.
   /// </summary>
-  public string Text
-  {
-    get => _textInstance.Text ?? string.Empty;
-    set => _textInstance.Text = value;
-  }
+  public event EventHandler? ValueChangedEvent;
 
   /// <summary>
-  /// Creates a new OptionsSlider instance using graphics from the specified texture atlas.
+  /// Creates a new OptionsSlider instance with a simple, functional design.
   /// </summary>
-  /// <param name="atlas">The texture atlas containing slider graphics.</param>
-  public OptionsSlider(TextureAtlas atlas)
+  public OptionsSlider()
   {
     // Create the top-level container for all visual elements
-    var topLevelContainer = new ContainerRuntime();
-    topLevelContainer.Height = 40f;
-    topLevelContainer.Width = 264f;
+    var topLevelContainer = new ContainerRuntime
+    {
+      Height = 40f,
+      Width = 264f
+    };
 
-    var backgroundRegion = atlas.GetRegion("panel-background");
-
-    // Create the background panel that contains everything
-    var background = new NineSliceRuntime();
-    background.Texture = atlas.Texture;
-    background.TextureAddress = TextureAddress.Custom;
-    background.TextureHeight = backgroundRegion.Height;
-    background.TextureLeft = backgroundRegion.SourceRectangle.Left;
-    background.TextureTop = backgroundRegion.SourceRectangle.Top;
-    background.TextureWidth = backgroundRegion.Width;
-    background.Dock(Gum.Wireframe.Dock.Fill);
-    topLevelContainer.AddChild(background);
-
-    // Create the title text element
-    _textInstance = new TextRuntime();
-    _textInstance.CustomFontFile = @"fonts/04b_30.fnt";
-    _textInstance.UseCustomFont = true;
-    _textInstance.FontScale = 0.3f;
-    _textInstance.Text = "Replace Me";
-    _textInstance.X = 10f;
-    _textInstance.Y = 10f;
-    _textInstance.WidthUnits = DimensionUnitType.RelativeToChildren;
-    topLevelContainer.AddChild(_textInstance);
-
-    // Create the container for the slider track and decorative elements
-    var innerContainer = new ContainerRuntime();
-    innerContainer.Height = 10f;
-    innerContainer.Width = 241f;
-    innerContainer.X = 10f;
-    innerContainer.Y = 26f;
+    // Create the container for the slider track
+    var innerContainer = new ContainerRuntime
+    {
+      Height = 10f,
+      Width = 241f,
+      X = 10f,
+      Y = 26f
+    };
     topLevelContainer.AddChild(innerContainer);
 
-    var offBackgroundRegion = atlas.GetRegion("slider-off-background");
-
-    // Create the "OFF" side of the slider (left end)
-    var offBackground = new NineSliceRuntime();
-    offBackground.Dock(Gum.Wireframe.Dock.Left);
-    offBackground.Texture = atlas.Texture;
-    offBackground.TextureAddress = TextureAddress.Custom;
-    offBackground.TextureHeight = offBackgroundRegion.Height;
-    offBackground.TextureLeft = offBackgroundRegion.SourceRectangle.Left;
-    offBackground.TextureTop = offBackgroundRegion.SourceRectangle.Top;
-    offBackground.TextureWidth = offBackgroundRegion.Width;
-    offBackground.Width = 24f;
-    offBackground.WidthUnits = DimensionUnitType.Absolute;
-    offBackground.Dock(Gum.Wireframe.Dock.Left);
-    innerContainer.AddChild(offBackground);
-
-    var middleBackgroundRegion = atlas.GetRegion("slider-middle-background");
-
-    // Create the middle track portion of the slider
-    var middleBackground = new NineSliceRuntime();
-    middleBackground.Dock(Gum.Wireframe.Dock.FillVertically);
-    middleBackground.Texture = middleBackgroundRegion.Texture;
-    middleBackground.TextureAddress = TextureAddress.Custom;
-    middleBackground.TextureHeight = middleBackgroundRegion.Height;
-    middleBackground.TextureLeft = middleBackgroundRegion.SourceRectangle.Left;
-    middleBackground.TextureTop = middleBackgroundRegion.SourceRectangle.Top;
-    middleBackground.TextureWidth = middleBackgroundRegion.Width;
-    middleBackground.Width = 175f;
-    middleBackground.WidthUnits = DimensionUnitType.Absolute;
-    middleBackground.Dock(Gum.Wireframe.Dock.Left);
-    middleBackground.X = 27f;
-    innerContainer.AddChild(middleBackground);
-
-    var maxBackgroundRegion = atlas.GetRegion("slider-max-background");
-
-    // Create the "MAX" side of the slider (right end)
-    var maxBackground = new NineSliceRuntime();
-    maxBackground.Texture = maxBackgroundRegion.Texture;
-    maxBackground.TextureAddress = TextureAddress.Custom;
-    maxBackground.TextureHeight = maxBackgroundRegion.Height;
-    maxBackground.TextureLeft = maxBackgroundRegion.SourceRectangle.Left;
-    maxBackground.TextureTop = maxBackgroundRegion.SourceRectangle.Top;
-    maxBackground.TextureWidth = maxBackgroundRegion.Width;
-    maxBackground.Width = 32f;
-    maxBackground.WidthUnits = DimensionUnitType.Absolute;
-    maxBackground.Dock(Gum.Wireframe.Dock.Right);
-    innerContainer.AddChild(maxBackground);
+    // Create the track background
+    var trackBackground = new ColoredRectangleRuntime
+    {
+      Color = Color.DarkGray
+    };
+    trackBackground.Dock(Gum.Wireframe.Dock.Fill);
+    innerContainer.AddChild(trackBackground);
 
     // Create the interactive track that responds to clicks
     // The special name "TrackInstance" is required for Slider functionality
@@ -127,10 +58,13 @@ internal sealed class OptionsSlider : Slider
     trackInstance.Dock(Gum.Wireframe.Dock.Fill);
     trackInstance.Height = -2f;
     trackInstance.Width = -2f;
-    middleBackground.AddChild(trackInstance);
+    trackBackground.AddChild(trackInstance);
 
     // Create the fill rectangle that visually displays the current value
-    _fillRectangle = new ColoredRectangleRuntime();
+    _fillRectangle = new ColoredRectangleRuntime
+    {
+      Color = Color.LightBlue
+    };
     _fillRectangle.Dock(Gum.Wireframe.Dock.Left);
     _fillRectangle.Width = 90f; // Default to 90% - will be updated by value changes
     _fillRectangle.WidthUnits = DimensionUnitType.PercentageOfParent;
@@ -138,64 +72,59 @@ internal sealed class OptionsSlider : Slider
 
     // Add "OFF" text to the left end
     var offText = new TextRuntime();
-    offText.Red = 70;
-    offText.Green = 86;
-    offText.Blue = 130;
-    offText.CustomFontFile = @"fonts/04b_30.fnt";
+    offText.CustomFontFile = @"fonts/NotArial.fnt";
     offText.FontScale = 0.2f;
     offText.UseCustomFont = true;
     offText.Text = "OFF";
-    offText.Anchor(Gum.Wireframe.Anchor.Center);
-    offBackground.AddChild(offText);
+    offText.X = 5f;
+    offText.Y = 2f;
+    innerContainer.AddChild(offText);
 
     // Add "MAX" text to the right end
-    var maxText = new TextRuntime();
-    maxText.Red = 70;
-    maxText.Green = 86;
-    maxText.Blue = 130;
-    maxText.CustomFontFile = @"fonts/04b_30.fnt";
-    maxText.FontScale = 0.2f;
-    maxText.UseCustomFont = true;
-    maxText.Text = "MAX";
-    maxText.Anchor(Gum.Wireframe.Anchor.Center);
-    maxBackground.AddChild(maxText);
+    var maxText = new TextRuntime
+    {
+      CustomFontFile = @"fonts/NotArial.fnt",
+      FontScale = 0.2f,
+      UseCustomFont = true,
+      Text = "MAX"
+    };
+    maxText.Anchor(Gum.Wireframe.Anchor.TopRight);
+    maxText.X = -5f;
+    maxText.Y = 2f;
+    innerContainer.AddChild(maxText);
 
     // Define colors for focused and unfocused states
     var focusedColor = Color.White;
     var unfocusedColor = Color.Gray;
 
     // Create slider state category - Slider.SliderCategoryName is the required name
-    var sliderCategory = new StateSaveCategory();
-    sliderCategory.Name = Slider.SliderCategoryName;
+    var sliderCategory = new StateSaveCategory
+    {
+      Name = SliderCategoryName
+    };
     topLevelContainer.AddCategory(sliderCategory);
 
     // Create the enabled (default/unfocused) state
-    var enabled = new StateSave();
-    enabled.Name = FrameworkElement.EnabledStateName;
-    enabled.Apply = () =>
+    var enabled = new StateSave
     {
-      // When enabled but not focused, use gray coloring for all elements
-      background.Color = unfocusedColor;
-      _textInstance.Color = unfocusedColor;
-      offBackground.Color = unfocusedColor;
-      middleBackground.Color = unfocusedColor;
-      maxBackground.Color = unfocusedColor;
-      _fillRectangle.Color = unfocusedColor;
+      Name = EnabledStateName,
+      Apply = () =>
+        {
+          // When enabled but not focused, use gray coloring for text
+          _fillRectangle.Color = Color.LightBlue;
+        }
     };
     sliderCategory.States.Add(enabled);
 
     // Create the focused state
-    var focused = new StateSave();
-    focused.Name = FrameworkElement.FocusedStateName;
-    focused.Apply = () =>
+    var focused = new StateSave
     {
-      // When focused, use white coloring for all elements
-      background.Color = focusedColor;
-      _textInstance.Color = focusedColor;
-      offBackground.Color = focusedColor;
-      middleBackground.Color = focusedColor;
-      maxBackground.Color = focusedColor;
-      _fillRectangle.Color = focusedColor;
+      Name = FocusedStateName,
+      Apply = () =>
+        {
+          // When focused, use white coloring for text
+          _fillRectangle.Color = Color.Cyan;
+        }
     };
     sliderCategory.States.Add(focused);
 
@@ -220,9 +149,26 @@ internal sealed class OptionsSlider : Slider
     // Add event handlers
 #pragma warning disable CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
     Visual.RollOn += HandleRollOn;
-    ValueChanged += HandleValueChanged;
+    base.ValueChanged += (s, e) => ValueChangedEvent?.Invoke(this, e);
+    ValueChangedEvent += HandleValueChanged;
     ValueChangedByUi += HandleValueChangedByUi;
 #pragma warning restore CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
+  }
+
+  /// <summary>
+  /// Overrides the Value property to ensure ValueChangedEvent is fired when set programmatically.
+  /// </summary>
+  public new double Value
+  {
+    get => base.Value;
+    set
+    {
+      if (base.Value != value)
+      {
+        base.Value = value;
+        ValueChangedEvent?.Invoke(this, EventArgs.Empty);
+      }
+    }
   }
 
   /// <summary>

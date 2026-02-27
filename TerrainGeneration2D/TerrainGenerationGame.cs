@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Gum.Forms;
 using Gum.Forms.Controls;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Scenes;
@@ -35,6 +35,8 @@ internal sealed class TerrainGenerationGame : CoreGame
       GraphicsDevice!.PresentationParameters.BackBufferWidth,
       GraphicsDevice.PresentationParameters.BackBufferHeight);
 
+    Window.ClientSizeChanged += OnClientSizeChanged;
+
     if (Audio is null) throw new InvalidOperationException($"Unable to start game if {nameof(Audio)} is null");
 
     Audio.SongVolume = 0;
@@ -46,6 +48,11 @@ internal sealed class TerrainGenerationGame : CoreGame
     ChangeScene(new GameScene());
 #pragma warning restore CA2000 // Dispose objects before losing scope
     GameLoggerMessages.MonoGameInitEnd(_log);
+  }
+
+  private void OnClientSizeChanged(object? sender, EventArgs e)
+  {
+    Graphics!.ApplyChanges();
   }
 
   protected override void LoadContent()
@@ -87,6 +94,7 @@ internal sealed class TerrainGenerationGame : CoreGame
     if (disposing)
     {
       _themeSong?.Dispose();
+      _disposed = true;
     }
 
     base.Dispose(disposing);

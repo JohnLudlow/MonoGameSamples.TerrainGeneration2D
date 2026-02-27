@@ -1,4 +1,4 @@
-﻿namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
+namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 
 public sealed class OceanTileType : TileType
 {
@@ -9,11 +9,11 @@ public sealed class OceanTileType : TileType
 
   public override bool EvaluateRules(TileRuleContext context)
   {
-    if (context.CandidateHeight.Altitude > context.Config.OceanHeightMax)
+    var rule = context.Config.GetRuleForType(TileId);
+    if (rule != null && context.CandidateHeight.Altitude > rule.ElevationMax)
     {
       return false;
     }
-
     return MatchesNeighbor(context, TerrainTileIds.Void, TerrainTileIds.Ocean, TerrainTileIds.Beach);
   }
 }

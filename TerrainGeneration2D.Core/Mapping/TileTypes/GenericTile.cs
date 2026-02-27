@@ -1,4 +1,4 @@
-﻿namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
+namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 
 public sealed class GenericTileType : TileType
 {

@@ -14,7 +14,7 @@ This plan outlines improvements to the GitHub Actions workflows for the MonoGame
   - [Definition of terms](#definition-of-terms)
   - [Architectural considerations and constraints](#architectural-considerations-and-constraints)
   - [Implementation guide](#implementation-guide)
-    - [Feature requirements](#feature-requirements)
+    - [Plan requirements](#plan-requirements)
     - [Phase 1: Version Numbering Refinement](#phase-1-version-numbering-refinement)
       - [Objective](#objective)
       - [Technical details](#technical-details)
@@ -90,7 +90,7 @@ Overall: **In Progress** - 1 of 4 phases complete
 
 ## Implementation guide
 
-### Feature requirements
+### Plan requirements
 
 - (***COMPLETE***) Semantic versioning ensures consistent artifact and release versioning
   - GIVEN a GitHub Actions workflow for the project

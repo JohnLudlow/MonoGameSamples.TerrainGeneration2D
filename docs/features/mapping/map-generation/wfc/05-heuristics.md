@@ -1,5 +1,20 @@
 # Entropy & Selection Heuristics
 
+## Table of contents
+
+- [Entropy & Cell Selection](#entropy--cell-selection)
+- [Shannon Entropy vs. Domain Size](#shannon-entropy-vs-domain-size)
+- [Implementation tips](#implementation-tips)
+- [What's Still To Implement (Heuristics)](#whats-still-to-implement-heuristics)
+- [Visual Aids](#visual-aids)
+
+## Definition of terms
+
+| Term | Meaning |
+| ---- | ------- |
+| Shannon entropy | $H = -\sum p_i \log p_i$ measure of uncertainty based on candidate priors |
+| Tie-break | Method used when multiple cells have equal score |
+
 > See also
 >
 > - Roadmap: deeper context and tuning tips in [WFC README](README.md)
@@ -40,7 +55,7 @@ How to choose $p_i$ in practice:
 - Weighted-by-context: derive per-candidate weights $w_i$ from your heuristics (e.g., neighbor matches, biome/height compatibility, global frequency shaping), then set $p_i = w_i/\sum_j w_j$.
 - Global priors: maintain historical frequencies to discourage overused tiles; blend them with local weights, e.g., $w_i = \alpha \cdot w^{local}_i + (1-\alpha) \cdot w^{global}_i$.
 
-Implementation tips:
+## Implementation tips
 
 - Use natural logs ($\ln$) or base-2 ($\log_2$); both are equivalent for ordering. Cache/log-lookup if you compute entropy frequently.
 - Guard against zeros: clamp with a small $\epsilon$ when converting weights to probabilities.
@@ -310,7 +325,7 @@ int ChooseTile(List<(int tile, int weight)> weightedOptions)
 
 ## How PrecomputedRuleTable Works
 
-The `PrecomputedRuleTable` (see [PrecomputedRuletable.cs](../../../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/PrecomputedRuletable.cs)) is a performance optimization for constraint checking in WFC. Instead of evaluating tile adjacency rules at runtime for every propagation step, it builds a lookup table during initialization:
+The `PrecomputedTileTypeRuleTable` (see [PrecomputedTileTypeRuleTable.cs](../../../../../TerrainGeneration2D.Core/Mapping/TileTypes/PrecomputedTileTypeRuleTable.cs)) is a performance optimization for constraint checking in WFC. Instead of evaluating tile adjacency rules at runtime for every propagation step, it builds a lookup table during initialization:
 
 - For each tile type and direction, it tests every possible neighbor tile using a valid context (e.g., appropriate altitude for terrain tiles).
 - If the adjacency rule passes, the neighbor tile is added to a BitSet for that direction.

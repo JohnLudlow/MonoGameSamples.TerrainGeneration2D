@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using Gum.DataTypes;
 using Gum.Forms.Controls;
@@ -280,7 +280,7 @@ internal sealed class GameSceneUI : ContainerRuntime
     var text = new TextRuntime();
     text.Text = "PAUSED";
     text.UseCustomFont = true;
-    text.CustomFontFile = "fonts/04b_30.fnt";
+    text.CustomFontFile = "fonts/NotArial.fnt";
     text.FontScale = 0.5f;
     text.X = 10.0f;
     text.Y = 10.0f;
@@ -341,7 +341,7 @@ internal sealed class GameSceneUI : ContainerRuntime
     text.Text = "GAME OVER";
     text.WidthUnits = DimensionUnitType.RelativeToChildren;
     text.UseCustomFont = true;
-    text.CustomFontFile = "fonts/04b_30.fnt";
+    text.CustomFontFile = "fonts/NotArial.fnt";
     text.FontScale = 0.5f;
     text.X = 10.0f;
     text.Y = 10.0f;
@@ -382,12 +382,13 @@ internal sealed class GameSceneUI : ContainerRuntime
   {
     var text = new TextRuntime();
     // Bottom-left with small padding
-    text.Anchor(Gum.Wireframe.Anchor.BottomLeft);
+    text.Dock(Gum.Wireframe.Dock.Bottom);
+    text.Anchor(Gum.Wireframe.Anchor.Bottom);
     text.X = 10.0f;
     text.Y = -10.0f;
     text.UseCustomFont = true;
-    text.CustomFontFile = "fonts/04b_30.fnt";
-    text.FontScale = 0.3f;
+    text.CustomFontFile = "fonts/NotArial.fnt";
+
     // Slightly dim color for subtle hint
     text.Red = 220;
     text.Green = 220;

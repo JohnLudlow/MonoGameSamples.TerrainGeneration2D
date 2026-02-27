@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 
