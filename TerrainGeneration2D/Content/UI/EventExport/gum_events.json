@@ -1,0 +1,62 @@
+{
+  "UserEvents": {
+    "252ce22fef302424d6973ff5f63a50c36955c3a89290d2503c2331e4b7f4a55f": [
+      {
+        "NewName": "TerrainGenerationOptionsScreen",
+        "OldName": null,
+        "ElementType": "Screens",
+        "EventType": 0,
+        "TimestampUtc": "2026-02-27T20:40:12.3494081Z"
+      },
+      {
+        "NewName": "TerrainGenerationComponents/TerrainGenerationOptionsElement",
+        "OldName": null,
+        "ElementType": "Components",
+        "EventType": 0,
+        "TimestampUtc": "2026-02-27T20:45:04.958947Z"
+      },
+      {
+        "NewName": "TerrainGenerationComponents/TerrainGenerationOptionsElement (Container).PanelInstance",
+        "OldName": null,
+        "ElementType": "Components",
+        "EventType": 5,
+        "TimestampUtc": "2026-02-27T20:56:41.9751329Z"
+      },
+      {
+        "NewName": "TerrainGenerationComponents/TerrainGenerationOptionsElement (Container).TerrainGenerationOptionsPanel",
+        "OldName": "TerrainGenerationComponents/TerrainGenerationOptionsElement (Container).PanelInstance",
+        "ElementType": "Components",
+        "EventType": 7,
+        "TimestampUtc": "2026-02-27T20:57:02.416813Z"
+      },
+      {
+        "NewName": "TerrainGenerationComponents/TerrainGenerationOptionsElement (Container).NineSliceInstance",
+        "OldName": null,
+        "ElementType": "Components",
+        "EventType": 5,
+        "TimestampUtc": "2026-02-27T20:57:25.9191382Z"
+      },
+      {
+        "NewName": "TerrainGenerationComponents/TerrainGenerationOptionsElement (Container).Background",
+        "OldName": "TerrainGenerationComponents/TerrainGenerationOptionsElement (Container).NineSliceInstance",
+        "ElementType": "Components",
+        "EventType": 7,
+        "TimestampUtc": "2026-02-27T20:57:31.7225517Z"
+      },
+      {
+        "NewName": "TerrainGenerationComponents/TerrainGenerationOptionsElement (Container).SliderInstance",
+        "OldName": null,
+        "ElementType": "Components",
+        "EventType": 5,
+        "TimestampUtc": "2026-02-27T20:57:56.3211543Z"
+      },
+      {
+        "NewName": null,
+        "OldName": "TerrainGenerationComponents/TerrainGenerationOptionsElement (Container).Controls/Slider SliderInstance in TerrainGenerationComponents/TerrainGenerationOptionsElement (Container)",
+        "ElementType": "Components",
+        "EventType": 6,
+        "TimestampUtc": "2026-02-27T20:58:05.329221Z"
+      }
+    ]
+  }
+}

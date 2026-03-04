@@ -7,6 +7,7 @@
     <RootNameSpace>JohnLudlow.MonoGameSamples.TerrainGeneration2D.Content</RootNameSpace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Gum.MonoGame" Version="2025.12.9.1" />
     <PackageReference Include="MonoGame.Framework.Content.Pipeline" Version="3.8.5-preview.*" />
     <PackageReference Include="MonoGame.Framework.Native" Version="3.8.5-preview.*">
       <PrivateAssets>All</PrivateAssets>

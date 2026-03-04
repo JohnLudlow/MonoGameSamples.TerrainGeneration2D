@@ -1,6 +1,4 @@
 using System;
-using Gum.Forms;
-using Gum.Forms.Controls;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Scenes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 using Microsoft.Extensions.Logging;
@@ -8,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Media;
 using MonoGameGum;
 using CoreGame = JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.GameCore;
+using Gum.Managers;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D;
 
@@ -105,19 +104,9 @@ internal sealed class TerrainGenerationGame : CoreGame
   {
     if (Content is null) throw new InvalidOperationException($"Unable to start game if {nameof(Content)} is null");
 
-    GumService.Default.Initialize(this, DefaultVisualsVersion.V3);
-
-    GumService.Default.ContentLoader?.XnaContentManager = Content;
-    FrameworkElement.KeyboardsForUiControl.Add(GumService.Default.Keyboard);
-    FrameworkElement.GamePadsForUiControl.AddRange(GumService.Default.Gamepads);
-
-    FrameworkElement.TabReverseKeyCombos.Add(
-      new KeyCombo { PushedKey = Microsoft.Xna.Framework.Input.Keys.Up }
-    );
-
-    FrameworkElement.TabKeyCombos.Add(
-      new KeyCombo { PushedKey = Microsoft.Xna.Framework.Input.Keys.Down }
-    );
+    GumService.Default.Initialize(this, "UI/TerrainGenerationOptionsScreen.gumx");
+    var screen = ObjectFinder.Self?.GumProjectSave?.Screens[0]?.ToGraphicalUiElement() ?? throw new InvalidOperationException("Unable to get UI screen");
+    screen.AddToRoot();
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
     GumService.Default.CanvasWidth = GraphicsDevice.PresentationParameters.BackBufferWidth;

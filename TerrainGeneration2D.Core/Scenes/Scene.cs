@@ -29,6 +29,10 @@ public abstract class Scene : IDisposable
 
   }
 
+  /// <summary>
+  /// Update!!!
+  /// </summary>
+  /// <param name="gameTime"></param>
   public virtual void Update(GameTime gameTime)
   {
 

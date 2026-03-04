@@ -6,6 +6,7 @@ using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGameGum;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core;
 
@@ -153,10 +154,7 @@ public class GameCore : Game
   private static void TransitionScene()
   {
     // If there is an active scene, dispose of it.
-    if (_activeScene != null)
-    {
-      _activeScene.Dispose();
-    }
+    _activeScene?.Dispose();
 
     // Force the garbage collector to collect to ensure memory is cleared.
     GC.Collect();
