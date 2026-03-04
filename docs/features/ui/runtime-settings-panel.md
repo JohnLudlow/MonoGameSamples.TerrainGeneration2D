@@ -14,7 +14,7 @@
 ## Architecture & References
 
 - Scene integration: [TerrainGeneration2D/Scenes/GameScene.cs](../../../TerrainGeneration2D/Scenes/GameScene.cs) constructs `RuntimeSettingsPanel` and binds callbacks.
-- UI component: [TerrainGeneration2D/UI/RuntimeSettingsPanel.cs](../../../TerrainGeneration2D/UI/RuntimeSettingsPanel.cs) (panel visuals and controls).
+- UI component: legacy `RuntimeSettingsPanel` (code-only implementation removed) — see [migration-notes.md](migration-notes.md) for details.
 - Tilemap operations: [TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs](../../../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs) provides `RegenerateChunksInView(...)`, `ClearAllSavedChunks()`, and `WfcTimeBudgetMs`.
 - Input: F10 toggle via [TerrainGeneration2D/GameController.cs](../../../TerrainGeneration2D/GameController.cs).
 

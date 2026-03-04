@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Gum.DataTypes;
-using Gum.Forms.Controls;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
@@ -13,7 +11,6 @@ using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Scenes;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoGameGum;
 using Microsoft.Extensions.Logging;
 using TerrainGeneration2D.Content.UI.Screens;
 
@@ -32,7 +29,6 @@ internal sealed class GameScene : Scene
 
   private ChunkedTilemap? _chunkedTilemap;
   private Camera2D? _camera;
-  // private TooltipManager? _tooltipManager;
   private Vector2? _lastMouseDragPosition;
 #pragma warning disable CA2213 // Disposable fields should be disposed
   private Texture2D? _debugPixel;
@@ -41,15 +37,12 @@ internal sealed class GameScene : Scene
   private IReadOnlyCollection<ChunkedTilemap.ActiveChunkInfo> _activeChunkSnapshot = Array.Empty<ChunkedTilemap.ActiveChunkInfo>();
   private readonly ILogger _log = Log.Create<GameScene>();
   private HeuristicsConfiguration? _heuristicsConfig;
-  private TerrainGenerationOptionsScreen? _optionsScreen;
   private bool _showSettings;
   private int _viewportWidth;
   private int _viewportHeight;
 
   public override void Initialize()
   {
-    GumService.Default.Root.Children.Clear();
-
     base.Initialize();
   }
 
@@ -152,22 +145,7 @@ internal sealed class GameScene : Scene
 
     _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDir, useWaveFunctionCollapse: true, terrainRuleConfiguration: terrainConfig, heightMapConfiguration: heightConfig, weightConfig: weightConfig, heuristicsConfig: heuristics, logger: _log, wfcTimeBudgetMs: timeBudgetMs);
 
-    // Settings UI: prefer Gum's XNA content manager when available, otherwise fall back to the scene Content manager
-    var contentManager = GumService.Default?.ContentLoader?.XnaContentManager ?? Content;
-    var atlas = TextureAtlas.FromFile(contentManager, "images/atlas-definition.xml");
-
-    // Instantiate the Gum-generated screen for terrain generation options.
-    // The generated screen class is a partial class under TerrainGeneration2D.Screens.
-    _optionsScreen = new TerrainGenerationOptionsScreen();
-
-    // If the generated screen exposes visibility or IsVisible, try to enable it.
-    // Use dynamic to avoid hard compile-time coupling to generated members.
-    if (_optionsScreen != null)
-    {
-      dynamic s = _optionsScreen;
-      try { s.IsVisible = true; } catch { }
-      try { s.Visible = true; } catch { }
-    }
+    // Settings UI is provided by Gum-editor assets; legacy code-only settings panel removed.
 
     // Create camera
     if (Core.GameCore.GraphicsDevice != null)
@@ -181,12 +159,7 @@ internal sealed class GameScene : Scene
       _camera.Position = new Vector2(centerTile * tileset.TileWidth, centerTile * tileset.TileWidth);
     }
 
-    // Create tooltip manager
-    // if (_camera != null && _chunkedTilemap != null)
-    // {
-    //   _tooltipManager = new TooltipManager(_camera, _chunkedTilemap);
-    //   _tooltipManager.Initialize();
-    // }
+    // Tooltip manager removed; Gum-based UI should provide tooltip functionality when available.
 
     var graphicsDevice = Core.GameCore.GraphicsDevice;
     if (graphicsDevice != null)
@@ -278,12 +251,6 @@ internal sealed class GameScene : Scene
     if (GameController.ToggleSettingsPanel())
     {
       _showSettings = !_showSettings;
-      if (_optionsScreen != null)
-      {
-        dynamic s = _optionsScreen;
-        try { s.IsVisible = _showSettings; } catch { }
-        try { s.Visible = _showSettings; } catch { }
-      }
     }
 
     if (_showDebugOverlay)
@@ -291,8 +258,6 @@ internal sealed class GameScene : Scene
       _activeChunkSnapshot = _chunkedTilemap.GetActiveChunkInfos();
     }
 
-    // Update tooltip
-    // _tooltipManager?.Update(GameController.GetMousePosition());
     GameLoggerMessages.SceneUpdateEnd(_log);
   }
 
@@ -333,8 +298,6 @@ internal sealed class GameScene : Scene
       spriteBatch.End();
     }
 
-    // Draw Gum UI
-    GumService.Default.Draw();
     GameLoggerMessages.SceneDrawEnd(_log);
 
     base.Draw(gameTime);
