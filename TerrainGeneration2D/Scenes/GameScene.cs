@@ -2,19 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Gum.DataTypes;
-using Gum.Forms.Controls;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Scenes;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.UI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoGameGum;
 using Microsoft.Extensions.Logging;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Scenes;
@@ -45,13 +41,8 @@ internal sealed class GameScene : Scene
   private int _viewportWidth;
   private int _viewportHeight;
 
-#pragma warning disable CS8618
-#pragma warning restore CS8618
-
   public override void Initialize()
   {
-    GumService.Default.Root.Children.Clear();
-
     base.Initialize();
   }
 
@@ -153,11 +144,6 @@ internal sealed class GameScene : Scene
     var timeBudgetMs = runtimeSection.GetValue<int>("TimeBudgetMs", 50);
 
     _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDir, useWaveFunctionCollapse: true, terrainRuleConfiguration: terrainConfig, heightMapConfiguration: heightConfig, weightConfig: weightConfig, heuristicsConfig: heuristics, logger: _log, wfcTimeBudgetMs: timeBudgetMs);
-
-    if (GumService.Default?.ContentLoader?.XnaContentManager is null)
-    {
-      throw new InvalidOperationException("Unable to fetch GUM XnaContentManager");
-    }
 
     // Settings UI is provided by Gum-editor assets; legacy code-only settings panel removed.
 
@@ -315,8 +301,6 @@ internal sealed class GameScene : Scene
       spriteBatch.End();
     }
 
-    // Draw Gum UI
-    GumService.Default.Draw();
     GameLoggerMessages.SceneDrawEnd(_log);
 
     base.Draw(gameTime);
