@@ -176,8 +176,6 @@ internal sealed class GameScene : Scene
     GameLoggerMessages.SceneUpdateBegin(_log);
     base.Update(gameTime);
 
-
-
     if (_camera == null || _chunkedTilemap == null)
     {
       return;
