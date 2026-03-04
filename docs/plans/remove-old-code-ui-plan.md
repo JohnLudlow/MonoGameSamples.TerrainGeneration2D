@@ -60,40 +60,48 @@ No issue created yet — add a link here once an issue/PR is opened to track the
 Phase 1 — Inventory (COMPLETE)
 
 Objective
-  - Produce a complete list of code and asset references to the old UI.
+
+- Produce a complete list of code and asset references to the old UI.
 
 Technical details
-  - Identified files: `TerrainGeneration2D/UI/GameSceneUI.cs`, `AnimatedButton.cs`, `TooltipManager.cs`, `RuntimeSettingsPanel.cs`, `OptionsGrid.cs`, `OptionsSlider.cs`, and references in `TerrainGeneration2D/Scenes/GameScene.cs`.
-  - Asset list: `images/terrain-atlas.png`, `images/atlas-definition.xml`, `fonts/04B_30.spritefont` / `04B_30_5x.spritefont`, `fonts/NotArial.fnt`.
+
+- Identified files: `TerrainGeneration2D/UI/GameSceneUI.cs`, `AnimatedButton.cs`, `TooltipManager.cs`, `RuntimeSettingsPanel.cs`, `OptionsGrid.cs`, `OptionsSlider.cs`, and references in `TerrainGeneration2D/Scenes/GameScene.cs`.
+- Asset list: `images/terrain-atlas.png`, `images/atlas-definition.xml`, `fonts/04B_30.spritefont` / `04B_30_5x.spritefont`, `fonts/NotArial.fnt`.
 
 Phase 2 — Add a no-op UI factory and feature flag (COMPLETED)
 
 Objective
-  - During the transition a small no-op factory/shims were used so the project could be built and run while the legacy UI code was removed.
+
+- During the transition a small no-op factory/shims were used so the project could be built and run while the legacy UI code was removed.
 
 Technical details
-  - Temporary shim implementations (`OptionsGrid`, `OptionsSlider`, `RuntimeSettingsPanel`) were added to restore compilation when code references remained. Those shims were later removed once code references were eliminated.
-  - The changes to `GameScene` replaced direct legacy UI constructions with Gum-based usage and removed guarded legacy branches.
+
+- Temporary shim implementations (`OptionsGrid`, `OptionsSlider`, `RuntimeSettingsPanel`) were added to restore compilation when code references remained. Those shims were later removed once code references were eliminated.
+- The changes to `GameScene` replaced direct legacy UI constructions with Gum-based usage and removed guarded legacy branches.
 
 Phase 3 — Remove code-only classes (COMPLETED)
 
 Objective
-  - The code-only UI source files under `TerrainGeneration2D/UI` were deleted and the solution was rebuilt to ensure no remaining references.
+
+- The code-only UI source files under `TerrainGeneration2D/UI` were deleted and the solution was rebuilt to ensure no remaining references.
 
 Phase 4 — Remove assets and content builder includes (COMPLETED)
 
 Objective
-  - Demo fonts (`04B_30.spritefont`, `04B_30_5x.spritefont`, `NotArial.fnt`) and `Assets/images/logo.png` were removed from `TerrainGeneration2D.Content/Assets` and the content builder was updated accordingly. Required assets (terrain atlas and definitions) were left in place.
+
+- Demo fonts (`04B_30.spritefont`, `04B_30_5x.spritefont`, `NotArial.fnt`) and `Assets/images/logo.png` were removed from `TerrainGeneration2D.Content/Assets` and the content builder was updated accordingly. Required assets (terrain atlas and definitions) were left in place.
 
 Phase 5 — Run build, tests, and manual verification (COMPLETED)
 
 Objective
-  - The solution was built and unit/integration tests run. The game was launched locally and verified to run without the legacy UI and without missing-asset exceptions.
+
+- The solution was built and unit/integration tests run. The game was launched locally and verified to run without the legacy UI and without missing-asset exceptions.
 
 Phase 6 — Cleanup and docs (COMPLETED)
 
 Objective
-  - Migration notes were added: `docs/features/ui/migration-notes.md` documents what was removed, verification steps, and next steps for adding Gum assets on a separate branch.
+
+- Migration notes were added: `docs/features/ui/migration-notes.md` documents what was removed, verification steps, and next steps for adding Gum assets on a separate branch.
 
 Migration notes: [docs/features/ui/migration-notes.md](../features/ui/migration-notes.md)
 
@@ -131,4 +139,3 @@ Migration notes: [docs/features/ui/migration-notes.md](../features/ui/migration-
 - `TerrainGeneration2D/UI/GameSceneUI.cs`
 - `TerrainGeneration2D/Scenes/GameScene.cs`
 - `TerrainGeneration2D.Content/Builder/TerrainGeneration2DContentBuilder.cs`
-

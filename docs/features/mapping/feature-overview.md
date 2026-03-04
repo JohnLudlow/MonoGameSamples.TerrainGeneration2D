@@ -46,7 +46,7 @@ This document provides a high-level, developer-focused introduction to the mappi
 - [GameScene.cs](../../../TerrainGeneration2D/Scenes/GameScene.cs): Scene integration, camera, and UI wiring.
 - [appsettings.json](../../../TerrainGeneration2D/appsettings.json): Default config for all generation parameters.
 - [WfcProvider.cs](../../../TerrainGeneration2D.Core/Mapping/WaveFunctionCollapse/WfcProvider.cs): Core WFC implementation.
-- [RuntimeSettingsPanel.cs](../../../TerrainGeneration2D/UI/RuntimeSettingsPanel.cs): UI for runtime tuning.
+- Runtime settings UI: [migration notes](../ui/migration-notes.md) (legacy code-only UI removed)
 
 ## Best Practices
 

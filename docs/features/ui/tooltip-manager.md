@@ -12,7 +12,7 @@
 
 ## Architecture & References
 
-- Component: [TerrainGeneration2D/UI/TooltipManager.cs](../../../TerrainGeneration2D/UI/TooltipManager.cs).
+- Component: legacy `TooltipManager` (code-only implementation removed) — see [migration-notes.md](migration-notes.md).
 - Camera: [TerrainGeneration2D.Core/Graphics/Camera2D.cs](../../../TerrainGeneration2D.Core/Graphics/Camera2D.cs) for `ScreenToWorld(...)` and viewport math.
 - Tilemap: [TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs](../../../TerrainGeneration2D.Core/Graphics/ChunkedTilemap.cs) for `TileToChunkCoordinates(...)` and tile lookups.
 

@@ -32,7 +32,7 @@ internal sealed class GameScene : Scene
 
   private ChunkedTilemap? _chunkedTilemap;
   private Camera2D? _camera;
-  
+
   private Vector2? _lastMouseDragPosition;
 #pragma warning disable CA2213 // Disposable fields should be disposed
   private Texture2D? _debugPixel;
@@ -159,7 +159,7 @@ internal sealed class GameScene : Scene
       throw new InvalidOperationException("Unable to fetch GUM XnaContentManager");
     }
 
-      // Settings UI is provided by Gum-editor assets; legacy code-only settings panel removed.
+    // Settings UI is provided by Gum-editor assets; legacy code-only settings panel removed.
 
     // Create camera
     if (Core.GameCore.GraphicsDevice != null)
@@ -190,7 +190,7 @@ internal sealed class GameScene : Scene
     GameLoggerMessages.SceneUpdateBegin(_log);
     base.Update(gameTime);
 
-    
+
 
     if (_camera == null || _chunkedTilemap == null)
     {
@@ -266,7 +266,7 @@ internal sealed class GameScene : Scene
 
     if (GameController.ToggleSettingsPanel())
     {
-      _showSettings = !_showSettings;    
+      _showSettings = !_showSettings;
     }
 
     if (_showDebugOverlay)
@@ -274,7 +274,7 @@ internal sealed class GameScene : Scene
       _activeChunkSnapshot = _chunkedTilemap.GetActiveChunkInfos();
     }
 
-    
+
     GameLoggerMessages.SceneUpdateEnd(_log);
   }
 
