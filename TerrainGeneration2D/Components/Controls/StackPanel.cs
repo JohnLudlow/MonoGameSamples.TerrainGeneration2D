@@ -9,11 +9,11 @@ using System.Linq;
 
 namespace TerrainGeneration2D.Components.Controls
 {
-    partial class StackPanel
+  partial class StackPanel
+  {
+    partial void CustomInitialize()
     {
-        partial void CustomInitialize()
-        {
-        
-        }
+
     }
+  }
 }

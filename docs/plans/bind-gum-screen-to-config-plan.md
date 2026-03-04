@@ -1,3 +1,22 @@
+# Bind Gum Screen To Config
+
+## Table of contents
+
+- [Overview](#overview)
+- [Definition of Terms](#definition-of-terms)
+- [Requirements](#requirements)
+- [Implementation Steps (code snippets)](#implementation-steps-code-snippets)
+- [Implementation Considerations](#implementation-considerations)
+- [Follow-ups](#follow-ups)
+
+## Plan issue
+
+- (link to related GitHub issue(s) or attach issue numbers here)
+
+## Plan status
+
+- In development
+
 ## Overview
 
 This document describes how to bind the runtime heuristics and terrain configuration objects to the Gum-generated `TerrainGenerationOptionsScreen` so UI controls reflect current values and updates push changes back into the running simulation.

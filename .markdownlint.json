@@ -1,8 +1,9 @@
 {
-  "MD013": false,
-  "MD060": false,
-  "MD029": false,
-  "MD024": false,
-  "MD033": false,
-  "MD037": false
+  "line-length": false,
+  "table-column-style": false,
+  "ol-prefix": false,
+  "no-duplicate-heading": false,
+  "no-inline-html": false,
+  "no-space-in-emphasis": false,
+  "ul-indent": false
 }

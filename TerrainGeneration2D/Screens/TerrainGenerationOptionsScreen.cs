@@ -9,11 +9,11 @@ using System.Linq;
 
 namespace TerrainGeneration2D.Content.UI.Screens
 {
-    partial class TerrainGenerationOptionsScreen
+  partial class TerrainGenerationOptionsScreen
+  {
+    partial void CustomInitialize()
     {
-        partial void CustomInitialize()
-        {
-        
-        }
+
     }
+  }
 }

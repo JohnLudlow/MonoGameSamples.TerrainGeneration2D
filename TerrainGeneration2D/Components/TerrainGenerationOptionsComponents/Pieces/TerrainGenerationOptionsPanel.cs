@@ -9,11 +9,11 @@ using System.Linq;
 
 namespace TerrainGeneration2D.Components.TerrainGenerationOptionsComponents.Pieces
 {
-    partial class TerrainGenerationOptionsPanel
+  partial class TerrainGenerationOptionsPanel
+  {
+    partial void CustomInitialize()
     {
-        partial void CustomInitialize()
-        {
-        
-        }
+
     }
+  }
 }
