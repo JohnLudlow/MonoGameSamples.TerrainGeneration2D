@@ -63,8 +63,6 @@ Rollback guidance
 
 Related docs
 
-- Implementation plan: [docs/plans/remove-old-code-ui-plan.md](../../plans/remove-old-code-ui-plan.md)
-
 - Feature overview: [docs/features/ui/feature-overview.md](feature-overview.md)
 
 Contact
