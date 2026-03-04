@@ -20,19 +20,19 @@ internal sealed class TerrainGeneration2DContentBuilder : ContentBuilder
     // include everything in the folder
     contentCollection.Include<WildcardRule>("images/atlas.png");
     contentCollection.Include<WildcardRule>("images/background-pattern.png");
-    contentCollection.IncludeCopy<WildcardRule>("images/atlas-definition.xml");
     contentCollection.IncludeCopy<WildcardRule>("images/tileset-definition.xml");
-
-    contentCollection.Include<WildcardRule>("images/terrain-atlas.png");
-    contentCollection.IncludeCopy<WildcardRule>("images/terrain-tileset-definition.xml");
 
     contentCollection.Include<WildcardRule>("audio/ui.wav");
     contentCollection.Include<WildcardRule>("audio/bounce.wav");
     contentCollection.Include<WildcardRule>("audio/collect.wav");
     contentCollection.Include<WildcardRule>("audio/theme.ogg");
 
-    contentCollection.IncludeCopy<WildcardRule>("fonts/NotArial_0.png");
-    contentCollection.IncludeCopy<WildcardRule>("fonts/NotArial.fnt");
+    // Runtime terrain atlas and its tileset definition are required by the game draw code.
+    contentCollection.IncludeCopy<WildcardRule>("images/atlas-definition.xml");
+    contentCollection.Include<WildcardRule>("images/terrain-atlas.png");
+    contentCollection.IncludeCopy<WildcardRule>("images/terrain-tileset-definition.xml");
+
+    // Demo-only fonts removed: NotArial and related spritefonts are no longer included.
 
     contentCollection.Include<WildcardRule>("effects/grayscaleEffect.fx");
 
