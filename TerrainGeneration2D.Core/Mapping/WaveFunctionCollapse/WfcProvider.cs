@@ -319,7 +319,6 @@ public class WfcProvider
         var frame = new DecisionFrame { X = x, Y = y, Candidates = ordered, NextIndex = 0, ChangesMark = log.Mark(), Depth = depth };
         stack.Push(frame);
 
-        var advanced = false;
         while (stack.Count > 0)
         {
           if (context.IsTimeBudgetExceeded())
@@ -380,7 +379,6 @@ public class WfcProvider
             continue;
           }
 
-          advanced = true;
           break;
         }
 

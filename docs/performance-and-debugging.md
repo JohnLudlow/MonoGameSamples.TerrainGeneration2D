@@ -63,7 +63,7 @@
 - Implemented: F12 toggles a debug overlay in the scene. The overlay draws current active-chunk borders (orange=dirty, green=clean) and the viewport bounds. See [TerrainGeneration2D/Scenes/GameScene.cs](../TerrainGeneration2D/Scenes/GameScene.cs) for `DrawDebugOverlay()` and the `_showDebugOverlay` toggle logic.
 - Input: The toggle uses `GameController.ToggleDebugOverlay()`; handled in `GameScene.Update()` once per frame. See [TerrainGeneration2D/GameController.cs](../TerrainGeneration2D/GameController.cs).
 - Rendering: The overlay draws after terrain using a 1×1 pixel texture and `SpriteBatch` to render rectangles around chunk boundaries and the viewport. This confirms culling and buffer behavior during scrolling.
-- Tooltips: Tile/Chunk tooltips are provided by `TooltipManager` and update when tile coords change. See [TerrainGeneration2D/UI/TooltipManager.cs](../TerrainGeneration2D/UI/TooltipManager.cs).
+- Tooltips: Tile/Chunk tooltips are provided by `TooltipManager` and update when tile coords change. See [UI migration notes](features/ui/migration-notes.md).
 
 ## Terrain parameter tuning UI plan
 

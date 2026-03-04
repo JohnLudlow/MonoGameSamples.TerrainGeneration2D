@@ -13,7 +13,7 @@
 
 ## Architecture & References
 
-- Component: [TerrainGeneration2D/UI/GameSceneUI.cs](../../../TerrainGeneration2D/UI/GameSceneUI.cs).
+- Component: legacy `GameSceneUI` (code-only implementation removed) — see [migration-notes.md](migration-notes.md).
 - Scene integration: constructed in `GameScene.Initialize()` and updated/drawn each frame.
   - See [TerrainGeneration2D/Scenes/GameScene.cs](../../../TerrainGeneration2D/Scenes/GameScene.cs).
 - Input toggles: mapped in [TerrainGeneration2D/GameController.cs](../../../TerrainGeneration2D/GameController.cs) (F10 settings, F11 fullscreen, F12 debug overlay).

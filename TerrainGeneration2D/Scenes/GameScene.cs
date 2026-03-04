@@ -2,19 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Gum.DataTypes;
-using Gum.Forms.Controls;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Graphics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Diagnostics;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.HeightMap;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.TileTypes;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Mapping.WaveFunctionCollapse;
 using JohnLudlow.MonoGameSamples.TerrainGeneration2D.Core.Scenes;
-using JohnLudlow.MonoGameSamples.TerrainGeneration2D.UI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoGameGum;
 using Microsoft.Extensions.Logging;
 
 namespace JohnLudlow.MonoGameSamples.TerrainGeneration2D.Scenes;
@@ -32,7 +28,7 @@ internal sealed class GameScene : Scene
 
   private ChunkedTilemap? _chunkedTilemap;
   private Camera2D? _camera;
-  private TooltipManager? _tooltipManager;
+
   private Vector2? _lastMouseDragPosition;
 #pragma warning disable CA2213 // Disposable fields should be disposed
   private Texture2D? _debugPixel;
@@ -41,22 +37,13 @@ internal sealed class GameScene : Scene
   private IReadOnlyCollection<ChunkedTilemap.ActiveChunkInfo> _activeChunkSnapshot = Array.Empty<ChunkedTilemap.ActiveChunkInfo>();
   private readonly ILogger _log = Log.Create<GameScene>();
   private HeuristicsConfiguration? _heuristicsConfig;
-  private RuntimeSettingsPanel? _settingsPanel;
   private bool _showSettings;
   private int _viewportWidth;
   private int _viewportHeight;
 
-#pragma warning disable CS8618
-  private GameSceneUI _ui;
-#pragma warning restore CS8618
-
   public override void Initialize()
   {
-    GumService.Default.Root.Children.Clear();
-
     base.Initialize();
-
-    _ui = new GameSceneUI();
   }
 
   public override void LoadContent()
@@ -158,25 +145,7 @@ internal sealed class GameScene : Scene
 
     _chunkedTilemap = new ChunkedTilemap(tileset, MapSizeInTiles, MasterSeed, saveDir, useWaveFunctionCollapse: true, terrainRuleConfiguration: terrainConfig, heightMapConfiguration: heightConfig, weightConfig: weightConfig, heuristicsConfig: heuristics, logger: _log, wfcTimeBudgetMs: timeBudgetMs);
 
-    if (GumService.Default?.ContentLoader?.XnaContentManager is null)
-    {
-      throw new InvalidOperationException("Unable to fetch GUM XnaContentManager");
-    }
-
-    // Settings UI
-    var content = GumService.Default.ContentLoader.XnaContentManager;
-    var atlas = TextureAtlas.FromFile(content, "images/atlas-definition.xml");
-    _settingsPanel = new RuntimeSettingsPanel(atlas);
-    _settingsPanel.Bind(
-        heuristics,
-        terrainConfig,
-        getBudget: () => _chunkedTilemap?.WfcTimeBudgetMs ?? timeBudgetMs,
-        setBudget: v => { _chunkedTilemap?.WfcTimeBudgetMs = v; },
-        regenerateVisible: () => { if (_chunkedTilemap != null && _camera != null) _chunkedTilemap.RegenerateChunksInView(_camera.ViewportWorldBounds, overwriteSaves: true); },
-        clearSaves: () => { _chunkedTilemap?.ClearAllSavedChunks(); }
-    );
-    _settingsPanel.IsVisible = true;
-    _settingsPanel.AddToRoot();
+    // Settings UI is provided by Gum-editor assets; legacy code-only settings panel removed.
 
     // Create camera
     if (Core.GameCore.GraphicsDevice != null)
@@ -190,12 +159,7 @@ internal sealed class GameScene : Scene
       _camera.Position = new Vector2(centerTile * tileset.TileWidth, centerTile * tileset.TileWidth);
     }
 
-    // Create tooltip manager
-    if (_camera != null && _chunkedTilemap != null)
-    {
-      _tooltipManager = new TooltipManager(_camera, _chunkedTilemap);
-      _tooltipManager.Initialize();
-    }
+    // Tooltip manager removed; Gum-based UI should provide tooltip functionality when available.
 
     var graphicsDevice = Core.GameCore.GraphicsDevice;
     if (graphicsDevice != null)
@@ -211,8 +175,6 @@ internal sealed class GameScene : Scene
   {
     GameLoggerMessages.SceneUpdateBegin(_log);
     base.Update(gameTime);
-
-    _ui.Update(gameTime);
 
     if (_camera == null || _chunkedTilemap == null)
     {
@@ -289,7 +251,6 @@ internal sealed class GameScene : Scene
     if (GameController.ToggleSettingsPanel())
     {
       _showSettings = !_showSettings;
-      if (_settingsPanel != null) _settingsPanel.IsVisible = _showSettings;
     }
 
     if (_showDebugOverlay)
@@ -297,8 +258,7 @@ internal sealed class GameScene : Scene
       _activeChunkSnapshot = _chunkedTilemap.GetActiveChunkInfos();
     }
 
-    // Update tooltip
-    _tooltipManager?.Update(GameController.GetMousePosition());
+
     GameLoggerMessages.SceneUpdateEnd(_log);
   }
 
@@ -339,8 +299,6 @@ internal sealed class GameScene : Scene
       spriteBatch.End();
     }
 
-    // Draw Gum UI
-    GumService.Default.Draw();
     GameLoggerMessages.SceneDrawEnd(_log);
 
     base.Draw(gameTime);
